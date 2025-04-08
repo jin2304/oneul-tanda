@@ -2,7 +2,7 @@ package com.oneultanda.userservice.application.dto.comand;
 
 import com.oneultanda.userservice.domain.entity.User;
 
-public record CreateUserCommand(
+public record RegisterUserCommand(
         String username,
         String password,
         String nickname,

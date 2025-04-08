@@ -47,7 +47,7 @@ public class User extends BaseTimeEntity {
     }
 
     public static User from(String username, String password, String nickname, String email, String contact) {
-        return User.builder()
+        User user = User.builder()
                 .username(username)
                 .password(password)
                 .nickname(nickname)
@@ -55,5 +55,8 @@ public class User extends BaseTimeEntity {
                 .contact(contact)
                 .role(Role.CUSTOMER)
                 .build();
+        user.registerCreatedBy(username);
+
+        return user;
     }
 }
