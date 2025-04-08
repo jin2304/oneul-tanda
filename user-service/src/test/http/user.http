@@ -32,3 +32,15 @@ X-User-ID: 3
   "email": "test@test.com",
   "contact": "010-1111-2212"
 }
+
+### 유저 암호 수정 todo: 추후 feignclient grpc를 통해 수정 작업 진행
+PUT http://localhost:19093/api/v1/users/password
+Content-Type: application/json
+X-User-Name: tester
+X-User-Role: CUSTOMER
+X-User-ID: 3
+
+{
+  "currentPassword": "12345678a*",
+  "newPassword": "12345678a"
+}

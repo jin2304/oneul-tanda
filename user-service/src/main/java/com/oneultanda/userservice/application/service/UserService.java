@@ -1,6 +1,7 @@
 package com.oneultanda.userservice.application.service;
 
 import com.oneultanda.userservice.application.dto.comand.RegisterUserCommand;
+import com.oneultanda.userservice.application.dto.comand.UpdatePasswordCommand;
 import com.oneultanda.userservice.application.dto.comand.UpdateUserCommand;
 import com.oneultanda.userservice.common.exception.CustomException;
 import com.oneultanda.userservice.domain.entity.User;
@@ -47,9 +48,20 @@ public class UserService {
                 .toUri();
     }
 
-    private User checkUser(final Long userId) {
-        User user = userRespository.findById(userId).orElseThrow(() ->
-                new CustomException(PresentaionErrorCode.RESOURCE_NOT_FOUND));
-        return user;
+    @Transactional
+    public void updatePassword(Long userId, UpdatePasswordCommand command) {
+        User user = checkUser(userId);
+        if (!user.getPassword().equals(command.currentPassword())) {
+            throw new CustomException(PresentaionErrorCode.INVALID_REQUEST);
+        }
+        user.updateFromUpdatePasswordCommand(command);
     }
+
+    private User checkUser(final Long userId) {
+        return userRespository.findById(userId)
+                .orElseThrow(() ->
+                new CustomException(PresentaionErrorCode.RESOURCE_NOT_FOUND));
+    }
+
+
 }

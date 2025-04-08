@@ -1,5 +1,6 @@
 package com.oneultanda.userservice.domain.entity;
 
+import com.oneultanda.userservice.application.dto.comand.UpdatePasswordCommand;
 import com.oneultanda.userservice.application.dto.comand.UpdateUserCommand;
 import com.oneultanda.userservice.common.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -65,5 +66,9 @@ public class User extends BaseTimeEntity {
         this.nickname = command.nickname();
         this.email = command.email();
         this.contact = command.contact();
+    }
+
+    public void updateFromUpdatePasswordCommand(UpdatePasswordCommand command) {
+        this.password = command.newPassword();
     }
 }
