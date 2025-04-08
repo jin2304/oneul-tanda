@@ -1,10 +1,8 @@
 package com.oneultanda.userservice.application.service;
 
-import com.oneultanda.userservice.application.dto.comand.DeleteUserCommand;
-import com.oneultanda.userservice.application.dto.comand.RegisterUserCommand;
-import com.oneultanda.userservice.application.dto.comand.UpdatePasswordCommand;
-import com.oneultanda.userservice.application.dto.comand.UpdateUserCommand;
+import com.oneultanda.userservice.application.dto.comand.*;
 import com.oneultanda.userservice.common.exception.CustomException;
+import com.oneultanda.userservice.domain.entity.Role;
 import com.oneultanda.userservice.domain.entity.User;
 import com.oneultanda.userservice.domain.repository.UserRepository;
 import com.oneultanda.userservice.presentaion.dto.response.UserResponse;
@@ -63,6 +61,31 @@ public class UserService {
         user.markDeleted(user.getUsername());
     }
 
+    @Transactional(readOnly = true)
+    public UserResponse getUserFromUsername(Role role, String username) {
+        checkAdmin(role);
+        User user = checkUserFromUsername(username);
+        return UserResponse.fromUser(user);
+    }
+
+    @Transactional
+    public URI updateRole(Role role, String username, UpdateUserRoleCommand command) {
+        checkAdmin(role);
+        User user = checkUserFromUsername(username);
+        user.updateRole(command);
+
+        return ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .build()
+                .toUri();
+    }
+
+    @Transactional(readOnly = true)
+    public Long getUserIdFromUsername(String username) {
+        User user = checkUserFromUsername(username);
+        return user.getId();
+    }
+
     /**
      * todo: gateway에서 검증된 값이므로 굳이 한번더 check 할 필요가 없나?
      */
@@ -75,6 +98,19 @@ public class UserService {
     private void checkPassword(final User user, final String password) {
         if (!user.getPassword().equals(password)) {
             throw new CustomException(PresentaionErrorCode.INVALID_REQUEST);
+        }
+    }
+
+    private User checkUserFromUsername(final String username) {
+        User user = userRespository.findByUsernameAndDeletedAtIsNull(username)
+                .orElseThrow(() ->
+                        new CustomException(PresentaionErrorCode.RESOURCE_NOT_FOUND));
+        return user;
+    }
+
+    private void checkAdmin(final Role role) {
+        if(!role.equals(Role.ADMIN)) {
+            throw new CustomException(PresentaionErrorCode.ACCESS_DENIED);
         }
     }
 }

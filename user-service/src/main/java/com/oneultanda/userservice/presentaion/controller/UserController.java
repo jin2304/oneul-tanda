@@ -1,10 +1,9 @@
 package com.oneultanda.userservice.presentaion.controller;
 
 import com.oneultanda.userservice.application.service.UserService;
-import com.oneultanda.userservice.presentaion.dto.request.DeleteUserRequest;
-import com.oneultanda.userservice.presentaion.dto.request.RegisterUserRequest;
-import com.oneultanda.userservice.presentaion.dto.request.UpdatePasswordRequest;
-import com.oneultanda.userservice.presentaion.dto.request.UpdateUserRequest;
+import com.oneultanda.userservice.domain.entity.Role;
+import com.oneultanda.userservice.domain.entity.User;
+import com.oneultanda.userservice.presentaion.dto.request.*;
 import com.oneultanda.userservice.presentaion.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -75,4 +74,29 @@ public class UserController {
         userservice.deleteUser(userId, request.toCommand());
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * todo: 관리자 대상 (get, seardh)(username 기반) gateway에서 토큰처리 함에 있어서도 필요함
+     * todo: gateway에서 권한 있는 사람만 사용가능하게 설정 + id값 필요시 feignclient 요청
+     * todo: gateway에서 권한 있는 사람만 사용가능하게 설정 + gateway에서 feignclient 요청시 header에 권한담아서 요청 + 내부에서 권한 검증 진행
+     */
+    @GetMapping("/admin/{username}")
+    public ResponseEntity<UserResponse> getUserFromUsername(
+            @RequestHeader("X-User-Role") final Role role,
+            @PathVariable final String username
+    ) {
+        UserResponse response = userservice.getUserFromUsername(role, username);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/admin/{username}")
+    public ResponseEntity<User> updateRole(
+            @RequestHeader("X-User-Role") final Role role,
+            @PathVariable final String username,
+            @RequestBody final UpdateUserRoleRequest request
+    ) {
+        URI location = userservice.updateRole(role, username, request.toCommand());
+        return ResponseEntity.ok().location(location).build();
+    }
+
 }

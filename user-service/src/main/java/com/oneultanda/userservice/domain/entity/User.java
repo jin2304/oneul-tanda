@@ -2,6 +2,7 @@ package com.oneultanda.userservice.domain.entity;
 
 import com.oneultanda.userservice.application.dto.comand.UpdatePasswordCommand;
 import com.oneultanda.userservice.application.dto.comand.UpdateUserCommand;
+import com.oneultanda.userservice.application.dto.comand.UpdateUserRoleCommand;
 import com.oneultanda.userservice.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -70,5 +71,9 @@ public class User extends BaseTimeEntity {
 
     public void updateFromUpdatePasswordCommand(UpdatePasswordCommand command) {
         this.password = command.newPassword();
+    }
+
+    public void updateRole(UpdateUserRoleCommand command) {
+        this.role = command.role();
     }
 }

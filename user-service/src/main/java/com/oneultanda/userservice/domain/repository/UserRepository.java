@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface UserRepository {
     User save(User gathering);
-    Optional<User> findByUsername(String username);
+    Optional<User> findByUsernameAndDeletedAtIsNull(String username);
 
     Optional<User> findByIdAndDeletedAtIsNull(Long userId);
 }

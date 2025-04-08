@@ -52,3 +52,29 @@ X-User-ID: 3
 {
   "password": "12345678a"
 }
+
+### 유저 조회 username기반
+GET http://localhost:19093/api/v1/users/admin/tester
+Content-Type: application/json
+X-User-Name: admin
+X-User-Role: ADMIN
+X-User-ID: 1
+
+### 유저 권한 상승 username기반
+PUT http://localhost:19093/api/v1/users/admin/tester
+Content-Type: application/json
+X-User-Name: admin
+X-User-Role: ADMIN
+X-User-ID: 1
+
+{
+  "role": "MANAGER"
+}
+
+### 유저 조회 userId기반
+GET http://localhost:19093/api/v1/internal/users/3
+Content-Type: application/json
+
+### 유저 id 조회 username기반
+GET http://localhost:19093/api/v1/internal/users/tester/user-id
+Content-Type: application/json
