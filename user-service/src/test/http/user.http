@@ -1,0 +1,14 @@
+### 유저 생성
+POST http://localhost:19093/api/v1/users/signup
+Content-Type: application/json
+#X-User-Name: tester
+#X-User-Role: CUSTOMER
+#X-User-ID: d5a2c91b-6c8a-4f1c-9e2e-4a3f5f2e8c76
+
+{
+  "username": "tester",
+  "password": "12345678a*",
+  "nickname": "테스터",
+  "email": "test@test.com",
+  "contact": "010-1111-2222"
+}
