@@ -1,14 +1,14 @@
 services:
-  mysql:
+  reservation:
     image: mysql:8.0
-    container_name: my_mysql
+    container_name: reservation-service
     environment:
       MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: reservation_service
+      MYSQL_DATABASE: reservation_db
       MYSQL_USER: admin
       MYSQL_PASSWORD: 1234
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
 

@@ -5,7 +5,7 @@ spring:
     name: reservation-service
 
   datasource:
-    url: jdbc:mysql://localhost:3306/reservation_service
+    url: jdbc:mysql://localhost:3307/reservation_db
     username: admin
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -20,12 +20,12 @@ spring:
         use_sql_comments: true
         spring.jpa.open-in-view: false
         default_batch_fetch_size: 10
-        default_schema: reservation_service
+        default_schema: reservation_db
         dialect: org.hibernate.dialect.MySQL8Dialect
 
 
 server:
-  port: 19096
+  port: 19095
 
 eureka:
   client:
