@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 public class QueueController {
     private final QueueService queueService;
 
-    @PostMapping("/{flightId}")
+    @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void tryReserve(@RequestBody FlightRequestDto request,
                            @RequestHeader("X-User-ID") String userId) {
