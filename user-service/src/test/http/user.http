@@ -1,0 +1,80 @@
+### 유저 생성
+POST http://localhost:19093/api/v1/users/signup
+Content-Type: application/json
+
+{
+  "username": "tester",
+  "password": "12345678a*",
+  "nickname": "테스터",
+  "email": "test@test.com",
+  "contact": "010-1111-2222"
+}
+
+### 유저 조회(개인)
+GET http://localhost:19093/api/v1/users/me
+Content-Type: application/json
+X-User-Name: tester
+X-User-Role: CUSTOMER
+X-User-ID: 3
+
+### 유저 정보 수정
+PUT http://localhost:19093/api/v1/users/me
+Content-Type: application/json
+X-User-Name: tester
+X-User-Role: CUSTOMER
+X-User-ID: 3
+
+{
+  "nickname": "테스터",
+  "email": "test@test.com",
+  "contact": "010-1111-2212"
+}
+
+### 유저 암호 수정 todo: 추후 feignclient grpc를 통해 수정 작업 진행
+PUT http://localhost:19093/api/v1/users/password
+Content-Type: application/json
+X-User-Name: tester
+X-User-Role: CUSTOMER
+X-User-ID: 3
+
+{
+  "currentPassword": "12345678a*",
+  "newPassword": "12345678a"
+}
+
+### 유저 탈퇴 todo: 추후 feignclient grpc를 통해 수정 작업 진행
+DELETE http://localhost:19093/api/v1/users/me
+Content-Type: application/json
+X-User-Name: tester
+X-User-Role: CUSTOMER
+X-User-ID: 3
+
+{
+  "password": "12345678a"
+}
+
+### 유저 조회 username기반
+GET http://localhost:19093/api/v1/users/admin/tester
+Content-Type: application/json
+X-User-Name: admin
+X-User-Role: ADMIN
+X-User-ID: 1
+
+### 유저 권한 상승 username기반
+PUT http://localhost:19093/api/v1/users/admin/tester
+Content-Type: application/json
+X-User-Name: admin
+X-User-Role: ADMIN
+X-User-ID: 1
+
+{
+  "role": "MANAGER"
+}
+
+### 유저 조회 userId기반
+GET http://localhost:19093/api/v1/internal/users/3
+Content-Type: application/json
+
+### 유저 id 조회 username기반
+GET http://localhost:19093/api/v1/internal/users/auth/tester
+Content-Type: application/json

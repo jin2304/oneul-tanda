@@ -1,0 +1,22 @@
+spring:
+  profiles:
+    active: local
+  application:
+    name: user-service
+
+  datasource:
+    username: admin
+    url: jdbc:mysql://localhost:3306/oneul-tanda?serverTimezone=Asia/Seoul
+    password: 1234
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 19093
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:19090/eureka/
+    register-with-eureka: true
