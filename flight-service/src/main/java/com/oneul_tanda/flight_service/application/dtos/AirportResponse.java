@@ -20,7 +20,7 @@ public class AirportResponse {
     private String country;
     private String city;
 
-    public static AirportResponse of(Airport airport) {
+    public static AirportResponse from(Airport airport) {
         return AirportResponse.builder()
                 .id(airport.getId())
                 .code(airport.getCode())
