@@ -43,7 +43,7 @@ public class QueueService {
         }
         setExistReserve(flightId, userId);
         // 대기열에 들어온 순서대로 정렬 (시간순으로 정렬 - 같은 시간을 대비해 난수를 더하기)
-        long score = System.currentTimeMillis() * 1000 + (long)(Math.random() * 1000) + Thread.currentThread().getId();
+        long score = System.nanoTime() + (long)(Math.random() * 1000);
         String reserveInfo = userId + ":" + seatCount;
         rankOps.add("ranks:" +  flightId, reserveInfo, score);
 
