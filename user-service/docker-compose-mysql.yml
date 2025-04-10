@@ -1,0 +1,26 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: oneul-tanda
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3306:3306"
+#todo: 추후에 port 확인, 변경 필요
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - user_network
+
+volumes:
+  mysql_data:
+
+networks:
+  user_network:
