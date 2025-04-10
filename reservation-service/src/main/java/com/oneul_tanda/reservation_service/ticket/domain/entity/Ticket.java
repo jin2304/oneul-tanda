@@ -4,7 +4,7 @@ import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
 import jakarta.persistence.*;
 import lombok.*;
-import org.bouncycastle.pqc.jcajce.provider.BIKE;
+
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -39,5 +39,24 @@ public class Ticket {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "passenger_id", nullable = false)
     private Passenger passenger;
-    
+
+
+    /**
+     * 티켓 생성
+     */
+    public static Ticket createTicket(Passenger passenger, UUID flightId, SeatClass seatClass, BigDecimal unitPrice) {
+        return Ticket.builder()
+                .passenger(passenger)
+                .flightId(flightId)
+                .seatClass(seatClass)
+                .unitPrice(unitPrice)
+                .build();
+    }
+
+
+    // 예약 참조 설정 메서드
+    public void associateTicket(Reservation reservation) {
+        this.reservation = reservation; // 티켓이 예약을 참조하도록 설정
+    }
+
 }

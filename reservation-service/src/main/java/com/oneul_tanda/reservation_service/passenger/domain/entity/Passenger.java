@@ -1,6 +1,5 @@
 package com.oneul_tanda.reservation_service.passenger.domain.entity;
 
-import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,5 +27,17 @@ public class Passenger {
 
     @Column(name = "passport_number", nullable = false)
     String passportNumber;
-    
+
+
+    /**
+     * 탑승객 생성
+     */
+    public static Passenger createPassenger(String birth, Gender gender, String passportNumber) {
+        return Passenger.builder()
+                .birth(birth)
+                .gender(gender)
+                .passportNumber(passportNumber)
+                .build();
+    }
+
 }
