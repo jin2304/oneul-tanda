@@ -18,41 +18,41 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class BaseTimeEntity {
 
-  @CreatedDate
-  @Temporal(TemporalType.TIMESTAMP)
-  @Column(name = "created_at", updatable = false)
-  private LocalDateTime createdAt;
+    @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
-  @CreatedBy
-  @Column(name = "created_by", updatable = false)
-  private String createdBy;
+    @CreatedBy
+    @Column(name = "created_by", updatable = false)
+    private String createdBy;
 
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  @Temporal(TemporalType.TIMESTAMP)
-  private LocalDateTime updatedAt;
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime updatedAt;
 
-  @LastModifiedBy
-  @Column(name = "updated_by")
-  private String updatedBy;
+    @LastModifiedBy
+    @Column(name = "updated_by")
+    private String updatedBy;
 
-  @Column(name = "Deleted_at")
-  private LocalDateTime deletedAt;
+    @Column(name = "Deleted_at")
+    private LocalDateTime deletedAt;
 
-  @Column(name = "deleted_by")
-  private String deletedBy;
+    @Column(name = "deleted_by")
+    private String deletedBy;
 
-  public void updateCreatedBy(String username) {
-    this.createdBy = username;
-  }
+    public void updateCreatedBy(String username) {
+        this.createdBy = username;
+    }
 
-  public void updateModificationInfo(String username) {
-    this.updatedAt = LocalDateTime.now();
-    this.updatedBy = username;
-  }
+    public void updateModificationInfo(String username) {
+        this.updatedAt = LocalDateTime.now();
+        this.updatedBy = username;
+    }
 
-  public void updateDeletionInfo(String deletedBy) {
-    this.deletedAt = LocalDateTime.now();
-    this.deletedBy = deletedBy;
-  }
+    public void updateDeletionInfo(String deletedBy) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = deletedBy;
+    }
 }
