@@ -1,4 +1,4 @@
-package com.oneul_tanda.reservation_service.reservation.presentation.dto.response;
+package com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create;
 
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Gender;
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
