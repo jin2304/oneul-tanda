@@ -38,4 +38,4 @@ out/
 .vscode/
 
 ## application-test.yml
-src/test/resources/application-test.yml
+/src/test/resources/application-test.yml
