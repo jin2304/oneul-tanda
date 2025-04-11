@@ -69,8 +69,7 @@ public class AirportService {
                 airportCommand.getCountry()
         );
 
-//        airport.updateModificationInfo(username);
-        airportRepository.save(airport);
+        airport.updateModificationInfo("수정자");
 
         return AirportResponse.from(airport);
     }
@@ -81,7 +80,6 @@ public class AirportService {
         Airport airport = airportRepository.findById(airportId)
                 .orElseThrow(() -> new IllegalArgumentException("Airport not found"));
 
-//        airport.updateDeletionInfo(username);
-        airportRepository.save(airport);
+        airport.updateDeletionInfo("삭제자");
     }
 }
