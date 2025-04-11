@@ -23,7 +23,7 @@ spring:
           max-wait: 1000ms
 
 server:
-  port: 19095
+  port: 19096
 
 eureka:
   client:
