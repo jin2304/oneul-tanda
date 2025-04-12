@@ -1,6 +1,8 @@
 package com.oneul_tanda.flight_service.application.service;
 
 import com.oneul_tanda.flight_service.application.dtos.airline.CreateAirlineCommand;
+import com.oneul_tanda.flight_service.application.dtos.airline.UpdateAirlineCommand;
+import com.oneul_tanda.flight_service.application.dtos.airport.UpdateAirportCommand;
 import com.oneul_tanda.flight_service.domain.entity.AirLine;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
@@ -18,7 +20,7 @@ public class AirlineService {
     @Transactional
     public AirlineResponse createAirline(CreateAirlineCommand airlineCommand) {
 
-        if(airlineRepository.findByCode(airlineCommand.getCode()).isPresent()) {
+        if (airlineRepository.findByCode(airlineCommand.getCode()).isPresent()) {
             throw new IllegalArgumentException("Airline code " + airlineCommand.getCode() + " already exists");
         }
 
@@ -28,6 +30,22 @@ public class AirlineService {
         );
 
         airlineRepository.save(airLine);
+
+        return AirlineResponse.from(airLine);
+    }
+
+    @Transactional
+    public AirlineResponse updateAirline(UpdateAirlineCommand airlineCommand) {
+
+        AirLine airLine = airlineRepository.findById(airlineCommand.getAirlineId())
+                .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
+
+        airLine.updateOf(
+                airlineCommand.getName(),
+                airlineCommand.getCode()
+        );
+
+        airLine.updateModificationInfo("수정자");
 
         return AirlineResponse.from(airLine);
     }
