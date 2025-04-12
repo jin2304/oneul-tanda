@@ -73,4 +73,15 @@ public class Ticket {
         this.reservation = reservation; // 티켓이 예약을 참조하도록 설정
     }
 
+
+
+
+    /**
+     * 티켓 확정
+     */
+    public void confirmTicket(Passenger passenger) {
+        this.passenger = passenger;
+    }
+
+
 }

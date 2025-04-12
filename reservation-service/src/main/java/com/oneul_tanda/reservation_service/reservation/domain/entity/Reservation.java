@@ -86,4 +86,13 @@ public class Reservation {
         ticket.associateTicket(this);  // 티켓에서도 해당 예약 정보 설정, setter 대신 associateTicket 메서드 사용
     }
 
+
+
+
+    /**
+     * 예약 확정
+     */
+    public void confirmReservation() {
+        this.status = ReservationStatus.RESERVED;
+    }
 }

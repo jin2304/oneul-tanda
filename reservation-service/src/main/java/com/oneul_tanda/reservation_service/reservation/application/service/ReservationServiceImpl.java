@@ -1,6 +1,7 @@
 package com.oneul_tanda.reservation_service.reservation.application.service;
 
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
+import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
 import com.oneul_tanda.reservation_service.reservation.domain.repository.ReservationRepository;
@@ -8,6 +9,7 @@ import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import com.oneul_tanda.reservation_service.ticket.domain.entity.SeatClass;
 import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
 import lombok.RequiredArgsConstructor;
@@ -125,5 +127,46 @@ public class ReservationServiceImpl implements ReservationService {
     public Page<ReadReservationResponseDto> readAllReservation(Pageable pageable) {
         return reservationRepository.findAll(pageable)
                 .map(ReadReservationResponseDto::from);
+    }
+
+
+
+
+    /**
+     * 예약 확정 (예약 수정)
+     */
+    @Override
+    public ConfirmReservationResponseDto confirmReservation(ConfirmReservationCommand command) {
+        // 1. 예약 조회 (예약 + 티켓)
+        Reservation reservation = reservationRepository.findById(command.reservationId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+
+
+        // 2. 티켓 확정 (탑승객 정보 매핑)
+        for (ConfirmReservationCommand.ConfirmTicketCommand ticketCommand : command.tickets()) {
+            // 2-1. 해당 ticketId를 가진 티켓 찾기
+            Ticket ticket = reservation.getTicketList().stream()
+                    .filter(t -> t.getId().equals(ticketCommand.ticketId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("해당 티켓을 찾을 수 없습니다."));
+
+            // 2-2. 탑승객 생성 및 티켓에 확정 처리
+            Passenger passenger = Passenger.createPassenger(
+                    ticketCommand.passenger().birth(),
+                    ticketCommand.passenger().gender(),
+                    ticketCommand.passenger().passportNumber()
+            );
+
+            ticket.confirmTicket(passenger);
+        }
+
+        // 3. 예약 상태를 확정으로 변경
+        reservation.confirmReservation();
+
+        // 4. 변경사항 저장 (티켓 및 탑승객 포함)
+        reservationRepository.save(reservation);
+
+        // 5. 응답 반환
+        return ConfirmReservationResponseDto.from(reservation);
     }
 }
