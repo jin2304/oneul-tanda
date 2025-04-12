@@ -19,7 +19,6 @@ public class QueueService {
 //    private final FlightClient flightClient;
 //    private final ProducerService producerService;
     private final RedisTemplate<String, String> redisTemplate;
-    int remainingSeats = 10; // 테스트용 남은 좌석 수
 
     public QueueService(FlightClient airportClient,
                         RedisTemplate<String, String> redisTemplate,
@@ -44,7 +43,7 @@ public class QueueService {
         }
         setExistReserve(flightId, userId);
         // 대기열에 들어온 순서대로 정렬 (시간순으로 정렬 - 같은 시간을 대비해 난수를 더하기)
-        long score = System.currentTimeMillis() + (long)(Math.random()*1000);
+        long score = System.nanoTime() + (long)(Math.random() * 1000);
         String reserveInfo = userId + ":" + seatCount;
         rankOps.add("ranks:" +  flightId, reserveInfo, score);
 
@@ -57,24 +56,21 @@ public class QueueService {
         // flightId를 받아 좌석 수를 조회
 //        FlightResponse flightResponse = flightClient.getAirport(flightId);
 //        int remainingSeats = flightResponse.getRemainingSeats();
-
+        // 테스트시 동시성 제어를 위한 redis 저장
+        String remainingSeatsStr = redisTemplate.opsForValue().get("seat:" + flightId);
+        // 값이 없다면, 기본 값인 10을 설정하여 redis 에 저장
+        int remainingSeats = (remainingSeatsStr != null) ? Integer.parseInt(remainingSeatsStr) : 75;
+        if (remainingSeatsStr == null) {
+            // 최초 저장 시에 redis 에 값 설정
+            redisTemplate.opsForValue().set("seat:" + flightId, String.valueOf(remainingSeats));
+            log.info("좌석 수 최초 설정: {}", remainingSeats);
+        }
         // 대기열에 있는 모든 유저 조회
         Set<String> topUsers = rankOps.range(key, 0, -1);
         if (topUsers == null || topUsers.isEmpty()) {
             return;
         }
         // 좌석 수가 남아 있을때 대기열 선점 좌석 수가 0이면 실패 메시지를 보낸 후 대기열에서 삭제
-        if  (remainingSeats <= 0) {
-            for(String reserveInfo : topUsers) {
-                String[] parts =  reserveInfo.split(":");
-                String userId = parts[0];
-                int seatCount = Integer.parseInt(parts[1]);
-
-//                producerService.sendReserveFailed(flightId, userId, seatCount);
-                rankOps.remove(key, reserveInfo);
-            }
-            return;
-        }
         for(String reserveInfo : topUsers) {
             String[] parts =  reserveInfo.split(":");
             String userId = parts[0];
@@ -83,17 +79,22 @@ public class QueueService {
             if(seatCount <= remainingSeats) { // 대기열 선점 성공시 항공편의 좌석 수 차감 후 성공 메세지 전달
                 // 좌석 수 차감 api 필요
                 remainingSeats -= seatCount;
+                redisTemplate.opsForValue().set("seat:" + flightId, String.valueOf(remainingSeats));
+
                 log.info("대기열 선점에 성공 했습니다. 남은 좌석 수: {}", remainingSeats);
 //                producerService.sendReserveSuccess(flightId, userId, seatCount);
 //                deleteExistReserve(flightId, userId);
-//                rankOps.remove(key, reserveInfo);
+                rankOps.remove(key, reserveInfo);
             } else { // 대기열 선점 실패서 실패 메세지 전달
                 log.info("대기열 선점에 실패했습니다. 남은 좌석 수: {}", remainingSeats);
 //                producerService.sendReserveFailed(flightId, userId, seatCount);
-//                deleteExistReserve(flightId, userId);
-//                rankOps.remove(key, reserveInfo);
+                deleteExistReserve(flightId, userId);
+                rankOps.remove(key, reserveInfo);
             }
-            break;
+
+            if(remainingSeats <= 0) {
+                log.info("남은 좌석이 없습니다. 남은 좌석 수: {}", remainingSeats);
+            }
         }
     }
 
@@ -106,7 +107,7 @@ public class QueueService {
     // userId와 flightId를 redis 에 저장해 중복 체크
     private void setExistReserve(String flightId, String userId) {
         String key = "reserve:" +  flightId + ":" + userId;
-        log.info("key: {}", key);
+        log.info("중복 예약 방지 키: {}", key);
         redisTemplate.opsForValue().set(key, "1", Duration.ofMinutes(5));
     }
 
