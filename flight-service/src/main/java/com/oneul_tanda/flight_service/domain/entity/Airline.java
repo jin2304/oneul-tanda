@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "m_airlines")
 @Builder(access = AccessLevel.PRIVATE)
-public class AirLine extends BaseTimeEntity {
+public class Airline extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,8 +32,8 @@ public class AirLine extends BaseTimeEntity {
     @Column(name = "airline_name", nullable = false)
     private String name;
 
-    public static AirLine from(String code, String name) {
-        return AirLine.builder()
+    public static Airline from(String code, String name) {
+        return Airline.builder()
                 .code(code)
                 .name(name)
                 .build();

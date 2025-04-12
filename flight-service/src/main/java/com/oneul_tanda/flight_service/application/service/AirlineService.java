@@ -2,10 +2,10 @@ package com.oneul_tanda.flight_service.application.service;
 
 import com.oneul_tanda.flight_service.application.dtos.airline.CreateAirlineCommand;
 import com.oneul_tanda.flight_service.application.dtos.airline.UpdateAirlineCommand;
-import com.oneul_tanda.flight_service.application.dtos.airport.UpdateAirportCommand;
-import com.oneul_tanda.flight_service.domain.entity.AirLine;
+import com.oneul_tanda.flight_service.domain.entity.Airline;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,29 +24,38 @@ public class AirlineService {
             throw new IllegalArgumentException("Airline code " + airlineCommand.getCode() + " already exists");
         }
 
-        AirLine airLine = AirLine.from(
+        Airline airline = Airline.from(
                 airlineCommand.getCode(),
                 airlineCommand.getName()
         );
 
-        airlineRepository.save(airLine);
+        airlineRepository.save(airline);
 
-        return AirlineResponse.from(airLine);
+        return AirlineResponse.from(airline);
     }
 
     @Transactional
     public AirlineResponse updateAirline(UpdateAirlineCommand airlineCommand) {
 
-        AirLine airLine = airlineRepository.findById(airlineCommand.getAirlineId())
+        Airline airline = airlineRepository.findById(airlineCommand.getAirlineId())
                 .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
 
-        airLine.updateOf(
+        airline.updateOf(
                 airlineCommand.getName(),
                 airlineCommand.getCode()
         );
 
-        airLine.updateModificationInfo("수정자");
+        airline.updateModificationInfo("수정자");
 
-        return AirlineResponse.from(airLine);
+        return AirlineResponse.from(airline);
+    }
+
+    @Transactional
+    public void deleteAirline(UUID airlineId) {
+
+        Airline airline = airlineRepository.findById(airlineId)
+                .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
+
+        airline.updateDeletionInfo("삭제자");
     }
 }

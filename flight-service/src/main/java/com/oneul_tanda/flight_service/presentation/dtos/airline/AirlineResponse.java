@@ -1,6 +1,6 @@
 package com.oneul_tanda.flight_service.presentation.dtos.airline;
 
-import com.oneul_tanda.flight_service.domain.entity.AirLine;
+import com.oneul_tanda.flight_service.domain.entity.Airline;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ public class AirlineResponse {
     private String code;
     private String name;
 
-    public static AirlineResponse from(AirLine airline) {
+    public static AirlineResponse from(Airline airline) {
         return AirlineResponse.builder()
                 .id(airline.getId())
                 .code(airline.getCode())
