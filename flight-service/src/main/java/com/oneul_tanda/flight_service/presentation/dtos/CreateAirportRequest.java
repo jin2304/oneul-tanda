@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AirportRequest {
+public class CreateAirportRequest {
 
     @NotBlank
     private String code;
