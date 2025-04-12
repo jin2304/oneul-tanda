@@ -37,7 +37,7 @@ public class Ticket {
     private Reservation reservation;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "passenger_id", nullable = false)
+    @JoinColumn(name = "passenger_id")
     private Passenger passenger;
 
 
@@ -47,6 +47,20 @@ public class Ticket {
     public static Ticket createTicket(Passenger passenger, UUID flightId, SeatClass seatClass, BigDecimal unitPrice) {
         return Ticket.builder()
                 .passenger(passenger)
+                .flightId(flightId)
+                .seatClass(seatClass)
+                .unitPrice(unitPrice)
+                .build();
+    }
+
+
+
+
+    /**
+     * 티켓 임시 생성
+     */
+    public static Ticket createTicketWithoutPassenger(UUID flightId, SeatClass seatClass, BigDecimal unitPrice) {
+        return Ticket.builder()
                 .flightId(flightId)
                 .seatClass(seatClass)
                 .unitPrice(unitPrice)
