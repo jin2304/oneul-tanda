@@ -1,5 +1,6 @@
 package com.oneul_tanda.flight_service.domain.entity;
 
+import com.oneul_tanda.flight_service.common.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "m_airlines")
 @Builder(access = AccessLevel.PRIVATE)
-public class AirLine {
+public class AirLine extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -37,6 +38,7 @@ public class AirLine {
                 .name(name)
                 .build();
     }
+
     public void updateOf(String code, String name) {
         this.code = code;
         this.name = name;
