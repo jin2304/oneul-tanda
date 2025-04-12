@@ -2,8 +2,8 @@ package com.oneul_tanda.flight_service.presentation.controller;
 
 import com.oneul_tanda.flight_service.presentation.dtos.UpdateAirportRequest;
 import com.oneul_tanda.flight_service.application.service.AirportService;
-import com.oneul_tanda.flight_service.presentation.dtos.AirportRequest;
-import com.oneul_tanda.flight_service.application.dtos.AirportResponse;
+import com.oneul_tanda.flight_service.presentation.dtos.CreateAirportRequest;
+import com.oneul_tanda.flight_service.presentation.dtos.AirportResponse;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class AirportController {
 
     @PostMapping
     public ResponseEntity<AirportResponse> createAirport(
-            @RequestBody @Valid AirportRequest request
+            @RequestBody @Valid CreateAirportRequest request
     ) {
         AirportResponse response = airportService.createAirport(request.toCommand());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

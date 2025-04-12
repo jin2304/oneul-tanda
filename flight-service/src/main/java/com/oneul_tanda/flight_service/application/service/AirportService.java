@@ -1,7 +1,7 @@
 package com.oneul_tanda.flight_service.application.service;
 
 import com.oneul_tanda.flight_service.application.dtos.AirportCommand;
-import com.oneul_tanda.flight_service.application.dtos.AirportResponse;
+import com.oneul_tanda.flight_service.presentation.dtos.AirportResponse;
 import com.oneul_tanda.flight_service.application.dtos.UpdateAirportCommand;
 import com.oneul_tanda.flight_service.domain.entity.Airport;
 import com.oneul_tanda.flight_service.domain.repository.AirportRepository;
