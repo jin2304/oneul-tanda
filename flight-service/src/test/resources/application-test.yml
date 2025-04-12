@@ -26,8 +26,8 @@ spring:
 
 amadeus:
   base-url: https://test.api.amadeus.com
-  client-id: ${AMADEUS_CLIENT_ID}
-  client-secret: ${AMADEUS_CLIENT_SECRET}
+  client-id: test-client-id
+  client-secret: test-client-secret
 
 eureka:
   client:
