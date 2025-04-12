@@ -1,4 +1,4 @@
-package com.oneul_tanda.flight_service.application.dtos;
+package com.oneul_tanda.flight_service.presentation.dtos;
 
 import com.oneul_tanda.flight_service.domain.entity.Airport;
 import java.util.UUID;
