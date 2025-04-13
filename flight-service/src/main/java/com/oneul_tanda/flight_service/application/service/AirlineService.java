@@ -5,8 +5,11 @@ import com.oneul_tanda.flight_service.application.dtos.airline.UpdateAirlineComm
 import com.oneul_tanda.flight_service.domain.entity.Airline;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
+import com.oneul_tanda.flight_service.util.PagingUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,13 @@ public class AirlineService {
                 .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
 
         return AirlineResponse.from(airline);
+    }
+
+    public Page<AirlineResponse> searchAirlines(String code, String name, Pageable pageable) {
+        Pageable adjusted = PagingUtil.adjustPageable(pageable);
+        Page<Airline> airlines = airlineRepository.findByCodeAndName(code, name, adjusted);
+
+        return airlines.map(AirlineResponse::from);
     }
 
     @Transactional
