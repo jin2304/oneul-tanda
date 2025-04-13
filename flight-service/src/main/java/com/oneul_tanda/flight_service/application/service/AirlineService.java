@@ -17,6 +17,13 @@ public class AirlineService {
 
     private final AirlineRepository airlineRepository;
 
+    public AirlineResponse getAirline(UUID airlineId) {
+        Airline airline = airlineRepository.findById(airlineId)
+                .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
+
+        return AirlineResponse.from(airline);
+    }
+
     @Transactional
     public AirlineResponse createAirline(CreateAirlineCommand airlineCommand) {
 
