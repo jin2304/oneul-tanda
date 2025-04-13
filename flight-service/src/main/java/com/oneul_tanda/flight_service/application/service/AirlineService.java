@@ -40,12 +40,10 @@ public class AirlineService {
         if (airlineRepository.findByCode(airlineCommand.getCode()).isPresent()) {
             throw new IllegalArgumentException("Airline code " + airlineCommand.getCode() + " already exists");
         }
-
         AirlineEntity airline = AirlineEntity.from(
                 airlineCommand.getCode(),
                 airlineCommand.getName()
         );
-
         airlineRepository.save(airline);
 
         return AirlineResponse.from(airline);
@@ -58,8 +56,8 @@ public class AirlineService {
                 .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
 
         airline.updateOf(
-                airlineCommand.getName(),
-                airlineCommand.getCode()
+                airlineCommand.getCode(),
+                airlineCommand.getName()
         );
 
         airline.updateModificationInfo("수정자");

@@ -4,6 +4,7 @@ import com.oneul_tanda.flight_service.application.service.AirlineService;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.CreateAirlineRequest;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.UpdateAirlineRequest;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,14 +49,15 @@ public class AirlineController {
     }
 
     @PostMapping
-    public ResponseEntity<AirlineResponse> createAirline(CreateAirlineRequest request) {
+    public ResponseEntity<AirlineResponse> createAirline(@RequestBody @Valid CreateAirlineRequest request) {
         AirlineResponse response = airlineService.createAirline(request.toCommand());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{airlineId}")
     public ResponseEntity<AirlineResponse> updateAirline(
-            @PathVariable UUID airlineId, UpdateAirlineRequest request
+            @PathVariable UUID airlineId,
+            @RequestBody @Valid UpdateAirlineRequest request
     ) {
         AirlineResponse response = airlineService.updateAirline(request.toCommand(airlineId));
         return ResponseEntity.status(HttpStatus.OK).body(response);
