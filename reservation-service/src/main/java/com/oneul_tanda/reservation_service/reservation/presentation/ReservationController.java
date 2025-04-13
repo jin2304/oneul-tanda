@@ -1,8 +1,11 @@
 package com.oneul_tanda.reservation_service.reservation.presentation;
 
+import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.service.ReservationService;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.CreateReservationRequestDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.update.ConfirmReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +36,16 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<CreateReservationResponseDto> createReservation(@RequestBody CreateReservationRequestDto requestDto) {
         return ResponseEntity.ok(reservationService.createReservation(requestDto));
+    }
+
+
+    /**
+     * 에약 확정 (예약 수정)
+     */
+    @PutMapping("/{reservationId}/confirm")
+    public ResponseEntity<ConfirmReservationResponseDto> confirmReservation(@PathVariable UUID reservationId,
+                                                                            @RequestBody ConfirmReservationRequestDto requestDto) {
+        return ResponseEntity.ok(reservationService.confirmReservation(ConfirmReservationCommand.of(reservationId, requestDto)));
     }
 
 
