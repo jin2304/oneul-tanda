@@ -1,4 +1,4 @@
-package com.oneul_tanda.flight_service.domain.repository;
+package com.oneul_tanda.flight_service.domain.repository.airport;
 
 import com.oneul_tanda.flight_service.domain.entity.Airport;
 import java.util.Optional;

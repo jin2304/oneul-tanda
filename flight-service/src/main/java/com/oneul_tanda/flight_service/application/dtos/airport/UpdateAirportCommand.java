@@ -1,4 +1,4 @@
-package com.oneul_tanda.flight_service.application.dtos;
+package com.oneul_tanda.flight_service.application.dtos.airport;
 
 import java.util.UUID;
 import lombok.AccessLevel;

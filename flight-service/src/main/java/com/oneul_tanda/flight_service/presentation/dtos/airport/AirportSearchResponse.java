@@ -1,4 +1,4 @@
-package com.oneul_tanda.flight_service.presentation.dtos;
+package com.oneul_tanda.flight_service.presentation.dtos.airport;
 
 import com.amadeus.resources.Location;
 import lombok.AccessLevel;

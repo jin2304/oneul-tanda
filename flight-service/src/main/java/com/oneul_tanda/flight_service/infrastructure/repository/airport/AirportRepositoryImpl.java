@@ -1,8 +1,8 @@
-package com.oneul_tanda.flight_service.infrastructure.repository;
+package com.oneul_tanda.flight_service.infrastructure.repository.airport;
 
 import com.oneul_tanda.flight_service.domain.entity.Airport;
 import com.oneul_tanda.flight_service.domain.entity.QAirport;
-import com.oneul_tanda.flight_service.domain.repository.AirportRepositoryCustom;
+import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepositoryCustom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;

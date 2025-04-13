@@ -1,6 +1,6 @@
-package com.oneul_tanda.flight_service.presentation.dtos;
+package com.oneul_tanda.flight_service.presentation.dtos.airport;
 
-import com.oneul_tanda.flight_service.application.dtos.AirportCommand;
+import com.oneul_tanda.flight_service.application.dtos.airport.CreateAirportCommand;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +23,12 @@ public class CreateAirportRequest {
     @NotBlank
     private String country;
 
-    public AirportCommand toCommand() {
-        return new AirportCommand(code, name, city, country);
+    public CreateAirportCommand toCommand() {
+        return CreateAirportCommand.of(
+                this.code,
+                this.name,
+                this.city,
+                this.country
+        );
     }
 }

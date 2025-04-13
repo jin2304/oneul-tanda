@@ -1,6 +1,6 @@
-package com.oneul_tanda.flight_service.presentation.dtos;
+package com.oneul_tanda.flight_service.presentation.dtos.airport;
 
-import com.oneul_tanda.flight_service.application.dtos.UpdateAirportCommand;
+import com.oneul_tanda.flight_service.application.dtos.airport.UpdateAirportCommand;
 import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
 import lombok.AccessLevel;

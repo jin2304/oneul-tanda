@@ -1,11 +1,11 @@
 package com.oneul_tanda.flight_service.application.service;
 
-import com.oneul_tanda.flight_service.application.dtos.AirportCommand;
-import com.oneul_tanda.flight_service.presentation.dtos.AirportResponse;
-import com.oneul_tanda.flight_service.application.dtos.UpdateAirportCommand;
+import com.oneul_tanda.flight_service.application.dtos.airport.CreateAirportCommand;
+import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
+import com.oneul_tanda.flight_service.application.dtos.airport.UpdateAirportCommand;
 import com.oneul_tanda.flight_service.domain.entity.Airport;
-import com.oneul_tanda.flight_service.domain.repository.AirportRepository;
-import com.oneul_tanda.flight_service.domain.repository.AirportRepositoryCustom;
+import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepository;
+import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepositoryCustom;
 import com.oneul_tanda.flight_service.util.PagingUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class AirportService {
     }
 
     @Transactional
-    public AirportResponse createAirport(AirportCommand airportCommand) {
+    public AirportResponse createAirport(CreateAirportCommand airportCommand) {
 
         if (airportRepository.findByCode(airportCommand.getCode()).isPresent()) {
             throw new IllegalArgumentException("Airport code " + airportCommand.getCode() + " already exists");

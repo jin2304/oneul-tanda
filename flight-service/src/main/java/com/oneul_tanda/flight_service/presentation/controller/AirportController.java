@@ -1,9 +1,9 @@
 package com.oneul_tanda.flight_service.presentation.controller;
 
-import com.oneul_tanda.flight_service.presentation.dtos.UpdateAirportRequest;
+import com.oneul_tanda.flight_service.presentation.dtos.airport.UpdateAirportRequest;
 import com.oneul_tanda.flight_service.application.service.AirportService;
-import com.oneul_tanda.flight_service.presentation.dtos.CreateAirportRequest;
-import com.oneul_tanda.flight_service.presentation.dtos.AirportResponse;
+import com.oneul_tanda.flight_service.presentation.dtos.airport.CreateAirportRequest;
+import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
