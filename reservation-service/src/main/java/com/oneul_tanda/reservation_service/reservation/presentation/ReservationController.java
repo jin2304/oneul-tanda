@@ -34,7 +34,10 @@ public class ReservationController {
      * 에약 생성
      */
     @PostMapping
-    public ResponseEntity<CreateReservationResponseDto> createReservation(@RequestBody CreateReservationRequestDto requestDto) {
+    public ResponseEntity<CreateReservationResponseDto> createReservation(
+            @RequestHeader("X-User-ID") UUID userId,
+            @RequestBody CreateReservationRequestDto requestDto
+    ) {
         return ResponseEntity.ok(reservationService.createReservation(requestDto));
     }
 

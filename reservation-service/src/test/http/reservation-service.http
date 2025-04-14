@@ -1,9 +1,10 @@
 ### 예약 생성
 POST http://localhost:19095/api/v1/reservations
 Content-Type: application/json
+X-User-ID: 9b7f421f-47b0-47f5-aa5c-8f489697a57d
 
 {
-  "userId": 1,
+  "userId": "9b7f421f-47b0-47f5-aa5c-8f489697a57d",
   "tickets": [
     {
       "flightId": "b84b09ef-1e4f-4cb2-9121-3ad86c013551",
