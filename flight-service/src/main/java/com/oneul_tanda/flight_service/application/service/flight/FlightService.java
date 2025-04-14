@@ -1,6 +1,7 @@
 package com.oneul_tanda.flight_service.application.service.flight;
 
 import com.oneul_tanda.flight_service.application.dtos.flight.CreateFlightCommand;
+import com.oneul_tanda.flight_service.application.dtos.flight.UpdateFlightCommand;
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
 import com.oneul_tanda.flight_service.domain.entity.Airport;
 import com.oneul_tanda.flight_service.domain.entity.FlightEntity;
@@ -23,35 +24,68 @@ public class FlightService {
     private final AirportRepository airportRepository;
 
     @Transactional
-    public FlightResponse createFlight(CreateFlightCommand command) {
+    public FlightResponse createFlight(CreateFlightCommand flightCommand) {
 
-       if (flightRepository.findByFlightNumAndDepartureDate(command.getFlightNum(), command.getDepartureDate()).isPresent()) {
+        if (flightRepository.findByFlightNumAndDepartureDate(flightCommand.getFlightNum(), flightCommand.getDepartureDate())
+                .isPresent()) {
             throw new IllegalArgumentException("Flight with this flight number and departure date already exists");
         }
 
         // AirlineEntity와 Airport 엔티티 조회
-        AirlineEntity airline = airlineRepository.findByCode(command.getAirlineCode())
+        AirlineEntity airline = airlineRepository.findByCode(flightCommand.getAirlineCode())
                 .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
-        Airport departureAirport = airportRepository.findByCode(command.getDepartureAirportCode())
+        Airport departureAirport = airportRepository.findByCode(flightCommand.getDepartureAirportCode())
                 .orElseThrow(() -> new IllegalArgumentException("Departure Airport not found"));
-        Airport arrivalAirport = airportRepository.findByCode(command.getArrivalAirportCode())
+        Airport arrivalAirport = airportRepository.findByCode(flightCommand.getArrivalAirportCode())
                 .orElseThrow(() -> new IllegalArgumentException("Arrival Airport not found"));
 
-        Duration duration = Duration.between(command.getDepartureDate(), command.getArrivalDate());
+        Duration duration = Duration.between(flightCommand.getDepartureDate(), flightCommand.getArrivalDate());
         FlightEntity flight = FlightEntity.from(
-                command.getFlightNum(),
+                flightCommand.getFlightNum(),
                 airline,
                 departureAirport,
                 arrivalAirport,
-                command.getDepartureDate(),
-                command.getArrivalDate(),
+                flightCommand.getDepartureDate(),
+                flightCommand.getArrivalDate(),
                 duration,
-                command.getPrice(),
-                command.getRemainingSeats()
+                flightCommand.getPrice(),
+                flightCommand.getRemainingSeats()
         );
 
         flightRepository.save(flight);
 
         return FlightResponse.from(flight);
-       }
     }
+
+    @Transactional
+    public FlightResponse updateFlight(UpdateFlightCommand flightCommand) {
+
+        FlightEntity flight = flightRepository.findById(flightCommand.getFlightId())
+                .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
+
+        // AirlineEntity와 Airport 엔티티 조회
+        AirlineEntity airline = airlineRepository.findByCode(flightCommand.getAirlineCode())
+                .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
+        Airport departureAirport = airportRepository.findByCode(flightCommand.getDepartureAirportCode())
+                .orElseThrow(() -> new IllegalArgumentException("Departure Airport not found"));
+        Airport arrivalAirport = airportRepository.findByCode(flightCommand.getArrivalAirportCode())
+                .orElseThrow(() -> new IllegalArgumentException("Arrival Airport not found"));
+
+        Duration duration = Duration.between(flightCommand.getDepartureDate(), flightCommand.getArrivalDate());
+        flight.updateOf(
+                flightCommand.getFlightNum(),
+                airline,
+                departureAirport,
+                arrivalAirport,
+                flightCommand.getDepartureDate(),
+                flightCommand.getArrivalDate(),
+                duration,
+                flightCommand.getPrice(),
+                flightCommand.getRemainingSeats()
+                );
+
+        flight.updateModificationInfo("수정자");
+
+        return FlightResponse.from(flight);
+    }
+}
