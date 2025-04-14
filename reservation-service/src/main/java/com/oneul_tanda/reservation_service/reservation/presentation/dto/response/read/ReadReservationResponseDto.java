@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Builder
 public record ReadReservationResponseDto(
         UUID reservationId,
-        Long userId,
+        UUID userId,
         BigDecimal totalPrice,
         ReservationStatus status,
         List<CreateTicketResponseDto> tickets

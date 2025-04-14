@@ -4,15 +4,15 @@ import java.util.UUID;
 
 public record CreateHoldReservationCommand(
         UUID flightId,
-        Long userId,
+        UUID userId,
         int seatCount
 ) {
     public static CreateHoldReservationCommand of(
             UUID flightId,
-            Long userId,
+            String  userId,
             int seatCount
     ) {
-        return new CreateHoldReservationCommand(flightId, userId, seatCount);
+        return new CreateHoldReservationCommand(flightId,  UUID.fromString(userId), seatCount);
     }
 }
 

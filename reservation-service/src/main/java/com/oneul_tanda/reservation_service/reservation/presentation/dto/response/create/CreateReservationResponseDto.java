@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 @Builder
 public record CreateReservationResponseDto(
         UUID reservationId,
-        Long userId,
+        UUID userId,
         BigDecimal totalPrice,
         ReservationStatus status,
-         List<CreateTicketResponseDto> tickets
+        List<CreateTicketResponseDto> tickets
 ) {
 
     // Entity -> DTO 변환 메서드

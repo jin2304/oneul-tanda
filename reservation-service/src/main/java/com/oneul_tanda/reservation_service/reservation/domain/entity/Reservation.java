@@ -24,7 +24,7 @@ public class Reservation {
     private UUID id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private UUID userId;
 
     @Column(name = "total_price", nullable = false)
     private BigDecimal totalPrice;
@@ -41,7 +41,7 @@ public class Reservation {
     /**
      * 예약 생성
      */
-    public static Reservation createReservation(Long userId, List<Ticket> ticketList) {
+    public static Reservation createReservation(UUID userId, List<Ticket> ticketList) {
         Reservation reservation = Reservation.builder()
                 .userId(userId)
                 .ticketList(new ArrayList<>())
@@ -62,7 +62,7 @@ public class Reservation {
     /**
      * 예약 임시 생성
      */
-    public static Reservation createHoldReservation(Long userId, List<Ticket> ticketList) {
+    public static Reservation createHoldReservation(UUID userId, List<Ticket> ticketList) {
 
         Reservation reservation = Reservation.builder()
                 .userId(userId)
