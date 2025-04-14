@@ -38,10 +38,10 @@ public abstract class BaseTimeEntity {
     private LocalDateTime deletedAt;
 
     @Column(name = "deleted_by")
-    private String deletedBy;
+    private UUID deletedBy;
 
 
-    public void markDeleted(String deletedBy) {
+    public void markDeleted(UUID deletedBy) {
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deletedBy;
     }
