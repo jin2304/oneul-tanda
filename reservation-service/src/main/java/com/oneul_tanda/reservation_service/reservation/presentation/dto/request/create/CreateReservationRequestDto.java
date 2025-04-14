@@ -1,4 +1,4 @@
-package com.oneul_tanda.reservation_service.reservation.presentation.dto.request;
+package com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create;
 
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Gender;
 import com.oneul_tanda.reservation_service.ticket.domain.entity.SeatClass;
@@ -19,6 +19,7 @@ public record CreateReservationRequestDto(UUID userId,
     ) {}
 
     public record CreatePassengerDto(
+            String name,
             String birth,
             Gender gender,
             String passportNumber

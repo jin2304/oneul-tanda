@@ -19,6 +19,9 @@ public class Passenger extends BaseTimeEntity {
     @Column(name = "passenger_id", updatable = false, nullable = false)
     private UUID id;
 
+    @Column(name = "passenger_name", nullable = false)
+    String name;
+
     @Column(name = "birth", nullable = false)
     String birth;
 
@@ -33,8 +36,9 @@ public class Passenger extends BaseTimeEntity {
     /**
      * 탑승객 생성
      */
-    public static Passenger createPassenger(String birth, Gender gender, String passportNumber) {
+    public static Passenger createPassenger(String name, String birth, Gender gender, String passportNumber) {
         return Passenger.builder()
+                .name(name)
                 .birth(birth)
                 .gender(gender)
                 .passportNumber(passportNumber)

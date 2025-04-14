@@ -34,12 +34,13 @@ public record ConfirmReservationCommand(
 
 
     public record ConfirmPassengerCommand(
+            String name,
             String birth,
             Gender gender,
             String passportNumber
     ) {
         public static ConfirmPassengerCommand from(ConfirmReservationRequestDto.ConfirmPassengerDto dto) {
-            return new ConfirmPassengerCommand(dto.birth(), dto.gender(), dto.passportNumber());
+            return new ConfirmPassengerCommand(dto.name(), dto.birth(), dto.gender(), dto.passportNumber());
         }
     }
 }
