@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Builder
 public record CreateHoldReservationResponseDto(
         UUID reservationId,
-        Long userId,
+        UUID userId,
         BigDecimal totalPrice,
         ReservationStatus status,
         List<CreateHoldTicketResponseDto> tickets

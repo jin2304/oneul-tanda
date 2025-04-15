@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.UUID;
 
 public record ConfirmReservationCommand(
+        UUID userId,
         UUID reservationId,
         List<ConfirmTicketCommand> tickets
 ) {
-    public static ConfirmReservationCommand of(UUID reservationId, ConfirmReservationRequestDto dto) {
+    public static ConfirmReservationCommand of(UUID userId, UUID reservationId, ConfirmReservationRequestDto dto) {
         return new ConfirmReservationCommand(
+                userId,
                 reservationId,
                 dto.tickets().stream()
                         .map(ConfirmTicketCommand::from)
@@ -34,12 +36,13 @@ public record ConfirmReservationCommand(
 
 
     public record ConfirmPassengerCommand(
+            String name,
             String birth,
             Gender gender,
             String passportNumber
     ) {
         public static ConfirmPassengerCommand from(ConfirmReservationRequestDto.ConfirmPassengerDto dto) {
-            return new ConfirmPassengerCommand(dto.birth(), dto.gender(), dto.passportNumber());
+            return new ConfirmPassengerCommand(dto.name(), dto.birth(), dto.gender(), dto.passportNumber());
         }
     }
 }

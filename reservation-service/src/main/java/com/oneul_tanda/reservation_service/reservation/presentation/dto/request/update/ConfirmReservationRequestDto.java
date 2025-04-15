@@ -15,6 +15,7 @@ public record ConfirmReservationRequestDto(
     ) {}
 
     public record ConfirmPassengerDto(
+            String name,
             String birth,
             Gender gender,
             String passportNumber

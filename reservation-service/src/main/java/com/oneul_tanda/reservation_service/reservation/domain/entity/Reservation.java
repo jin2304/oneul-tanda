@@ -1,6 +1,7 @@
 package com.oneul_tanda.reservation_service.reservation.domain.entity;
 
 
+import com.oneul_tanda.reservation_service.common.entity.BaseTimeEntity;
 import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder(access = AccessLevel.PRIVATE)
-public class Reservation {
+public class Reservation extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,7 +25,7 @@ public class Reservation {
     private UUID id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private UUID userId;
 
     @Column(name = "total_price", nullable = false)
     private BigDecimal totalPrice;
@@ -41,7 +42,7 @@ public class Reservation {
     /**
      * 예약 생성
      */
-    public static Reservation createReservation(Long userId, List<Ticket> ticketList) {
+    public static Reservation createReservation(UUID userId, List<Ticket> ticketList) {
         Reservation reservation = Reservation.builder()
                 .userId(userId)
                 .ticketList(new ArrayList<>())
@@ -62,7 +63,7 @@ public class Reservation {
     /**
      * 예약 임시 생성
      */
-    public static Reservation createHoldReservation(Long userId, List<Ticket> ticketList) {
+    public static Reservation createHoldReservation(UUID userId, List<Ticket> ticketList) {
 
         Reservation reservation = Reservation.builder()
                 .userId(userId)
@@ -75,6 +76,8 @@ public class Reservation {
         for (Ticket ticket : ticketList) {
             reservation.addTicket(ticket);
         }
+
+        reservation.registerCreatedBy(userId);
 
         return reservation;
     }
