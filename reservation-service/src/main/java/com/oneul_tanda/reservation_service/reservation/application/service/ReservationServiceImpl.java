@@ -5,6 +5,7 @@ import com.oneul_tanda.reservation_service.reservation.application.command.Confi
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
 import com.oneul_tanda.reservation_service.reservation.domain.repository.ReservationRepository;
+import com.oneul_tanda.reservation_service.reservation.infrastructure.client.FlightClient;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
@@ -13,22 +14,26 @@ import com.oneul_tanda.reservation_service.reservation.presentation.dto.response
 import com.oneul_tanda.reservation_service.ticket.domain.entity.SeatClass;
 import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final FlightClient flightClient;
 
     /**
      * 예약 생성
@@ -86,8 +91,10 @@ public class ReservationServiceImpl implements ReservationService {
 
 
         // Todo FeignClient 항공편 조회 및 데이터 획득
+        // 더미 데이터 세팅
+        LocalDateTime dummyDepartureDate = LocalDateTime.now().plusDays(5);
+        LocalDateTime dummyArrivalDate = dummyDepartureDate.plusHours(2);
 
-        // Todo FeignClient 좌석 차감
 
         // 티켓 임시 생성
         List<Ticket> ticketList = new ArrayList<>();
@@ -98,7 +105,9 @@ public class ReservationServiceImpl implements ReservationService {
                     command.userId(),
                     // TODO 임시 값 설정, 항공편 조회에서 데이터 획득 고려
                     SeatClass.ECONOMY,
-                    BigDecimal.valueOf(10000)
+                    BigDecimal.valueOf(10000),
+                    dummyDepartureDate,
+                    dummyArrivalDate
             );
 
             ticketList.add(ticket);
