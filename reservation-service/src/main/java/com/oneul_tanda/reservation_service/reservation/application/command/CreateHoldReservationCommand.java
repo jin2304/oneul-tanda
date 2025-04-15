@@ -9,10 +9,10 @@ public record CreateHoldReservationCommand(
 ) {
     public static CreateHoldReservationCommand of(
             UUID flightId,
-            String  userId,
+            UUID userId,
             int seatCount
     ) {
-        return new CreateHoldReservationCommand(flightId,  UUID.fromString(userId), seatCount);
+        return new CreateHoldReservationCommand(flightId, userId, seatCount);
     }
 }
 
