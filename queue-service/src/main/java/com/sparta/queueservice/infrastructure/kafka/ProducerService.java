@@ -1,13 +1,12 @@
-package com.sparta.queueservice.infrastructure.Kafka;
+package com.sparta.queueservice.infrastructure.kafka;
 
-import com.sparta.queueservice.infrastructure.Kafka.event.EventStatusEnum;
-import com.sparta.queueservice.infrastructure.Kafka.event.ReservationHeldEvent;
+import com.sparta.queueservice.infrastructure.kafka.event.EventStatusEnum;
+import com.sparta.queueservice.infrastructure.kafka.event.ReservationHeldEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j

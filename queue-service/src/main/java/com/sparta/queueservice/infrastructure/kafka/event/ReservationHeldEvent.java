@@ -1,4 +1,4 @@
-package com.sparta.queueservice.infrastructure.Kafka.event;
+package com.sparta.queueservice.infrastructure.kafka.event;
 
 import lombok.*;
 

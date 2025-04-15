@@ -1,10 +1,9 @@
 package com.sparta.queueservice.application.service;
 
 import com.sparta.queueservice.application.dto.FlightRequestDto;
-import com.sparta.queueservice.infrastructure.Kafka.ProducerService;
-import com.sparta.queueservice.infrastructure.Kafka.event.EventStatusEnum;
+import com.sparta.queueservice.infrastructure.kafka.ProducerService;
+import com.sparta.queueservice.infrastructure.kafka.event.EventStatusEnum;
 import com.sparta.queueservice.infrastructure.client.FlightClient;
-import com.sparta.queueservice.infrastructure.client.FlightResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
