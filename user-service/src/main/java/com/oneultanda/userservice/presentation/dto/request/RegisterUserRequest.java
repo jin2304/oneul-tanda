@@ -1,4 +1,4 @@
-package com.oneultanda.userservice.presentaion.dto.request;
+package com.oneultanda.userservice.presentation.dto.request;
 
 import com.oneultanda.userservice.application.dto.comand.RegisterUserCommand;
 
