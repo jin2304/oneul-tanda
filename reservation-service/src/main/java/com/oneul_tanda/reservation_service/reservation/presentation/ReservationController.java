@@ -5,6 +5,7 @@ import com.oneul_tanda.reservation_service.reservation.application.service.Reser
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.update.ConfirmReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -70,5 +71,15 @@ public class ReservationController {
     public ResponseEntity<Page<ReadReservationResponseDto>> readAllReservation(
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(reservationService.readAllReservation(pageable));
+    }
+
+
+
+    /**
+     * 예약 취소(예약 수정)
+     */
+    @PutMapping("/{reservationId}/cancel")
+    public ResponseEntity<CancelReservationResponseDto> cancelReservation(@PathVariable UUID reservationId) {
+        return ResponseEntity.ok(reservationService.cancelReservation(reservationId));
     }
 }
