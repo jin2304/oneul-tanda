@@ -74,12 +74,20 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     /**
-     * 에약 임시 생성
+     * 예약 임시 생성
      */
     @Override
     public CreateHoldReservationResponseDto createHoldReservation(CreateHoldReservationCommand command) {
 
-        // TODO FeignClient 항공편 조회
+        // 중복 예약 생성 검증
+        if (reservationRepository.findByUserIdAndFlightId(command.userId(), command.flightId()).isPresent()) {
+            throw new IllegalStateException("이미 해당 항공편에 대한 임시 예약이 존재합니다.");
+        }
+
+
+        // Todo FeignClient 항공편 조회 및 데이터 획득
+
+        // Todo FeignClient 좌석 차감
 
         // 티켓 임시 생성
         List<Ticket> ticketList = new ArrayList<>();

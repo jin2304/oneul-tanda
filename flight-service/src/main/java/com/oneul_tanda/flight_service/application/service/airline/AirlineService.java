@@ -1,4 +1,4 @@
-package com.oneul_tanda.flight_service.application.service;
+package com.oneul_tanda.flight_service.application.service.airline;
 
 import com.oneul_tanda.flight_service.application.dtos.airline.CreateAirlineCommand;
 import com.oneul_tanda.flight_service.application.dtos.airline.UpdateAirlineCommand;

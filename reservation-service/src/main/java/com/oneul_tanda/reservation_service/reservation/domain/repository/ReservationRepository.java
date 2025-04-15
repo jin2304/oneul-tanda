@@ -14,4 +14,6 @@ public interface ReservationRepository {
     Optional<Reservation> findById(UUID reservationId);
 
     Page<Reservation> findAll(Pageable pageable);
+
+    Optional<Reservation> findByUserIdAndFlightId(UUID userId, UUID flightId);
 }

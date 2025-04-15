@@ -1,7 +1,7 @@
 package com.oneul_tanda.flight_service.presentation.controller;
 
 import com.oneul_tanda.flight_service.presentation.dtos.airport.UpdateAirportRequest;
-import com.oneul_tanda.flight_service.application.service.AirportService;
+import com.oneul_tanda.flight_service.application.service.airport.AirportService;
 import com.oneul_tanda.flight_service.presentation.dtos.airport.CreateAirportRequest;
 import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
 import jakarta.validation.Valid;
