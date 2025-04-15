@@ -1,4 +1,4 @@
-package com.oneul_tanda.flight_service.application.service;
+package com.oneul_tanda.flight_service.application.service.airline;
 
 import com.amadeus.Amadeus;
 import com.amadeus.Params;

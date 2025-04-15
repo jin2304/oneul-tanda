@@ -1,6 +1,6 @@
 package com.oneul_tanda.flight_service.presentation.controller;
 
-import com.oneul_tanda.flight_service.application.service.AirlineService;
+import com.oneul_tanda.flight_service.application.service.airline.AirlineService;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.CreateAirlineRequest;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.UpdateAirlineRequest;

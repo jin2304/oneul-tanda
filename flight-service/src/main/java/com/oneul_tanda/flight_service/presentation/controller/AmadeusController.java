@@ -1,16 +1,21 @@
 package com.oneul_tanda.flight_service.presentation.controller;
 
 import com.amadeus.resources.Location;
-import com.oneul_tanda.flight_service.application.service.AirlineExternalService;
-import com.oneul_tanda.flight_service.application.service.AirportExternalService;
+import com.oneul_tanda.flight_service.application.service.airline.AirlineExternalService;
+import com.oneul_tanda.flight_service.application.service.airport.AirportExternalService;
+import com.oneul_tanda.flight_service.application.service.flight.FlightExternalService;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineSearchResponse;
 import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
 import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportSearchResponse;
+import com.oneul_tanda.flight_service.presentation.dtos.flight.FlightResponse;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +31,7 @@ public class AmadeusController {
 
     private final AirportExternalService airportExternalService;
     private final AirlineExternalService airlineExternalService;
+    private final FlightExternalService flightExternalService;
 
     // 실시간 공항 정보 조회용
     @GetMapping("/airports/live-search")
@@ -72,6 +78,55 @@ public class AmadeusController {
             return ResponseEntity.ok(airlineExternalService.searchAndSaveAirlines(keyword));
         } catch (Exception e) {
             log.error("Error fetching and saving airlines: {}", e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // 실시간 항공편 정보 조회용
+    @GetMapping("/flights/live-search")
+    public ResponseEntity<List<FlightResponse>> searchFlights(
+            @RequestParam String departureAirportCode,
+            @RequestParam String arrivalAirportCode,
+            @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime departureDate,
+            @RequestParam Integer requiredSeats
+    ) {
+        try {
+            log.debug(
+                    "Received params - departureAirportCode: {}, arrivalAirportCode: {}, departureDate: {}, requiredSeats: {}",
+                    departureAirportCode, arrivalAirportCode, departureDate, requiredSeats);
+            List<FlightResponse> flightResponses = flightExternalService.searchFlights(
+                    departureAirportCode, arrivalAirportCode, departureDate, requiredSeats);
+            return ResponseEntity.ok(flightResponses);
+        } catch (Exception e) {
+            log.error("Error while searching flights", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // 실시간 항공편 정보 조회 및 DB 저장용
+    @PostMapping("/flights/fetch-and-save")
+    public ResponseEntity<List<FlightResponse>> searchAndSaveFlights(
+            @RequestParam String departureAirportCode,
+            @RequestParam String arrivalAirportCode,
+            @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime departureDate,
+            @RequestParam Integer requiredSeats
+    ) {
+        try {
+            // 과거 날짜 검증
+            LocalDateTime now = LocalDateTime.now();
+            if (departureDate.toLocalDate().isBefore(now.toLocalDate())) {
+                log.warn("Requested departureDate {} is in the past", departureDate);
+                return ResponseEntity.badRequest().body(List.of());
+            }
+
+            log.debug(
+                    "Received params - departureAirportCode: {}, arrivalAirportCode: {}, departureDate: {}, requiredSeats: {}",
+                    departureAirportCode, arrivalAirportCode, departureDate, requiredSeats);
+            List<FlightResponse> response = flightExternalService.searchAndSaveFlights(
+                    departureAirportCode, arrivalAirportCode, departureDate, requiredSeats);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error while searching and saving flights", e);
             return ResponseEntity.internalServerError().build();
         }
     }
