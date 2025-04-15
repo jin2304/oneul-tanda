@@ -36,13 +36,17 @@ public class Passenger extends BaseTimeEntity {
     /**
      * 탑승객 생성
      */
-    public static Passenger createPassenger(String name, String birth, Gender gender, String passportNumber) {
-        return Passenger.builder()
+    public static Passenger createPassenger(UUID userId, String name, String birth, Gender gender, String passportNumber) {
+        Passenger passenger = Passenger.builder()
                 .name(name)
                 .birth(birth)
                 .gender(gender)
                 .passportNumber(passportNumber)
                 .build();
+
+        passenger.registerCreatedBy(userId);
+
+        return passenger;
     }
 
 }

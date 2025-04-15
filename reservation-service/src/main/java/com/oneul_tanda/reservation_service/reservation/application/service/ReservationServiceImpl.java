@@ -42,6 +42,7 @@ public class ReservationServiceImpl implements ReservationService {
         for (CreateReservationRequestDto.CreateTicketRequestDto ticketDto : requestDto.tickets()) {
             // 탑승객 생성
             Passenger passenger = Passenger.createPassenger(
+                            requestDto.userId(),
                             ticketDto.passenger().name(),
                             ticketDto.passenger().birth(),
                             ticketDto.passenger().gender(),
@@ -155,6 +156,7 @@ public class ReservationServiceImpl implements ReservationService {
 
             // 2-2. 탑승객 생성 및 티켓에 확정 처리
             Passenger passenger = Passenger.createPassenger(
+                    command.userId(),
                     ticketCommand.passenger().name(),
                     ticketCommand.passenger().birth(),
                     ticketCommand.passenger().gender(),

@@ -46,9 +46,11 @@ public class ReservationController {
      * 에약 확정 (예약 수정)
      */
     @PutMapping("/{reservationId}/confirm")
-    public ResponseEntity<ConfirmReservationResponseDto> confirmReservation(@PathVariable UUID reservationId,
-                                                                            @RequestBody ConfirmReservationRequestDto requestDto) {
-        return ResponseEntity.ok(reservationService.confirmReservation(ConfirmReservationCommand.of(reservationId, requestDto)));
+    public ResponseEntity<ConfirmReservationResponseDto> confirmReservation(
+            @RequestHeader("X-User-ID") UUID userId,
+            @PathVariable UUID reservationId,
+            @RequestBody ConfirmReservationRequestDto requestDto) {
+        return ResponseEntity.ok(reservationService.confirmReservation(ConfirmReservationCommand.of(userId, reservationId, requestDto)));
     }
 
 
