@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public record CreatePassengerResponseDto(
         UUID passengerId,
+        String name,
         String birth,
         Gender gender,
         String passportNumber
@@ -16,6 +17,7 @@ public record CreatePassengerResponseDto(
     public static CreatePassengerResponseDto from(Passenger passenger) {
         return new CreatePassengerResponseDto(
                 passenger.getId(),
+                passenger.getName(),
                 passenger.getBirth(),
                 passenger.getGender(),
                 passenger.getPassportNumber()

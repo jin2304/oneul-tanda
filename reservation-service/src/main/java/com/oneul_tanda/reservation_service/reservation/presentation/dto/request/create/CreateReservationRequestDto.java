@@ -1,4 +1,4 @@
-package com.oneul_tanda.reservation_service.reservation.presentation.dto.request;
+package com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create;
 
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Gender;
 import com.oneul_tanda.reservation_service.ticket.domain.entity.SeatClass;
@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-public record CreateReservationRequestDto(Long userId,
+public record CreateReservationRequestDto(UUID userId,
                                           List<CreateTicketRequestDto> tickets)
 {
 
@@ -19,6 +19,7 @@ public record CreateReservationRequestDto(Long userId,
     ) {}
 
     public record CreatePassengerDto(
+            String name,
             String birth,
             Gender gender,
             String passportNumber

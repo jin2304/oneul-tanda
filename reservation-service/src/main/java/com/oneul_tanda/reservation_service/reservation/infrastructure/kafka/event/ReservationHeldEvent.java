@@ -13,7 +13,7 @@ public record ReservationHeldEvent(
 
     public record Data(
             UUID flightId,
-            Long userId,
+            UUID userId,
             int seatCount
     ) {}
 }
