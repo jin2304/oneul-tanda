@@ -10,6 +10,7 @@ import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import com.oneul_tanda.reservation_service.ticket.domain.entity.SeatClass;
 import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
@@ -191,5 +192,52 @@ public class ReservationServiceImpl implements ReservationService {
 
         // 5. 응답 반환
         return ConfirmReservationResponseDto.from(reservation);
+    }
+
+
+
+
+    /**
+     * 예약 취소 (예약 수정)
+     */
+    @Override
+    @Transactional
+    public CancelReservationResponseDto cancelReservation(UUID reservationId) {
+        // 1. 예약 조회
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+
+
+        // 2. 예약 취소
+        reservation.cancel();
+
+
+        // 3. 좌석 수 추출
+        Integer seatCount = reservation.getTicketList().size();
+
+
+        // 4. 항공편 ID 추출 (모든 티켓이 동일한 flightId라고 가정)
+        UUID flightId = reservation.getTicketList().get(0).getFlightId();
+
+
+        // 5. 좌석 복구 요청 (좌석 복구 실패 시에도 예약 취소는 유지)
+        // TODO: 분산 트랜잭션 어떻게 관리? 1. Saga 패턴의 보상트랜잭션,  2. 이벤트 발행, 3. 기타
+/*
+        try {
+            flightClient.increaseSeats(flightId, seatCount);
+
+        } catch (Exception e) {
+            log.error("좌석 복원 실패 - flightId={}, seatCounts={}, error={}", flightId, seatCount, e.getMessage(), e);
+
+            */
+/*
+            // 예약 복구 실패 이벤트 발행
+            reservationEventPublisher.publishSeatRestoreFailed(reservation.getId(), flightId, seatCounts);*//*
+
+        }
+*/
+
+        // 6. 응답 반환
+        return CancelReservationResponseDto.of(reservation.getId());
     }
 }
