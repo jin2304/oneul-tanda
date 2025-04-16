@@ -1,4 +1,4 @@
-package com.oneultanda.userservice.common;
+package com.oneultanda.userservice.infrastructure.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
