@@ -77,3 +77,10 @@ X-User-ID: 9b7f421f-47b0-47f5-aa5c-8f489697a57d
     }
   ]
 }
+
+
+
+### 예약 취소(예약 수정)
+PUT http://localhost:19095/api/v1/reservations/791f1aa3-f2b1-4d08-bbf7-cb236090e30d/cancel
+Content-Type: application/json
+X-User-ID: 9b7f421f-47b0-47f5-aa5c-8f489697a57d

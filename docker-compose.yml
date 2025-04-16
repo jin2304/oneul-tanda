@@ -1,5 +1,5 @@
 services:
-  reservation:
+  reservation-service:
     image: mysql:8.0
     container_name: reservation-service
     environment:
@@ -10,11 +10,24 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - reservation-mysql-data:/var/lib/mysql
+
+  flight-service:
+    image: mysql:8.0
+    container_name: flight-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: flight_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3308:3306"
+    volumes:
+      - flight-mysql-data:/var/lib/mysql
 
   redis:
     image: redis:latest
-    container_name: queue-redis
+    container_name: ot-redis
     ports:
       - "6379:6379"
     restart: always
@@ -54,4 +67,6 @@ services:
       KAFKA_CLUSTERS_0_READONLY: "false"
 
 volumes:
-  mysql-data:
+  reservation-mysql-data:
+  flight-mysql-data:
+
