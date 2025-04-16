@@ -27,7 +27,7 @@ public class ReservationHeldEvent {
 
     public static ReservationHeldEvent createReservationEvent(UUID flightId,
                                                               UUID userId,
-                                                              int seatCount,
+                                                              Integer seatCount,
                                                               EventStatusEnum status) {
         return ReservationHeldEvent.builder()
                 .eventId(UUID.randomUUID())

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
-@FeignClient(name = "flight-service", url = "http://localhost:19094/api/v1/flights/")
+@FeignClient(name = "flight-service", url = "http://localhost:19094/api/v1/flights")
 public interface FlightClient {
     // 항공편을 조회 예시
     @GetMapping("/{flightId}")

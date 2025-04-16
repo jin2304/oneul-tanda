@@ -35,7 +35,7 @@ public class QueueService {
     public void tryReserve(FlightRequestDto request, UUID userId) {
         // 예약 신청한 flightId 와 좌석 수
         UUID flightId = request.getFlightId();
-        int seatCount = request.getSeatCount();
+        Integer seatCount = request.getSeatCount();
 
         log.info("예약 요청: flightId={}, seatCount={}, userId={}",
                 request.getFlightId(), request.getSeatCount(), userId);
@@ -60,7 +60,7 @@ public class QueueService {
         String key = "ranks:" +  flightId;
         // flightId를 받아 좌석 수를 조회
         FlightResponse flightResponse = flightClient.getFlight(flightId);
-        int remainingSeats = flightResponse.getRemainingSeats();
+        Integer remainingSeats = flightResponse.getRemainingSeats();
 
 //        // 테스트시 동시성 제어를 위한 redis 저장
 //        String remainingSeatsStr = redisTemplate.opsForValue().get("seat:" + flightId);
