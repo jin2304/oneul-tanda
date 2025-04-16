@@ -1,10 +1,10 @@
 package com.sparta.queueservice.application.service;
 
 import com.sparta.queueservice.application.dto.FlightRequestDto;
-import com.sparta.queueservice.infrastructure.Kafka.ProducerService;
-import com.sparta.queueservice.infrastructure.Kafka.event.EventStatusEnum;
-import com.sparta.queueservice.infrastructure.client.FlightClient;
 import com.sparta.queueservice.infrastructure.client.FlightResponse;
+import com.sparta.queueservice.infrastructure.kafka.ProducerService;
+import com.sparta.queueservice.infrastructure.kafka.event.EventStatusEnum;
+import com.sparta.queueservice.infrastructure.client.FlightClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -18,30 +18,31 @@ import java.util.UUID;
 @Service
 public class QueueService {
     private final ZSetOperations<String, String> rankOps;
-//    private final FlightClient flightClient;
+    private final FlightClient flightClient;
     private final ProducerService producerService;
     private final RedisTemplate<String, String> redisTemplate;
 
     public QueueService(FlightClient airportClient,
                         RedisTemplate<String, String> redisTemplate,
                         ProducerService producerService) {
-//        this.flightClient = airportClient;
+        this.flightClient = airportClient;
         this.rankOps = redisTemplate.opsForZSet();
         this.producerService = producerService;
         this.redisTemplate = redisTemplate;
     }
 
     // 예약 신청시 대기열 진입후 대기열 선점
-    public void tryReserve(FlightRequestDto request, String userId) {
+    public void tryReserve(FlightRequestDto request, UUID userId) {
         // 예약 신청한 flightId 와 좌석 수
         UUID flightId = request.getFlightId();
-        int seatCount = request.getSeatCount();
+        Integer seatCount = request.getSeatCount();
 
         log.info("예약 요청: flightId={}, seatCount={}, userId={}",
                 request.getFlightId(), request.getSeatCount(), userId);
         // 중복 예약 체크
         if(existReserve(flightId, userId)) {
             log.info("중복된 항공편 입니다. flightId: {} ", flightId);
+            producerService.sendReserveFailed(flightId, userId, seatCount, EventStatusEnum.DUPLICATE);
             return;
         }
 
@@ -55,20 +56,22 @@ public class QueueService {
     }
 
     //대기열 진입 후 선점 과정
-    public void processReserve(UUID flightId) {
+    public synchronized void processReserve(UUID flightId) {
         String key = "ranks:" +  flightId;
         // flightId를 받아 좌석 수를 조회
-//        FlightResponse flightResponse = flightClient.getAirport(flightId);
-//        int remainingSeats = flightResponse.getRemainingSeats();
-        // 테스트시 동시성 제어를 위한 redis 저장
-        String remainingSeatsStr = redisTemplate.opsForValue().get("seat:" + flightId);
-        // 값이 없다면, 기본 값인 10을 설정하여 redis 에 저장
-        int remainingSeats = (remainingSeatsStr != null) ? Integer.parseInt(remainingSeatsStr) : 10;
-        if (remainingSeatsStr == null) {
-            // 최초 저장 시에 redis 에 값 설정
-            redisTemplate.opsForValue().set("seat:" + flightId, String.valueOf(remainingSeats));
-            log.info("좌석 수 최초 설정: {}", remainingSeats);
-        }
+        FlightResponse flightResponse = flightClient.getFlight(flightId);
+        Integer remainingSeats = flightResponse.getRemainingSeats();
+
+//        // 테스트시 동시성 제어를 위한 redis 저장
+//        String remainingSeatsStr = redisTemplate.opsForValue().get("seat:" + flightId);
+//        // 값이 없다면, 기본 값인 10을 설정하여 redis 에 저장
+//        int remainingSeats = (remainingSeatsStr != null) ? Integer.parseInt(remainingSeatsStr) : 50;
+//        if (remainingSeatsStr == null) {
+//            // 최초 저장 시에 redis 에 값 설정
+//            redisTemplate.opsForValue().set("seat:" + flightId, String.valueOf(remainingSeats));
+//            log.info("좌석 수 최초 설정: {}", remainingSeats);
+//        }
+
         // 대기열에 있는 모든 유저 조회
         Set<String> topUsers = rankOps.range(key, 0, -1);
         if (topUsers == null || topUsers.isEmpty()) {
@@ -77,18 +80,18 @@ public class QueueService {
         // 좌석 수가 남아 있을때 대기열 선점 좌석 수가 0이면 실패 메시지를 보낸 후 대기열에서 삭제
         for(String reserveInfo : topUsers) {
             String[] parts =  reserveInfo.split(":");
-            String userId = parts[0];
+            UUID userId = UUID.fromString(parts[0]);
             int seatCount = Integer.parseInt(parts[1]);
 
             if(seatCount <= remainingSeats) { // 대기열 선점 성공시 항공편의 좌석 수 차감 후 성공 메세지 전달
                 // 좌석 수 차감 api 필요 (임시 좌석 차감 로직)
-                remainingSeats -= seatCount;
-                redisTemplate.opsForValue().set("seat:" + flightId, String.valueOf(remainingSeats));
-
+//                remainingSeats -= seatCount;
+//                redisTemplate.opsForValue().set("seat:" + flightId, String.valueOf(remainingSeats));
+                // 실제 항공편 서비스 좌석 차감
+                flightClient.decreaseSeats(flightId, seatCount);
                 log.info("대기열 선점에 성공 했습니다. 남은 좌석 수: {}", remainingSeats);
                 rankOps.remove(key, reserveInfo);
                 producerService.sendReserveSuccess(flightId, userId, seatCount, EventStatusEnum.SUCCESS);
-//                deleteExistReserve(flightId, userId);
 
             } else { // 대기열 선점 실패서 실패 메세지 전달
                 log.info("대기열 선점에 실패했습니다. 남은 좌석 수: {}", remainingSeats);
@@ -104,20 +107,20 @@ public class QueueService {
     }
 
     // 중복 유저가 있는지 체크
-    private boolean existReserve(UUID flightId, String userId) {
+    private boolean existReserve(UUID flightId, UUID userId) {
         String key = "reserve:" +  flightId + ":" + userId;
         return redisTemplate.hasKey(key);
     }
 
     // userId와 flightId를 redis 에 저장해 중복 체크
-    private void setExistReserve(UUID flightId, String userId) {
+    private void setExistReserve(UUID flightId, UUID userId) {
         String key = "reserve:" +  flightId + ":" + userId;
         log.info("중복 예약 방지 키: {}", key);
         redisTemplate.opsForValue().set(key, "1", Duration.ofMinutes(5));
     }
 
     // 대기열 선점 실패시 sortedSet 과 같이 삭제
-    public void deleteExistReserve(UUID flightId, String userId) {
+    public void deleteExistReserve(UUID flightId, UUID userId) {
         String key = "reserve:" +  flightId + ":" + userId;
         redisTemplate.delete(key);
     }

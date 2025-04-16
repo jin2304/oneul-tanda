@@ -1,4 +1,4 @@
-package com.sparta.queueservice.infrastructure.Kafka.event;
+package com.sparta.queueservice.infrastructure.kafka.event;
 
 import lombok.*;
 
@@ -21,13 +21,13 @@ public class ReservationHeldEvent {
     @AllArgsConstructor
     public static class Data {
         private UUID flightId;
-        private String userId;
+        private UUID userId;
         private Integer seatCount;
     }
 
     public static ReservationHeldEvent createReservationEvent(UUID flightId,
-                                                              String userId,
-                                                              int seatCount,
+                                                              UUID userId,
+                                                              Integer seatCount,
                                                               EventStatusEnum status) {
         return ReservationHeldEvent.builder()
                 .eventId(UUID.randomUUID())
