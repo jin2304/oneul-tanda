@@ -16,6 +16,7 @@ services:
     image: mysql:8.0
     container_name: flight-db
     environment:
+      MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: flight_db
       MYSQL_USER: root
       MYSQL_PASSWORD: 1234
