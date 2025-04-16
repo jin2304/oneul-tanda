@@ -216,24 +216,17 @@ public class ReservationServiceImpl implements ReservationService {
         UUID flightId = reservation.getTicketList().get(0).getFlightId();
 
 
-        // 5. 좌석 복구 요청 (좌석 복구 실패 시에도 예약 취소는 유지)
+        // 5. 좌석 복구 요청
         // TODO: 분산 트랜잭션 어떻게 관리? 1. Saga 패턴의 보상트랜잭션,  2. 이벤트 발행, 3. 기타
-/*
         try {
             flightClient.increaseSeats(flightId, seatCount);
 
         } catch (Exception e) {
             log.error("좌석 복원 실패 - flightId={}, seatCounts={}, error={}", flightId, seatCount, e.getMessage(), e);
-
-            */
-/*
-            // 예약 복구 실패 이벤트 발행
-            reservationEventPublisher.publishSeatRestoreFailed(reservation.getId(), flightId, seatCounts);*//*
-
+            throw new RuntimeException("좌석 복원 실패로 예약 취소 롤백");
         }
-*/
 
-        // 6. 응답 반환
+        // 6. 응답 반환 
         return CancelReservationResponseDto.of(reservation.getId());
     }
 }
