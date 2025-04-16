@@ -1,0 +1,22 @@
+services:
+  reservation:
+    image: mysql:8.0
+    container_name: flight-db
+    environment:
+      MYSQL_DATABASE: flight_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3308:3306"
+    volumes:
+      - flight-mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:latest
+    container_name: redis-flight
+    ports:
+      - "6380:6379"
+    restart: always
+
+volumes:
+  flight-mysql-data:
