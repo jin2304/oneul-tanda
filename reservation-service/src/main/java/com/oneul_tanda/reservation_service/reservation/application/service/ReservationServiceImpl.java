@@ -6,6 +6,7 @@ import com.oneul_tanda.reservation_service.reservation.application.command.Creat
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
 import com.oneul_tanda.reservation_service.reservation.domain.repository.ReservationRepository;
 import com.oneul_tanda.reservation_service.reservation.infrastructure.client.FlightClient;
+import com.oneul_tanda.reservation_service.reservation.infrastructure.client.dto.response.GetFlightInfo;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
@@ -21,8 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -91,10 +90,8 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
 
-        // Todo FeignClient 항공편 조회 및 데이터 획득
-        // 더미 데이터 세팅
-        LocalDateTime dummyDepartureDate = LocalDateTime.now().plusDays(5);
-        LocalDateTime dummyArrivalDate = dummyDepartureDate.plusHours(2);
+        // FeignClient 항공편 조회 및 데이터 획득
+        GetFlightInfo getFlightInfo = flightClient.getFlight(command.flightId());
 
 
         // 티켓 임시 생성
@@ -104,11 +101,10 @@ public class ReservationServiceImpl implements ReservationService {
             Ticket ticket = Ticket.createTicketWithoutPassenger(
                     command.flightId(),
                     command.userId(),
-                    // TODO 임시 값 설정, 항공편 조회에서 데이터 획득 고려
                     SeatClass.ECONOMY,
-                    BigDecimal.valueOf(10000),
-                    dummyDepartureDate,
-                    dummyArrivalDate
+                    getFlightInfo.price(),
+                    getFlightInfo.departureDate(),
+                    getFlightInfo.arrivalDate()
             );
 
             ticketList.add(ticket);
