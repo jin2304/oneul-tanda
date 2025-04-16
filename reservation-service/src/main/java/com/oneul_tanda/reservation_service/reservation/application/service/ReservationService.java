@@ -5,6 +5,7 @@ import com.oneul_tanda.reservation_service.reservation.application.command.Creat
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
 import org.springframework.data.domain.Page;
@@ -23,4 +24,6 @@ public interface ReservationService {
     Page<ReadReservationResponseDto> readAllReservation(Pageable pageable);
 
     ConfirmReservationResponseDto confirmReservation(ConfirmReservationCommand command);
+
+    CancelReservationResponseDto cancelReservation(UUID reservationId);
 }

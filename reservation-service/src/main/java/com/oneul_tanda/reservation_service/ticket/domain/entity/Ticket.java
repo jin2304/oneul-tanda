@@ -8,6 +8,7 @@ import lombok.*;
 
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -32,6 +33,12 @@ public class Ticket extends BaseTimeEntity {
 
     @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
+
+    @Column(name = "departure_date", updatable = false)
+    private LocalDateTime departureDate;
+
+    @Column(name = "arrival_date", updatable = false)
+    private LocalDateTime arrivalDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id", nullable = false)
@@ -64,11 +71,13 @@ public class Ticket extends BaseTimeEntity {
     /**
      * 티켓 임시 생성
      */
-    public static Ticket createTicketWithoutPassenger(UUID flightId, UUID userId, SeatClass seatClass, BigDecimal unitPrice) {
+    public static Ticket createTicketWithoutPassenger(UUID flightId, UUID userId, SeatClass seatClass, BigDecimal unitPrice, LocalDateTime departureDate, LocalDateTime arrivalDate) {
          Ticket ticket = Ticket.builder()
                 .flightId(flightId)
                 .seatClass(seatClass)
                 .unitPrice(unitPrice)
+                .departureDate(departureDate)
+                .arrivalDate(arrivalDate)
                 .build();
 
         ticket.registerCreatedBy(userId);
