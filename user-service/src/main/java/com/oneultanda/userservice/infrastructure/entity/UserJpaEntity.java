@@ -1,9 +1,7 @@
-package com.oneultanda.userservice.domain.entity;
+package com.oneultanda.userservice.infrastructure.entity;
 
-import com.oneultanda.userservice.application.dto.comand.UpdatePasswordCommand;
-import com.oneultanda.userservice.application.dto.comand.UpdateUserCommand;
-import com.oneultanda.userservice.application.dto.comand.UpdateUserRoleCommand;
-import com.oneultanda.userservice.common.BaseTimeEntity;
+import com.oneultanda.userservice.domain.model.Role;
+import com.oneultanda.userservice.domain.model.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,7 +15,7 @@ import java.util.UUID;
 @Getter
 @Table(name = "m_user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseTimeEntity {
+public class UserJpaEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
@@ -44,40 +42,46 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role;
 
+    @Column(nullable = false)
+    private int tokenVersion;
+
     @Builder
-    private User(String username, String password, String nickname, String email, String contact, Role role) {
+    private UserJpaEntity(UUID id, String username, String password, String nickname, String email, String contact, Role role, int tokenVersion) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.nickname = nickname;
         this.email = email;
         this.contact = contact;
         this.role = role;
+        this.tokenVersion = tokenVersion;
     }
 
-    public static User create(String username, String encodedPassword, String nickname, String email, String contact) {
-        User user = User.builder()
+    public static UserJpaEntity create(String username, String encodedPassword, String nickname, String email, String contact) {
+        UserJpaEntity userJpaEntity = UserJpaEntity.builder()
+
                 .username(username)
                 .password(encodedPassword)
                 .nickname(nickname)
                 .email(email)
                 .contact(contact)
                 .role(Role.CUSTOMER)
+                .tokenVersion(1)
                 .build();
 
-        return user;
+        return userJpaEntity;
     }
 
-    public void updateFromUpdateUserCommand(UpdateUserCommand command) {
-        this.nickname = command.nickname();
-        this.email = command.email();
-        this.contact = command.contact();
-    }
-
-    public void updateFromUpdatePasswordCommand(String encodedNewPassword) {
-        this.password = encodedNewPassword;
-    }
-
-    public void updateRole(UpdateUserRoleCommand command) {
-        this.role = command.role();
+    public User toDomain() {
+        return com.oneultanda.userservice.domain.model.User.of(
+                this.id,
+                this.username,
+                this.password,
+                this.nickname,
+                this.email,
+                this.contact,
+                this.role,
+                this.tokenVersion
+        );
     }
 }
