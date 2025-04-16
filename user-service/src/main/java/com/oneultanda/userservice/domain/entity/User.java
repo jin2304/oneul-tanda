@@ -9,6 +9,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -17,8 +20,10 @@ import lombok.NoArgsConstructor;
 public class User extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UuidGenerator
+    @Column(columnDefinition = "BINARY(16)")
+    private UUID id;
 
     @Column(nullable = false)
     private String username;
@@ -49,16 +54,15 @@ public class User extends BaseTimeEntity {
         this.role = role;
     }
 
-    public static User from(String username, String password, String nickname, String email, String contact) {
+    public static User create(String username, String encodedPassword, String nickname, String email, String contact) {
         User user = User.builder()
                 .username(username)
-                .password(password)
+                .password(encodedPassword)
                 .nickname(nickname)
                 .email(email)
                 .contact(contact)
                 .role(Role.CUSTOMER)
                 .build();
-        user.registerCreatedBy(username);
 
         return user;
     }
@@ -69,8 +73,8 @@ public class User extends BaseTimeEntity {
         this.contact = command.contact();
     }
 
-    public void updateFromUpdatePasswordCommand(UpdatePasswordCommand command) {
-        this.password = command.newPassword();
+    public void updateFromUpdatePasswordCommand(String encodedNewPassword) {
+        this.password = encodedNewPassword;
     }
 
     public void updateRole(UpdateUserRoleCommand command) {

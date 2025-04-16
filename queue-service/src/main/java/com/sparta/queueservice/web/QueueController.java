@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/queue")
 @RequiredArgsConstructor
@@ -15,7 +17,7 @@ public class QueueController {
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void tryReserve(@RequestBody FlightRequestDto request,
-                           @RequestHeader("X-User-ID") String userId) {
+                           @RequestHeader("X-User-ID") UUID userId) {
 
         queueService.tryReserve(request, userId);
     }

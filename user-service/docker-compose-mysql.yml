@@ -12,7 +12,7 @@ services:
       MYSQL_USER: admin
       MYSQL_PASSWORD: 1234
     ports:
-      - "3306:3306"
+      - "3309:3306"
 #todo: 추후에 port 확인, 변경 필요
     volumes:
       - mysql_data:/var/lib/mysql

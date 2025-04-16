@@ -6,6 +6,7 @@ plugins {
 
 ext {
 	springCloudVersion = "2024.0.1"
+	queryDslVersion = "5.1.0" // QueryDSL 최신 버전
 }
 
 group = 'com.oneul-tanda'
@@ -28,17 +29,42 @@ repositories {
 }
 
 dependencies {
+	// Amadeus
+	implementation 'com.amadeus:amadeus-java:5.0.0'
+
+	// QueryDSL
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
+	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+
+	// jpa
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// web
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// spring cache
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+	// spring cloud
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
-	testImplementation 'io.projectreactor:reactor-test'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// mysql
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// lombok
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// devtools
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -51,4 +77,23 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// QueryDsl
+def querydslSrcDir = 'src/main/generated'
+
+clean {
+	delete file(querydslSrcDir)
+}
+
+tasks.withType(JavaCompile) {
+	options.generatedSourceOutputDirectory = file(querydslSrcDir)
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir querydslSrcDir
+		}
+	}
 }

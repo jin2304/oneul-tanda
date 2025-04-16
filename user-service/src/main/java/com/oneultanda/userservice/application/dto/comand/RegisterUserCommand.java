@@ -9,7 +9,4 @@ public record RegisterUserCommand(
         String email,
         String contact
 ) {
-    public User toUser() {
-        return User.from(username, password, nickname, email, contact);
-    }
 }

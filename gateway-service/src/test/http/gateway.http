@@ -1,0 +1,75 @@
+### 유저 생성 - internal
+POST http://localhost:19091/api/v1/users/signup
+Content-Type: application/json
+
+{
+  "username": "tester",
+  "password": "12345678a*",
+  "nickname": "테스터",
+  "email": "test@test.com",
+  "contact": "010-1111-2222"
+}
+
+### 로그인
+POST http://localhost:19091/api/v1/users/login
+Content-Type: application/json
+
+{
+  "username": "tester",
+  "password": "12345678a*"
+}
+
+### 유저 조회(개인)
+GET http://localhost:19091/api/v1/users/me
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImY0ZmIzYmZhLTVlZGQtNGI2OC1iY2E4LTg1YTQ4NGM4NWQ4NSIsImlzcyI6Im9uZXVsLXRhbmRhIiwiaWF0IjoxNzQ0NjgyMjg4LCJleHAiOjE3NDQ2ODQwODh9.y5ps0ccdaWW5vEctq0TkfzmDB3vuQvWel9SrVuRfEUw
+
+### 유저 정보 수정
+PUT http://localhost:19091/api/v1/users/me
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImY0ZmIzYmZhLTVlZGQtNGI2OC1iY2E4LTg1YTQ4NGM4NWQ4NSIsImlzcyI6Im9uZXVsLXRhbmRhIiwiaWF0IjoxNzQ0NjgyMjg4LCJleHAiOjE3NDQ2ODQwODh9.y5ps0ccdaWW5vEctq0TkfzmDB3vuQvWel9SrVuRfEUw
+
+{
+  "nickname": "테스터",
+  "email": "test@test.com",
+  "contact": "010-1111-2212"
+}
+
+### 유저 암호 수정 todo: 추후 feignclient grpc를 통해 수정 작업 진행 - internal
+PUT http://localhost:19091/api/v1/users/password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImY0ZmIzYmZhLTVlZGQtNGI2OC1iY2E4LTg1YTQ4NGM4NWQ4NSIsImlzcyI6Im9uZXVsLXRhbmRhIiwiaWF0IjoxNzQ0NjgyMjg4LCJleHAiOjE3NDQ2ODQwODh9.y5ps0ccdaWW5vEctq0TkfzmDB3vuQvWel9SrVuRfEUw
+
+{
+  "currentPassword": "12345678a*",
+  "newPassword": "12345678a"
+}
+
+### 유저 탈퇴 todo: 추후 feignclient grpc를 통해 수정 작업 진행
+DELETE http://localhost:19091/api/v1/users/me
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImY0ZmIzYmZhLTVlZGQtNGI2OC1iY2E4LTg1YTQ4NGM4NWQ4NSIsImlzcyI6Im9uZXVsLXRhbmRhIiwiaWF0IjoxNzQ0NjgyMjg4LCJleHAiOjE3NDQ2ODQwODh9.y5ps0ccdaWW5vEctq0TkfzmDB3vuQvWel9SrVuRfEUw
+
+{
+  "password": "12345678a"
+}
+
+### 유저 조회 username기반
+GET http://localhost:19091/api/v1/users/admin/tester
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImY0ZmIzYmZhLTVlZGQtNGI2OC1iY2E4LTg1YTQ4NGM4NWQ4NSIsImlzcyI6Im9uZXVsLXRhbmRhIiwiaWF0IjoxNzQ0NjgyMjg4LCJleHAiOjE3NDQ2ODQwODh9.y5ps0ccdaWW5vEctq0TkfzmDB3vuQvWel9SrVuRfEUw
+
+### 유저 권한 상승 username기반
+PUT http://localhost:19091/api/v1/users/admin/tester
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImY0ZmIzYmZhLTVlZGQtNGI2OC1iY2E4LTg1YTQ4NGM4NWQ4NSIsImlzcyI6Im9uZXVsLXRhbmRhIiwiaWF0IjoxNzQ0NjgyMjg4LCJleHAiOjE3NDQ2ODQwODh9.y5ps0ccdaWW5vEctq0TkfzmDB3vuQvWel9SrVuRfEUw
+
+{
+  "role": "MANAGER"
+}
+
+### 유저 조회 userId기반
+GET http://localhost:19091/api/v1/users/43392dc4-3848-426d-bdfa-99946b3bedbb
+Content-Type: application/json
+
+

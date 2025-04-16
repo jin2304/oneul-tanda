@@ -1,0 +1,39 @@
+server:
+  port: 19091  # 게이트웨이 서비스가 실행될 포트 번호
+
+spring:
+  main:
+    web-application-type: reactive  # Spring 애플리케이션이 리액티브 웹 애플리케이션으로 설정됨
+  application:
+    name: gateway-service  # 애플리케이션 이름을 'gateway-service'로 설정
+  profiles:
+    include: secret
+  cloud:
+    gateway:
+      routes:  # Spring Cloud Gateway의 라우팅 설정
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+        - id: flight-service
+          uri: lb://flight-service
+          predicates:
+            - Path=/api/v1/airlines/**
+            - Path=/api/v1/airports/**
+            # amadeus의 경우에는 internal로 추정
+        - id: queue-service
+          uri: lb://queue-service
+          predicates:
+            - Path=/api/v1/queue/**
+        - id: reservation-service
+          uri: lb://reservation-service
+          predicates:
+            - Path=/api/v1/reservations/**
+      discovery:
+        locator:
+          enabled: true  # 서비스 디스커버리를 통해 동적으로 라우트를 생성하도록 설정
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:19090/eureka/  # Eureka 서버의 URL을 지정

@@ -24,6 +24,14 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
 
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+
+
 server:
   port: 19095
 
