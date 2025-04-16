@@ -9,5 +9,5 @@ import java.util.UUID;
 @Setter
 public class FlightResponse {
     private UUID flightId;
-    private int remainingSeats;
+    private Integer remainingSeats;
 }

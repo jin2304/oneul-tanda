@@ -7,5 +7,5 @@ import java.util.UUID;
 @Getter
 public class FlightRequestDto {
     private UUID flightId;
-    private int seatCount;
+    private Integer seatCount;
 }

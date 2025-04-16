@@ -16,14 +16,14 @@ public class ProducerService {
     private final KafkaTemplate<String, ReservationHeldEvent> kafkaTemplate;
 
     // 대기열 선점 성공시 성공 메시지 전달
-    public void sendReserveSuccess(UUID flightId, String userId, int seatCount, EventStatusEnum status) {
+    public void sendReserveSuccess(UUID flightId, UUID userId, int seatCount, EventStatusEnum status) {
         ReservationHeldEvent event = ReservationHeldEvent
                 .createReservationEvent(flightId, userId, seatCount, status);
 
         kafkaTemplate.send("reservation-held", flightId.toString(), event);
     }
     // 대기열 선점 실패시 실패 메세지 전달
-    public void sendReserveFailed(UUID flightId, String userId, int seatCount,  EventStatusEnum status) {
+    public void sendReserveFailed(UUID flightId, UUID userId, int seatCount,  EventStatusEnum status) {
         ReservationHeldEvent event = ReservationHeldEvent
                 .createReservationEvent(flightId, userId, seatCount, status);
 
