@@ -24,7 +24,7 @@ public class FlightResponse {
     private LocalDateTime departureDate;
     private LocalDateTime arrivalDate;
     private BigDecimal price;
-    private int remainingSeats;
+    private Integer remainingSeats;
 
     public static FlightResponse from(
             FlightEntity flight
@@ -51,7 +51,7 @@ public class FlightResponse {
             LocalDateTime departureDate,
             LocalDateTime arrivalDate,
             BigDecimal price,
-            int remainingSeats
+            Integer remainingSeats
     ) {
         return FlightResponse.builder()
                 .id(UUID.randomUUID()) // 응답 객체 생성시 임시 UUID 부여

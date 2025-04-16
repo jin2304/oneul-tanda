@@ -60,13 +60,13 @@ public class FlightEntity extends BaseTimeEntity {
     private BigDecimal price;
 
     @Column(name = "remaining_seats", nullable = false)
-    private int remainingSeats;
+    private Integer remainingSeats;
 
     public static FlightEntity from(String flightNum, AirlineEntity airlineCode, Airport departureAirport,
                                     Airport arrivalAirport,
                                     LocalDateTime departureDate, LocalDateTime arrivalDate,
                                     Duration duration, BigDecimal price,
-                                    int remainingSeats
+                                    Integer remainingSeats
     ) {
         return FlightEntity.builder()
                 .flightNum(flightNum)
@@ -84,7 +84,7 @@ public class FlightEntity extends BaseTimeEntity {
     public void updateOf(String flightNum, AirlineEntity airlineCode, Airport departureAirport,
                          Airport arrivalAirport,
                          LocalDateTime departureDate, LocalDateTime arrivalDate,
-                         Duration duration, BigDecimal price, int remainingSeats
+                         Duration duration, BigDecimal price, Integer remainingSeats
     ) {
         this.flightNum = flightNum;
         this.airline = airlineCode;
@@ -97,11 +97,20 @@ public class FlightEntity extends BaseTimeEntity {
         this.remainingSeats = remainingSeats;
     }
 
-    public void decreaseSeatCount(int requiredSeats) {
+    public void decreaseSeatCount(Integer requiredSeats) {
+        if (requiredSeats == null || requiredSeats <= 0) {
+            throw new IllegalArgumentException("Required seats must be positive");
+        }
+        if (this.remainingSeats < requiredSeats) {
+            throw new IllegalStateException("Not enough seats");
+        }
         this.remainingSeats -= requiredSeats;
     }
 
-    public void increaseSeatCount(int requiredSeats) {
+    public void increaseSeatCount(Integer requiredSeats) {
+        if (requiredSeats == null || requiredSeats <= 0) {
+            throw new IllegalArgumentException("Seats to add must be positive");
+        }
         this.remainingSeats += requiredSeats;
     }
 }

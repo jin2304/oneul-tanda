@@ -31,7 +31,7 @@ public class CreateFlightRequest {
 
     private BigDecimal price;
 
-    private int remainingSeats;
+    private Integer remainingSeats;
 
     public CreateFlightCommand toCommand() {
         return CreateFlightCommand.of(

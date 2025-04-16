@@ -21,13 +21,13 @@ public class CreateFlightCommand {
     private LocalDateTime departureDate;
     private LocalDateTime arrivalDate;
     private BigDecimal price;
-    private int remainingSeats;
+    private Integer remainingSeats;
 
     public static CreateFlightCommand of(
             String flightNum, String airline,
             String departureAirport, String arrivalAirport,
             LocalDateTime departureDate, LocalDateTime arrivalDate,
-            BigDecimal price, int remainingSeats
+            BigDecimal price, Integer remainingSeats
     ) {
         return CreateFlightCommand.builder()
                 .flightNum(flightNum)

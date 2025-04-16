@@ -30,7 +30,7 @@ public class UpdateFlightRequest {
 
     private BigDecimal price;
 
-    private int remainingSeats;
+    private Integer remainingSeats;
 
     public UpdateFlightCommand toCommand(UUID flightId) {
         return UpdateFlightCommand.of(

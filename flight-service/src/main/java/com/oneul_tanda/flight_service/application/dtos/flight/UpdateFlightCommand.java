@@ -23,14 +23,14 @@ public class UpdateFlightCommand {
     private LocalDateTime departureDate;
     private LocalDateTime arrivalDate;
     private BigDecimal price;
-    private int remainingSeats;
+    private Integer remainingSeats;
 
     public static UpdateFlightCommand of(
             UUID flightId,
             String flightNum, String airline,
             String departureAirport, String arrivalAirport,
             LocalDateTime departureDate, LocalDateTime arrivalDate,
-            BigDecimal price, int remainingSeats
+            BigDecimal price, Integer remainingSeats
     ) {
         return UpdateFlightCommand.builder()
                 .flightId(flightId)

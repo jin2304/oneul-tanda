@@ -25,7 +25,7 @@ public class FlightDetailResponse {
     private LocalDateTime arrivalDate;
     private String  formattedDuration;
     private BigDecimal price;
-    private int remainingSeats;
+    private Integer remainingSeats;
 
     public static FlightDetailResponse from(
             FlightEntity flight
