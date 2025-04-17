@@ -10,13 +10,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class KafkaProducerService {
 
-    private final KafkaTemplate<UUID, KafkaEvent> kafkaTemplate;
+    private final KafkaTemplate<UUID, TokenVersionChangedEvent> kafkaTemplate;
 
-    /**
-     * kafka 통한 상태 수정 메세지
-     */
     public void sendTokenVersionChange(UUID userId, int tokenVersion) {
         TokenVersionChangedEvent event = TokenVersionChangedEvent.of(userId, tokenVersion);
-        kafkaTemplate.send(KafkaTopics.TOKEN_VERSION_CHANGED.name(), userId, event);
+        kafkaTemplate.send(KafkaTopics.TOKEN_VERSION_CHANGED, userId, event);
     }
 }

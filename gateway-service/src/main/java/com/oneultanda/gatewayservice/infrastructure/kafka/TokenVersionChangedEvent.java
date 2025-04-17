@@ -1,4 +1,4 @@
-package com.oneultanda.userservice.infrastructure.kafka;
+package com.oneultanda.gatewayservice.infrastructure.kafka;
 
 import java.util.UUID;
 

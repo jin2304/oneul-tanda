@@ -9,6 +9,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.converter.JsonMessageConverter;
 import org.springframework.kafka.support.converter.RecordMessageConverter;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
@@ -16,25 +17,20 @@ import java.util.Map;
 import java.util.UUID;
 
 @Configuration
-//@EnableKafka
 public class KafkaProducerConfig {
 
     @Bean
-    public ProducerFactory<UUID, KafkaEvent> producerFactory() {
+    public ProducerFactory<UUID, TokenVersionChangedEvent> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, UUIDSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        configProps.put(JsonSerializer.TYPE_MAPPINGS, "TokenVersionChangedEvent:com.oneultanda.userservice.infrastructure.kafka.TokenVersionChangedEvent");
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
     @Bean
-    public KafkaTemplate<UUID, KafkaEvent> kafkaTemplate() {
+    public KafkaTemplate<UUID, TokenVersionChangedEvent> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
-
-//    @Bean
-//    public RecordMessageConverter recordMessageConverter() {
-//        return new JsonMessageConverter();
-//    }
 }
