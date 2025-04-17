@@ -1,10 +1,8 @@
 package com.oneultanda.userservice.infrastructure.jwt;
 
-import com.oneultanda.userservice.domain.entity.Role;
+import com.oneultanda.userservice.domain.model.Role;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import org.springframework.beans.factory.annotation.Value;

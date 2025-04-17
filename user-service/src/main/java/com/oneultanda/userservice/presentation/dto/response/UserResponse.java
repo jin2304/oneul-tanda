@@ -1,6 +1,6 @@
 package com.oneultanda.userservice.presentation.dto.response;
 
-import com.oneultanda.userservice.domain.entity.User;
+import com.oneultanda.userservice.domain.model.User;
 
 import java.util.UUID;
 

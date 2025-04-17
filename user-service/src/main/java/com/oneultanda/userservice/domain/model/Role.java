@@ -1,4 +1,4 @@
-package com.oneultanda.userservice.domain.entity;
+package com.oneultanda.userservice.domain.model;
 
 public enum Role {
     ADMIN,
