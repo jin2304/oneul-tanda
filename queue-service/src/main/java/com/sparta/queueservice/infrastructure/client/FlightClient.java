@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
-@FeignClient(name = "flight-service", url = "http://localhost:19094/api/v1/flights")
+@FeignClient(name = "flight-service")
 public interface FlightClient {
     // 항공편을 조회 예시
-    @GetMapping("/{flightId}")
+    @GetMapping("/api/v1/flights/{flightId}")
     FlightResponse getFlight(@PathVariable UUID flightId);
 
     // 대기열 선점 성공시 좌석 수 차감 로직 api
-    @PutMapping("/{flightId}/seats/decrease")
+    @PutMapping("/api/v1/flights/{flightId}/seats/decrease")
     void decreaseSeats(@PathVariable UUID flightId, @RequestParam Integer requiredSeats);
 }
