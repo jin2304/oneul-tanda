@@ -1,11 +1,9 @@
 package com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public record ReservationHeldEvent(
         String eventId,                    // 대상: 이벤트 고유 ID or 이벤트 대상 ID
         String eventType,                  // 행위: 이벤트 타입    (ex: 예약 선점)
