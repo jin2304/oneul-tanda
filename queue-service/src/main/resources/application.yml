@@ -12,8 +12,8 @@ spring:
 
   data:
     redis:
-      host: queue-redis
-      port: 6381
+      host: redis
+      port: 6379
       timeout: 5000ms
       lettuce:
         pool:
@@ -24,6 +24,15 @@ spring:
 
 server:
   port: 19096
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus"
+  endpoint:
+    health:
+      show-details: always
 
 eureka:
   client:
