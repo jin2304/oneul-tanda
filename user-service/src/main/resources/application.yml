@@ -5,13 +5,19 @@ spring:
   application:
     name: user-service
 
+  datasource:
+    url: jdbc:mysql://user-db:3309/user_db
+    username: admin
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
 server:
   port: 19093
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
+      defaultZone: http://eureka-server:19090/eureka/
     register-with-eureka: true
 
 jwt:
