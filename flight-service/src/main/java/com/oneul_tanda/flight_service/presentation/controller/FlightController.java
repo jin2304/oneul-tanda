@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -33,6 +34,7 @@ public class FlightController {
 
     private final FlightService flightService;
 
+    @Cacheable(value = "flights", key = "#flightId")
     @GetMapping("/{flightId}")
     public ResponseEntity<FlightDetailResponse> getFlight(
             @PathVariable UUID flightId
