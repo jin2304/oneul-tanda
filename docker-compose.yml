@@ -9,7 +9,7 @@ services:
 
   gateway:
     build:
-      context: ./gateway
+      context: ./gateway-service
       dockerfile: Dockerfile
     container_name: oneultanda-gateway
     ports:
@@ -49,24 +49,24 @@ services:
     volumes:
       - user-mysql-data:/var/lib/mysql
 
-  flight-service:
-        build:
-          context: ./flight-service
-          dockerfile: Dockerfile
-        container_name: oneultanda-flight-service
-        volumes:
-          - ./flight-service:/app/flight-service
-        ports:
-          - "19094:19094"
-        env_file:
-          - .env
-        environment:
-          - CLIENT_ID=${AMADEUS_CLIENT_ID}
-          - CLIENT_SECRET=${AMADEUS_CLIENT_SECRET}
-        depends_on:
-          - flight-db
-          - redis
-          - eureka-server
+#  flight-service:
+#        build:
+#          context: ./flight-service
+#          dockerfile: Dockerfile
+#        container_name: oneultanda-flight-service
+#        volumes:
+#          - ./flight-service:/app/flight-service
+#        ports:
+#          - "19094:19094"
+#        env_file:
+#          - .env
+#        environment:
+#          - CLIENT_ID=${AMADEUS_CLIENT_ID}
+#          - CLIENT_SECRET=${AMADEUS_CLIENT_SECRET}
+#        depends_on:
+#          - flight-db
+#          - redis
+#          - eureka-server
 
   flight-db:
     image: mysql:8.0
@@ -183,6 +183,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
 
@@ -190,5 +191,6 @@ volumes:
   user-mysql-data:
   reservation-mysql-data:
   flight-mysql-data:
+  prometheus_data:
   grafana-storage:
 

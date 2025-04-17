@@ -1,11 +1,9 @@
 spring:
-  profiles:
-    active: local
   application:
     name: reservation-service
 
   datasource:
-    url: jdbc:mysql://reservation-db:3307/reservation_db
+    url: jdbc:mysql://reservation-db:3306/reservation_db
     username: admin
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
