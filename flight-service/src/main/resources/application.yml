@@ -25,6 +25,11 @@ spring:
     redis:
       host: localhost
       port: 6379
+    cache:
+        type: redis
+        redis:
+          time-to-live: 300000 # 기본 TTL: 5분
+          cache-null-values: true # null 캐싱 방지
 
 amadeus:
   base-url: https://test.api.amadeus.com
