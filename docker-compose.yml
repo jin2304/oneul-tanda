@@ -18,21 +18,21 @@ services:
       - eureka-server
 
   user-service:
-        build:
-          context: ./user-service
-          dockerfile: Dockerfile
-        container_name: oneultanda-user-service
-        volumes:
-          - ./user-service:/app/user-service
-        ports:
-          - "19092:19092"
-        env_file:
-          - .env
-        environment:
-          - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-        depends_on:
-          - user-db
-          - eureka-server
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: oneultanda-user-service
+    volumes:
+      - ./user-service:/app/user-service
+    ports:
+      - "19092:19092"
+    env_file:
+      - .env
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    depends_on:
+      - user-db
+      - eureka-server
 
   user-db:
     image: mysql:8.0
@@ -49,37 +49,37 @@ services:
     volumes:
       - user-mysql-data:/var/lib/mysql
 
-#  flight-service:
-#        build:
-#          context: ./flight-service
-#          dockerfile: Dockerfile
-#        container_name: oneultanda-flight-service
-#        volumes:
-#          - ./flight-service:/app/flight-service
-#        ports:
-#          - "19094:19094"
-#        env_file:
-#          - .env
-#        environment:
-#          - CLIENT_ID=${AMADEUS_CLIENT_ID}
-#          - CLIENT_SECRET=${AMADEUS_CLIENT_SECRET}
-#        depends_on:
-#          - flight-db
-#          - redis
-#          - eureka-server
+  flight-service:
+    build:
+      context: ./flight-service
+      dockerfile: Dockerfile
+    container_name: oneultanda-flight-service
+    volumes:
+      - ./flight-service:/app/flight-service
+    ports:
+      - "19094:19094"
+    env_file:
+      - .env
+    environment:
+      - AMADEUS_CLIENT_ID=${AMADEUS_CLIENT_ID}
+      - AMADEUS_CLIENT_SECRET=${AMADEUS_CLIENT_SECRET}
+    depends_on:
+      - flight-db
+      - redis
+      - eureka-server
 
   flight-db:
-    image: mysql:8.0
-    container_name: flight-db
+    image: postgres:16.3
+    container_name: oneultanda-flight-db
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: flight_db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 1234
+      POSTGRES_USER: admin
+      POSTGRES_DB: flight_db
+      POSTGRES_PASSWORD: 1234
     ports:
-      - "3308:3306"
+      - "5433:5432"
     volumes:
-      - flight-mysql-data:/var/lib/mysql
+      - flight-postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
 
   reservation-service:
     build:
@@ -193,7 +193,7 @@ services:
 volumes:
   user-mysql-data:
   reservation-mysql-data:
-  flight-mysql-data:
+  flight-postgres-data:
   prometheus_data:
   grafana-storage:
 
