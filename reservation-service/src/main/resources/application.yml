@@ -32,6 +32,17 @@ spring:
 
 
 
+## actuator and prometheus setting
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus"
+  endpoint:
+    health:
+      show-details: always
+
+
 server:
   port: 19095
 

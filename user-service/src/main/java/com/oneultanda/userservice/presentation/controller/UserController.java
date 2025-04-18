@@ -1,8 +1,8 @@
 package com.oneultanda.userservice.presentation.controller;
 
 import com.oneultanda.userservice.application.service.UserService;
-import com.oneultanda.userservice.domain.entity.Role;
-import com.oneultanda.userservice.domain.entity.User;
+import com.oneultanda.userservice.domain.model.Role;
+import com.oneultanda.userservice.domain.model.User;
 import com.oneultanda.userservice.presentation.dto.request.*;
 import com.oneultanda.userservice.presentation.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +51,8 @@ public class UserController {
     public ResponseEntity<UserResponse> getUser(
             @RequestHeader("X-User-ID") UUID userId
     ) {
-        UserResponse response = userservice.getUser(userId);
+        User user = userservice.getUser(userId);
+        UserResponse response = UserResponse.fromUser(user);
         return ResponseEntity.ok(response);
     }
 
@@ -100,12 +101,13 @@ public class UserController {
             @RequestHeader("X-User-Role") final Role role,
             @PathVariable final String username
     ) {
-        UserResponse response = userservice.getUserFromUsername(role, username);
+        User user = userservice.getUserFromUsername(role, username);
+        UserResponse response = UserResponse.fromUser(user);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/admin/{username}")
-    public ResponseEntity<User> updateRole(
+    public ResponseEntity<Void> updateRole(
             @RequestHeader("X-User-Role") final Role role,
             @PathVariable final String username,
             @RequestBody final UpdateUserRoleRequest request
@@ -118,7 +120,8 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserFromUserId(
             @PathVariable final UUID userId
     ) {
-        UserResponse response = userservice.getUser(userId);
+        User user = userservice.getUser(userId);
+        UserResponse response = UserResponse.fromUser(user);
         return ResponseEntity.ok(response);
     }
 

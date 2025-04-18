@@ -6,6 +6,7 @@ import com.oneul_tanda.reservation_service.reservation.application.command.Creat
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
 import com.oneul_tanda.reservation_service.reservation.domain.repository.ReservationRepository;
 import com.oneul_tanda.reservation_service.reservation.infrastructure.client.FlightClient;
+import com.oneul_tanda.reservation_service.reservation.infrastructure.client.dto.response.GetFlightInfo;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
@@ -21,8 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -91,10 +90,8 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
 
-        // Todo FeignClient 항공편 조회 및 데이터 획득
-        // 더미 데이터 세팅
-        LocalDateTime dummyDepartureDate = LocalDateTime.now().plusDays(5);
-        LocalDateTime dummyArrivalDate = dummyDepartureDate.plusHours(2);
+        // FeignClient 항공편 조회 및 데이터 획득
+        GetFlightInfo getFlightInfo = flightClient.getFlight(command.flightId());
 
 
         // 티켓 임시 생성
@@ -104,11 +101,10 @@ public class ReservationServiceImpl implements ReservationService {
             Ticket ticket = Ticket.createTicketWithoutPassenger(
                     command.flightId(),
                     command.userId(),
-                    // TODO 임시 값 설정, 항공편 조회에서 데이터 획득 고려
                     SeatClass.ECONOMY,
-                    BigDecimal.valueOf(10000),
-                    dummyDepartureDate,
-                    dummyArrivalDate
+                    getFlightInfo.price(),
+                    getFlightInfo.departureDate(),
+                    getFlightInfo.arrivalDate()
             );
 
             ticketList.add(ticket);
@@ -220,24 +216,17 @@ public class ReservationServiceImpl implements ReservationService {
         UUID flightId = reservation.getTicketList().get(0).getFlightId();
 
 
-        // 5. 좌석 복구 요청 (좌석 복구 실패 시에도 예약 취소는 유지)
+        // 5. 좌석 복구 요청
         // TODO: 분산 트랜잭션 어떻게 관리? 1. Saga 패턴의 보상트랜잭션,  2. 이벤트 발행, 3. 기타
-/*
         try {
             flightClient.increaseSeats(flightId, seatCount);
 
         } catch (Exception e) {
             log.error("좌석 복원 실패 - flightId={}, seatCounts={}, error={}", flightId, seatCount, e.getMessage(), e);
-
-            */
-/*
-            // 예약 복구 실패 이벤트 발행
-            reservationEventPublisher.publishSeatRestoreFailed(reservation.getId(), flightId, seatCounts);*//*
-
+            throw new RuntimeException("좌석 복원 실패로 예약 취소 롤백");
         }
-*/
 
-        // 6. 응답 반환
+        // 6. 응답 반환 
         return CancelReservationResponseDto.of(reservation.getId());
     }
 }

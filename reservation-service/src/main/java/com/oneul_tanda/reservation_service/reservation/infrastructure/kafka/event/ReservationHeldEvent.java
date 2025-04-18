@@ -1,8 +1,8 @@
 package com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event;
 
+
 import java.time.LocalDateTime;
 import java.util.UUID;
-
 
 public record ReservationHeldEvent(
         String eventId,                    // 대상: 이벤트 고유 ID or 이벤트 대상 ID

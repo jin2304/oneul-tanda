@@ -1,13 +1,13 @@
 package com.oneultanda.userservice.application.service;
 
 import com.oneultanda.userservice.application.dto.comand.*;
-import com.oneultanda.userservice.common.exception.CustomException;
-import com.oneultanda.userservice.domain.entity.Role;
-import com.oneultanda.userservice.domain.entity.User;
+import com.oneultanda.userservice.application.exception.ApplicationErrorCode;
+import com.oneultanda.userservice.domain.model.Role;
+import com.oneultanda.userservice.domain.model.User;
 import com.oneultanda.userservice.domain.repository.UserRepository;
 import com.oneultanda.userservice.infrastructure.jwt.JwtUtil;
-import com.oneultanda.userservice.presentation.dto.response.UserResponse;
-import com.oneultanda.userservice.presentation.exception.PresentationErrorCode;
+import com.oneultanda.userservice.common.exception.CustomException;
+import com.oneultanda.userservice.infrastructure.kafka.KafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +26,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final KafkaProducerService kafkaProducerService;
 
     @Transactional
     public void registerUser(final RegisterUserCommand command) {
@@ -40,6 +41,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional(readOnly = true)
     public String loginUser(LoginUserCommand command) {
         User user = checkUserFromUsername(command.username());
         checkPassword(user, command.password());
@@ -51,15 +53,16 @@ public class UserService {
      * todo: 추후 만일 cqrs를 제대로 적용시 조회 / 생성,수정,삭제 db를 분리하고 각 서비스를 handler로 분리할 수 있음
      */
     @Transactional(readOnly = true)
-    public UserResponse getUser(final UUID userId) {
-        User user = checkUser(userId);
-        return UserResponse.fromUser(user);
+    public User getUser(final UUID userId) {
+        return checkUser(userId);
     }
 
     @Transactional
     public URI updateUser(final UUID userId, final UpdateUserCommand command) {
         User user = checkUser(userId);
-        user.updateFromUpdateUserCommand(command);
+        user.updateFromUpdateUserCommand(command.nickname(), command.email(), command.contact());
+        // 분리로 인해 더티체킹이 안되어 직접 명시해줘야함
+        userRepository.save(user);
 
         return ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -67,33 +70,45 @@ public class UserService {
                 .toUri();
     }
 
+    // 기존에 발급되어있던 토큰들을 무효화 처리할 필요가 있다.
     @Transactional
     public void updatePassword(UUID userId, UpdatePasswordCommand command) {
         User user = checkUser(userId);
         checkPassword(user, command.currentPassword());
         String encodedNewPassword = passwordEncoder.encode(command.newPassword());
         user.updateFromUpdatePasswordCommand(encodedNewPassword);
+        // 분리로 인해 더티체킹이 안되어 직접 명시해줘야함
+        userRepository.save(user);
+
+        kafkaProducerService.sendTokenVersionChange(userId, user.getTokenVersion());
     }
 
     @Transactional
     public void deleteUser(UUID userId, DeleteUserCommand command) {
         User user = checkUser(userId);
         checkPassword(user, command.password());
-        user.markDeleted(userId);
+        user.deleteUser();
+        // 분리로 인해 더티체킹이 안되어 직접 명시해줘야함
+        userRepository.save(user);
+
+        kafkaProducerService.sendTokenVersionChange(userId, user.getTokenVersion());
     }
 
     @Transactional(readOnly = true)
-    public UserResponse getUserFromUsername(Role role, String username) {
+    public User getUserFromUsername(Role role, String username) {
         checkAdmin(role);
-        User user = checkUserFromUsername(username);
-        return UserResponse.fromUser(user);
+        return checkUserFromUsername(username);
     }
 
     @Transactional
     public URI updateRole(Role role, String username, UpdateUserRoleCommand command) {
         checkAdmin(role);
         User user = checkUserFromUsername(username);
-        user.updateRole(command);
+        user.updateRole(command.role());
+        // 분리로 인해 더티체킹이 안되어 직접 명시해줘야함
+        userRepository.save(user);
+
+        kafkaProducerService.sendTokenVersionChange(user.getId(), user.getTokenVersion());
 
         return ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -108,33 +123,26 @@ public class UserService {
     private User checkUser(final UUID userId) {
         return userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() ->
-                new CustomException(PresentationErrorCode.RESOURCE_NOT_FOUND));
+                new CustomException(ApplicationErrorCode.RESOURCE_NOT_FOUND));
     }
 
 
     private void checkPassword(final User user, final String rawPassword) {
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new CustomException(PresentationErrorCode.INVALID_REQUEST);
+            throw new CustomException(ApplicationErrorCode.INVALID_REQUEST);
         }
     }
 
     private User checkUserFromUsername(final String username) {
         User user = userRepository.findByUsernameAndDeletedAtIsNull(username)
                 .orElseThrow(() ->
-                        new CustomException(PresentationErrorCode.RESOURCE_NOT_FOUND));
+                        new CustomException(ApplicationErrorCode.RESOURCE_NOT_FOUND));
         return user;
     }
 
     private void checkAdmin(final Role role) {
         if(!role.equals(Role.ADMIN)) {
-            throw new CustomException(PresentationErrorCode.ACCESS_DENIED);
+            throw new CustomException(ApplicationErrorCode.ACCESS_DENIED);
         }
-    }
-
-    /**
-     * todo: blacklist 등록필요시마다 진행해야 할 메서드
-     */
-    private void addBlackList(final User user){
-
     }
 }
