@@ -1,0 +1,79 @@
+# 전체 시나리오
+# 회원가입 → 로그인 → 특가 항공권 예매 요청 → 예약 대기열 서비스: 좌석 선점 처리 → 예약 대기열 서비스: 좌석 선점 성공 →
+# 예약 대기열 서비스 Kafka prodcuer: 예약 선점 성공 이벤트 발행 → 예약 서비스 Kafka Consumer: 예약 임시 생성 -> 예약 서비스: 추후 예약 확정 진행
+
+
+
+
+### 유저 생성 - internal
+POST http://localhost:19093/api/v1/users/signup
+Content-Type: application/json
+
+{
+  "username": "tester",
+  "password": "12345678a*",
+  "nickname": "테스터",
+  "email": "test@test.com",
+  "contact": "010-1111-2222"
+}
+
+
+
+### 로그인
+POST http://localhost:19093/api/v1/users/login
+Content-Type: application/json
+
+{
+  "username": "tester",
+  "password": "12345678a*"
+}
+
+
+
+### 특가 항공권 예매 요청
+POST http://localhost:19096/api/v1/queue
+Content-Type: application/json
+X-User-ID: 9b7f421f-47b0-47f5-aa5c-8f489697a57d
+
+{
+  "flightId" : "0e7d0581-2962-40ef-aa92-4105b46cca06",
+  "seatCount" : 2
+}
+
+
+
+
+### 예약 대기열 서비스 Kafka prodcuer: 예약 선점 성공 이벤트 발행
+
+### 예약 서비스 Kafka Consumer: 예약 임시 생성
+
+
+
+
+### 예약 확정(예약 수정)
+PUT http://localhost:19095/api/v1/reservations/df4aa5d2-2e7b-4728-a5b7-9cbbe1f7d35d/confirm
+Content-Type: application/json
+X-User-ID: 9b7f421f-47b0-47f5-aa5c-8f489697a57d
+
+{
+  "tickets": [
+    {
+      "ticketId": "650662ec-d79d-4dfb-8aa6-e90a54f31f13",
+      "passenger": {
+        "name": "홍길동1",
+        "birth": "1990-01-01",
+        "gender": "MALE",
+        "passportNumber": "P12345678"
+      }
+    },
+    {
+      "ticketId": "b66c461c-ef14-4424-a5b6-d4c71d771842",
+      "passenger": {
+        "name": "홍길동",
+        "birth": "1995-06-10",
+        "gender": "FEMALE",
+        "passportNumber": "P87654321"
+      }
+    }
+  ]
+}
