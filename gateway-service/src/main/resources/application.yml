@@ -41,3 +41,6 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:19090/eureka/  # Eureka 서버의 URL을 지정
+
+tokenVersion-expiration: 31 # Access token 만료 기간보다 1분 길게 만일 refresh 토큰이 추가되면 또 바뀔 예정
+

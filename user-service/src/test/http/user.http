@@ -24,14 +24,14 @@ GET http://localhost:19093/api/v1/users/me
 Content-Type: application/json
 X-User-Name: tester
 X-User-Role: CUSTOMER
-X-User-ID: 43392dc4-3848-426d-bdfa-99946b3bedbb
+X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 
 ### 유저 정보 수정
 PUT http://localhost:19093/api/v1/users/me
 Content-Type: application/json
 X-User-Name: tester
 X-User-Role: CUSTOMER
-X-User-ID: 43392dc4-3848-426d-bdfa-99946b3bedbb
+X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 
 {
   "nickname": "테스터",
@@ -44,7 +44,7 @@ PUT http://localhost:19093/api/v1/users/password
 Content-Type: application/json
 X-User-Name: tester
 X-User-Role: CUSTOMER
-X-User-ID: 43392dc4-3848-426d-bdfa-99946b3bedbb
+X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 
 {
   "currentPassword": "12345678a*",
@@ -56,7 +56,7 @@ DELETE http://localhost:19093/api/v1/users/me
 Content-Type: application/json
 X-User-Name: tester
 X-User-Role: CUSTOMER
-X-User-ID: 43392dc4-3848-426d-bdfa-99946b3bedbb
+X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 
 {
   "password": "12345678a"
@@ -67,21 +67,21 @@ GET http://localhost:19093/api/v1/users/admin/tester
 Content-Type: application/json
 X-User-Name: admin
 X-User-Role: ADMIN
-X-User-ID: 43392dc4-3848-426d-bdfa-99946b3bedbb
+X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 
 ### 유저 권한 상승 username기반
 PUT http://localhost:19093/api/v1/users/admin/tester
 Content-Type: application/json
 X-User-Name: admin
 X-User-Role: ADMIN
-X-User-ID: 43392dc4-3848-426d-bdfa-99946b3bedbb
+X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 
 {
   "role": "MANAGER"
 }
 
 ### 유저 조회 userId기반
-GET http://localhost:19093/api/v1/users/43392dc4-3848-426d-bdfa-99946b3bedbb
+GET http://localhost:19093/api/v1/users/4728aa0c-2277-4d1c-89a8-b5b28ec32472
 Content-Type: application/json
 
 

@@ -38,10 +38,12 @@ public class JwtUtil {
         this.signatureAlgorithm = Jwts.SIG.HS256;
     }
 
-    public String createAccessToken(String username, Role role, UUID id) {
+    public String createAccessToken(String username, Role role, UUID id, int tokenVersion) {
         Map<String, Object> claims = Map.of(
                 "role", role.toString(),
-                "id", id.toString());
+                "id", id.toString(),
+                "tokenVersion", tokenVersion
+        );
 
         return generateToken(Duration.ofMinutes(accessExpiration), username, claims);
     }
@@ -64,14 +66,5 @@ public class JwtUtil {
                 .expiration(Date.from(now.plus(expiration).toInstant()))
                 .signWith(secretKey, signatureAlgorithm)
                 .compact();
-    }
-
-    // 토큰에서 사용자 정보 가져오기, todo: gatewau로 이동
-    public Claims validateToken(String token) {
-        return Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
     }
 }

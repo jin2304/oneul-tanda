@@ -45,7 +45,7 @@ public class UserService {
     public String loginUser(LoginUserCommand command) {
         User user = checkUserFromUsername(command.username());
         checkPassword(user, command.password());
-        String accessToken = jwtUtil.createAccessToken(user.getUsername(), user.getRole(), user.getId());
+        String accessToken = jwtUtil.createAccessToken(user.getUsername(), user.getRole(), user.getId(), user.getTokenVersion());
         return accessToken;
     }
 
