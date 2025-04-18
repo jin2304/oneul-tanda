@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: local
+  application:
+    name: payment-service
+
+  datasource:
+    url: jdbc:mysql://payments-db:3306/payments_db
+    username: admin
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:19090/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
