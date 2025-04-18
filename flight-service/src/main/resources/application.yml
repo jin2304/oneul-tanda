@@ -6,9 +6,9 @@ spring:
     name: flight-service
 
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3308/flight_db
-    username: root
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://flight-db:5432/flight_db
+    username: admin
     password: 1234
 
   jpa:
@@ -23,7 +23,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
 
 amadeus:
@@ -34,7 +34,7 @@ amadeus:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
+      defaultZone: http://eureka-server:19090/eureka/
 
 logging:
   level:
