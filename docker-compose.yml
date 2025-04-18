@@ -1,18 +1,74 @@
 services:
-  reservation-service:
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: oneultanda-eureka-server
+    ports:
+      - "19090:19090"
+
+  gateway:
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    container_name: oneultanda-gateway
+    ports:
+      - "19091:19091"
+    depends_on:
+      - eureka-server
+
+  user-service:
+        build:
+          context: ./user-service
+          dockerfile: Dockerfile
+        container_name: oneultanda-user-service
+        volumes:
+          - ./user-service:/app/user-service
+        ports:
+          - "19092:19092"
+        env_file:
+          - .env
+        environment:
+          - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+        depends_on:
+          - user-db
+          - eureka-server
+
+  user-db:
     image: mysql:8.0
-    container_name: reservation-service
+    container_name: oneultanda-user-db
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: reservation_db
+      MYSQL_DATABASE: user_db
       MYSQL_USER: admin
       MYSQL_PASSWORD: 1234
     ports:
-      - "3307:3306"
+      - "3309:3306"
+    #todo: 추후에 port 확인, 변경 필요
     volumes:
-      - reservation-mysql-data:/var/lib/mysql
+      - user-mysql-data:/var/lib/mysql
 
-  flight-service:
+#  flight-service:
+#        build:
+#          context: ./flight-service
+#          dockerfile: Dockerfile
+#        container_name: oneultanda-flight-service
+#        volumes:
+#          - ./flight-service:/app/flight-service
+#        ports:
+#          - "19094:19094"
+#        env_file:
+#          - .env
+#        environment:
+#          - CLIENT_ID=${AMADEUS_CLIENT_ID}
+#          - CLIENT_SECRET=${AMADEUS_CLIENT_SECRET}
+#        depends_on:
+#          - flight-db
+#          - redis
+#          - eureka-server
+
+  flight-db:
     image: mysql:8.0
     container_name: flight-db
     environment:
@@ -25,9 +81,54 @@ services:
     volumes:
       - flight-mysql-data:/var/lib/mysql
 
+  reservation-service:
+    build:
+      context: ./reservation-service
+      dockerfile: Dockerfile
+    container_name: oneultanda-reservation-service
+    volumes:
+      - ./reservation-service:/app/reservation-service
+    ports:
+      - "19095:19095"
+    env_file:
+      - .env
+    depends_on:
+      - reservation-db
+      - kafka
+      - eureka-server
+
+  reservation-db:
+    image: mysql:8.0
+    container_name: oneultanda-reservation-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: reservation_db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3307:3306"
+    volumes:
+      - reservation-mysql-data:/var/lib/mysql
+
+  queue-service:
+    build:
+      context: ./queue-service
+      dockerfile: Dockerfile
+    container_name: oneultanda-queue-service
+    volumes:
+      - ./queue-service:/app/queue-service
+    ports:
+      - "19096:19096"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - kafka
+      - eureka-server
+
   redis:
     image: redis:latest
-    container_name: ot-redis
+    container_name: oneultanda-redis
     ports:
       - "6379:6379"
     restart: always
@@ -85,14 +186,14 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
 
-
-
-
 volumes:
+  user-mysql-data:
   reservation-mysql-data:
   flight-mysql-data:
+  prometheus_data:
   grafana-storage:
 

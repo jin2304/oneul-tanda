@@ -1,9 +1,16 @@
 spring:
-  profiles:
-    active: local
-    include: secret
   application:
     name: user-service
+
+  datasource:
+    url: jdbc:mysql://user-db:3306/user_db
+    username: admin
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 server:
   port: 19093
@@ -11,10 +18,11 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
+      defaultZone: http://eureka-server:19090/eureka/
     register-with-eureka: true
 
 jwt:
   issuer: "oneul-tanda"
+  secret: ${JWT_SECRET_KEY}
   access-expiration: 30 # Access Token: min
   refresh-expiration: 7 # Refresh Token: day

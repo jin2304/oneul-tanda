@@ -54,3 +54,4 @@ ehthumbs.db
 
 ### Linux 시스템 파일 ###
 .directory
+.env
