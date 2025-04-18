@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/internal/amadeus")
+@RequestMapping("/api/v1/amadeus")
 public class AmadeusController {
 
     private final AirportExternalService airportExternalService;
@@ -118,7 +118,6 @@ public class AmadeusController {
                 log.warn("Requested departureDate {} is in the past", departureDate);
                 return ResponseEntity.badRequest().body(List.of());
             }
-
             log.debug(
                     "Received params - departureAirportCode: {}, arrivalAirportCode: {}, departureDate: {}, requiredSeats: {}",
                     departureAirportCode, arrivalAirportCode, departureDate, requiredSeats);
