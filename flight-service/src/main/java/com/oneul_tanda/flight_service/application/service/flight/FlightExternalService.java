@@ -3,6 +3,7 @@ package com.oneul_tanda.flight_service.application.service.flight;
 import com.amadeus.Amadeus;
 import com.amadeus.Params;
 import com.amadeus.resources.FlightOfferSearch;
+import com.oneul_tanda.flight_service.application.service.CacheService;
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
 import com.oneul_tanda.flight_service.domain.entity.Airport;
 import com.oneul_tanda.flight_service.domain.entity.FlightEntity;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -32,214 +34,112 @@ public class FlightExternalService {
     private final FlightRepository flightRepository;
     private final AirlineRepository airlineRepository;
     private final AirportRepository airportRepository;
+    private final CacheService cacheService;
 
     // 실시간 항공편 정보 조회
+    @Cacheable(value = "flightOffers", key = "#departureAirportCode + '#' + #arrivalAirportCode + '#' + #departureDate.toLocalDate().toString() + '#' + #requiredSeats")
     public List<FlightResponse> searchFlights(String departureAirportCode, String arrivalAirportCode,
                                               LocalDateTime departureDate, Integer requiredSeats) throws Exception {
+        validateInputs(departureDate, requiredSeats);
+        FlightOfferSearch[] offers = fetchFlightOffers(departureAirportCode, arrivalAirportCode,
+                departureDate.toLocalDate().toString(), requiredSeats);
+        return extractFlightResponses(offers, false);
+    }
+
+    @Cacheable(value = "flightOffers", key = "#departureAirportCode + '#' + #arrivalAirportCode + '#' + #departureDate.toLocalDate().toString() + '#' + #requiredSeats")
+    public List<FlightResponse> searchAndSaveFlights(String departureAirportCode, String arrivalAirportCode,
+                                                     LocalDateTime departureDate, Integer requiredSeats) throws Exception {
+        validateInputs(departureDate, requiredSeats);
+        FlightOfferSearch[] offers = fetchFlightOffers(departureAirportCode, arrivalAirportCode,
+                departureDate.toLocalDate().toString(), requiredSeats);
+        return extractFlightResponses(offers, true);
+    }
+
+    private void validateInputs(LocalDateTime departureDate, Integer requiredSeats) {
         if (departureDate == null) {
-            log.error("departureDate is null");
             throw new IllegalArgumentException("departureDate is required");
         }
         if (requiredSeats == null || requiredSeats <= 0) {
-            log.warn("requiredSeats is invalid, defaulting to 1");
             requiredSeats = 1;
         }
-
-        String formattedDepartureDate = departureDate.toLocalDate().toString();
-        log.debug("Formatted departureDate: {}", formattedDepartureDate);
-
-        FlightOfferSearch[] results = amadeus.shopping.flightOffersSearch.get(
-                Params.with("originLocationCode", departureAirportCode)
-                        .and("destinationLocationCode", arrivalAirportCode)
-                        .and("departureDate", formattedDepartureDate)
-                        .and("adults", requiredSeats)
-                        .and("travelClass", "ECONOMY")
-                        .and("max", 10)
-        );
-
-        List<FlightResponse> flightResponses = mapToFlightResponseList(results);
-        log.debug("Amadeus API results - count: {}", flightResponses.size());
-        return flightResponses;
     }
 
-    private List<FlightResponse> mapToFlightResponseList(FlightOfferSearch[] offers) {
+    private FlightOfferSearch[] fetchFlightOffers(String departureAirportCode, String arrivalAirportCode,
+                                                  String departureDate, Integer requiredSeats) throws Exception {
+        return amadeus.shopping.flightOffersSearch.get(
+                Params.with("originLocationCode", departureAirportCode)
+                        .and("destinationLocationCode", arrivalAirportCode)
+                        .and("departureDate", departureDate)
+                        .and("adults", requiredSeats)
+                        .and("travelClass", "ECONOMY")
+                        .and("max", 10));
+    }
+
+    private List<FlightResponse> extractFlightResponses(FlightOfferSearch[] offers, boolean saveToDb) {
+        if (offers == null) {
+            return new ArrayList<>();
+        }
+
         List<FlightResponse> flights = new ArrayList<>();
         Set<String> uniqueFlights = new HashSet<>();
 
-        if (offers == null) {
-            log.debug("No flight offers returned");
-            return flights;
-        }
-
         for (FlightOfferSearch offer : offers) {
             FlightOfferSearch.Itinerary[] itineraries = offer.getItineraries();
-            if (itineraries == null || itineraries.length == 0) {
-                log.debug("No itineraries in offer");
-                continue;
-            }
+            if (itineraries == null || itineraries.length == 0) continue;
 
             FlightOfferSearch.SearchSegment[] segments = itineraries[0].getSegments();
-            if (segments == null || segments.length == 0) {
-                log.debug("No segments in itinerary");
-                continue;
-            }
+            if (segments == null || segments.length == 0) continue;
 
             FlightOfferSearch.SearchSegment firstSegment = segments[0];
             FlightOfferSearch.SearchSegment lastSegment = segments[segments.length - 1];
 
             String flightNum = firstSegment.getCarrierCode() + firstSegment.getNumber();
             String carrierCode = firstSegment.getCarrierCode();
+            String departureAirportCode = firstSegment.getDeparture().getIataCode();
+            String arrivalAirportCode = lastSegment.getArrival().getIataCode();
             LocalDateTime departureTime = LocalDateTime.parse(firstSegment.getDeparture().getAt());
             LocalDateTime arrivalTime = LocalDateTime.parse(lastSegment.getArrival().getAt());
-            String price = new BigDecimal(offer.getPrice().getTotal()).setScale(2, RoundingMode.HALF_UP).toString();
+            BigDecimal price = new BigDecimal(offer.getPrice().getTotal()).setScale(2, RoundingMode.HALF_UP);
             Integer remainingSeats = offer.getNumberOfBookableSeats();
 
-            // 중복 체크
             String flightKey = flightNum + "#" + departureTime + "#" + arrivalTime + "#" + price;
-            if (!uniqueFlights.add(flightKey)) {
-                log.debug("Skipping duplicate flight: {}", flightKey);
-                continue;
+            if (!uniqueFlights.add(flightKey)) continue;
+
+            if (saveToDb) {
+                FlightEntity flight = saveOrUpdateFlight(flightNum, carrierCode, departureAirportCode, arrivalAirportCode,
+                        departureTime, arrivalTime, price, remainingSeats);
+                flights.add(cacheService.cacheFlight(FlightResponse.from(flight)));
+            } else {
+                flights.add(FlightResponse.from(flightNum, carrierCode, departureAirportCode, arrivalAirportCode,
+                        departureTime, arrivalTime, price, remainingSeats));
             }
-
-            log.debug("Processing flight: {} from {} to {}, departure: {}, arrival: {}, price: {}, seats: {}",
-                    flightNum, firstSegment.getDeparture().getIataCode(), lastSegment.getArrival().getIataCode(),
-                    departureTime, arrivalTime, price, remainingSeats);
-
-            FlightResponse flight = FlightResponse.from(
-                    flightNum,
-                    carrierCode,
-                    firstSegment.getDeparture().getIataCode(),
-                    lastSegment.getArrival().getIataCode(),
-                    departureTime,
-                    arrivalTime,
-                    new BigDecimal(offer.getPrice().getTotal()).setScale(2, RoundingMode.HALF_UP),
-                    remainingSeats
-            );
-
-            flights.add(flight);
         }
-
         return flights;
     }
 
-    // 실시간 항공편 정보 조회 및 DB 저장
-    public List<FlightResponse> searchAndSaveFlights(
-            String departureAirportCode,
-            String arrivalAirportCode,
-            LocalDateTime departureDate,
-            Integer requiredSeats
-    ) throws Exception {
-        if (requiredSeats == null || requiredSeats <= 0) {
-            log.warn("requiredSeats is invalid, defaulting to 1");
-            requiredSeats = 1;
+    private FlightEntity saveOrUpdateFlight(String flightNum, String carrierCode, String departureAirportCode,
+                                            String arrivalAirportCode, LocalDateTime departureTime,
+                                            LocalDateTime arrivalTime, BigDecimal price, Integer remainingSeats) {
+        AirlineEntity airline = airlineRepository.findByCode(carrierCode)
+                .orElseGet(() -> airlineRepository.save(AirlineEntity.from(carrierCode, "Unknown Airline")));
+
+        Optional<FlightEntity> existing = flightRepository.findByFlightNumAndDepartureDateAndArrivalDate(
+                flightNum, departureTime, arrivalTime);
+        FlightEntity flight;
+        if (existing.isEmpty()) {
+            Airport departureAirport = airportRepository.findByCode(departureAirportCode)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid departure airport code: " + departureAirportCode));
+            Airport arrivalAirport = airportRepository.findByCode(arrivalAirportCode)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid arrival airport code: " + arrivalAirportCode));
+
+            flight = FlightEntity.from(
+                    flightNum, airline, departureAirport, arrivalAirport,
+                    departureTime, arrivalTime, Duration.between(departureTime, arrivalTime),
+                    price, remainingSeats);
+        } else {
+            flight = existing.get();
+            flight.updateFromOffer(price, remainingSeats);
         }
-
-        FlightOfferSearch[] offers = amadeus.shopping.flightOffersSearch.get(
-                Params.with("originLocationCode", departureAirportCode)
-                        .and("destinationLocationCode", arrivalAirportCode)
-                        .and("departureDate", departureDate.toLocalDate().toString())
-                        .and("adults", requiredSeats)
-                        .and("travelClass", "ECONOMY")
-                        .and("max", 10)
-        );
-
-        return handleFlightOffersAndSave(offers);
-    }
-
-    private List<FlightResponse> handleFlightOffersAndSave(FlightOfferSearch[] offers) {
-        List<FlightResponse> flights = new ArrayList<>();
-        Set<String> uniqueFlights = new HashSet<>();
-
-        if (offers == null) {
-            log.debug("No flight offers returned");
-            return flights;
-        }
-
-        for (FlightOfferSearch offer : offers) {
-            FlightOfferSearch.Itinerary[] itineraries = offer.getItineraries();
-            if (itineraries == null || itineraries.length == 0) {
-                log.debug("No itineraries in offer");
-                continue;
-            }
-
-            FlightOfferSearch.SearchSegment[] segments = itineraries[0].getSegments();
-            if (segments == null || segments.length == 0) {
-                log.debug("No segments in itinerary");
-                continue;
-            }
-
-            FlightOfferSearch.SearchSegment firstSegment = segments[0];
-            FlightOfferSearch.SearchSegment lastSegment = segments[segments.length - 1];
-
-            String flightNum = firstSegment.getCarrierCode() + firstSegment.getNumber();
-            String carrierCode = firstSegment.getCarrierCode();
-            LocalDateTime departureTime = LocalDateTime.parse(firstSegment.getDeparture().getAt());
-            LocalDateTime arrivalTime = LocalDateTime.parse(lastSegment.getArrival().getAt());
-            Duration duration = Duration.between(departureTime, arrivalTime);
-            String price = new BigDecimal(offer.getPrice().getTotal()).setScale(2, RoundingMode.HALF_UP).toString();
-            Integer remainingSeats = offer.getNumberOfBookableSeats();
-
-            // 중복 체크
-            String flightKey = flightNum + "#" + departureTime + "#" + arrivalTime + "#" + price;
-            if (!uniqueFlights.add(flightKey)) {
-                log.debug("Skipping duplicate flight: {}", flightKey);
-                continue;
-            }
-
-            log.debug("Processing flight: {} from {} to {}, departure: {}, arrival: {}, price: {}, seats: {}",
-                    flightNum, firstSegment.getDeparture().getIataCode(), lastSegment.getArrival().getIataCode(),
-                    departureTime, arrivalTime, price, remainingSeats);
-
-            // 항공사 조회 및 생성
-            AirlineEntity airline = airlineRepository.findByCode(carrierCode)
-                    .orElseGet(() -> {
-                        log.warn("Airline code {} not found, creating new entry", carrierCode);
-                        AirlineEntity newAirline = AirlineEntity.from(
-                                carrierCode, "Unknown Airline"
-                        );
-                        return airlineRepository.save(newAirline);
-                    });
-
-            // 중복된 항공편 체크
-            Optional<FlightEntity> existing = flightRepository.findByFlightNumAndDepartureDateAndArrivalDate(
-                    flightNum, departureTime, arrivalTime);
-            if (existing.isEmpty()) {
-                try {
-                    Airport departureAirport = airportRepository.findByCode(firstSegment.getDeparture().getIataCode())
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid departure airport code"));
-                    Airport arrivalAirport = airportRepository.findByCode(lastSegment.getArrival().getIataCode())
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid arrival airport code"));
-
-                    FlightEntity flight = FlightEntity.from(
-                            flightNum,
-                            airline,
-                            departureAirport,
-                            arrivalAirport,
-                            departureTime,
-                            arrivalTime,
-                            duration,
-                            new BigDecimal(offer.getPrice().getTotal()).setScale(2, RoundingMode.HALF_UP),
-                            remainingSeats
-                    );
-                    flightRepository.save(flight);
-                } catch (Exception e) {
-                    log.error("Failed to save flight {}: {}", flightNum, e.getMessage());
-                    continue;
-                }
-            }
-
-            flights.add(FlightResponse.from(
-                    flightNum,
-                    carrierCode,
-                    firstSegment.getDeparture().getIataCode(),
-                    lastSegment.getArrival().getIataCode(),
-                    departureTime,
-                    arrivalTime,
-                    new BigDecimal(offer.getPrice().getTotal()).setScale(2, RoundingMode.HALF_UP),
-                    remainingSeats
-            ));
-        }
-
-        return flights;
+        return flightRepository.save(flight);
     }
 }

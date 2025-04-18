@@ -55,6 +55,7 @@ public class FlightService {
     }
 
     @Transactional
+    @CacheEvict(value = "flights", allEntries = true) // 캐시 무효화
     public FlightResponse createFlight(CreateFlightCommand flightCommand) {
 
         if (flightRepository.findByFlightNumAndDepartureDate(flightCommand.getFlightNum(),
@@ -91,6 +92,7 @@ public class FlightService {
     }
 
     @Transactional
+    @CacheEvict(value = "flights", key = "#flightCommand.flightId") // 캐시 무효화
     public FlightResponse updateFlight(UpdateFlightCommand flightCommand) {
 
         FlightEntity flight = flightRepository.findById(flightCommand.getFlightId())
@@ -124,6 +126,7 @@ public class FlightService {
     }
 
     @Transactional
+    @CacheEvict(value = "flights", key = "#flightId") // 캐시 무효화
     public void deleteFlight(UUID flightId) {
 
         FlightEntity flight = flightRepository.findById(flightId)

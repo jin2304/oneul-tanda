@@ -3,6 +3,7 @@ package com.oneul_tanda.flight_service.application.service.airline;
 import com.amadeus.Amadeus;
 import com.amadeus.Params;
 import com.amadeus.resources.Airline;
+import com.oneul_tanda.flight_service.application.service.CacheService;
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -21,6 +23,7 @@ public class AirlineExternalService {
 
     private final Amadeus amadeus;
     private final AirlineRepository airlineRepository;
+    private final CacheService cacheService;
 
     // 실시간 항공사 정보 조회
     public List<AirlineSearchResponse> searchAirlines(String keyword) throws Exception {
@@ -51,8 +54,9 @@ public class AirlineExternalService {
                         return airlineRepository.save(newAirline);
                     });
 
-                    return AirlineResponse.from(existingAirline);
+                    return cacheService.cacheAirline(AirlineResponse.from(existingAirline));
                 })
                 .toList();
     }
+
 }

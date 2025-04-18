@@ -97,6 +97,11 @@ public class FlightEntity extends BaseTimeEntity {
         this.remainingSeats = remainingSeats;
     }
 
+    public void updateFromOffer(BigDecimal price, Integer remainingSeats) {
+        this.price = price;
+        this.remainingSeats = remainingSeats;
+    }
+
     public void decreaseSeatCount(Integer requiredSeats) {
         if (requiredSeats == null || requiredSeats <= 0) {
             throw new IllegalArgumentException("Required seats must be positive");
