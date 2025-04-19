@@ -1,8 +1,10 @@
 package com.oneul_tanda.reservation_service.reservation.application.service;
 
+import com.oneul_tanda.reservation_service.common.exception.CustomException;
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
+import com.oneul_tanda.reservation_service.reservation.application.exception.ReservationErrorCode;
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
 import com.oneul_tanda.reservation_service.reservation.domain.repository.ReservationRepository;
 import com.oneul_tanda.reservation_service.reservation.infrastructure.client.FlightClient;
@@ -129,11 +131,10 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional(readOnly = true)
     public ReadReservationResponseDto readReservation(UUID reservationId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+        // 1. 예약 조회
+        Reservation reservation = getReservationOrThrow(reservationId);
         return ReadReservationResponseDto.from(reservation);
     }
-
 
 
 
@@ -155,9 +156,8 @@ public class ReservationServiceImpl implements ReservationService {
      */
     @Override
     public ConfirmReservationResponseDto confirmReservation(ConfirmReservationCommand command) {
-        // 1. 예약 조회 (예약 + 티켓)
-        Reservation reservation = reservationRepository.findById(command.reservationId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+        // 1. 예약 조회
+        Reservation reservation = getReservationOrThrow(command.reservationId());
 
 
         // 2. 티켓 확정 (탑승객 정보 매핑)
@@ -200,9 +200,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Transactional
     public CancelReservationResponseDto cancelReservation(UUID reservationId) {
         // 1. 예약 조회
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
-
+        Reservation reservation = getReservationOrThrow(reservationId);
 
         // 2. 예약 취소
         reservation.cancel();
@@ -229,4 +227,14 @@ public class ReservationServiceImpl implements ReservationService {
         // 6. 응답 반환 
         return CancelReservationResponseDto.of(reservation.getId());
     }
+
+
+
+    
+    // 예약 조회
+    private Reservation getReservationOrThrow(UUID reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> CustomException.from(ReservationErrorCode.NOT_FOUND));
+    }
+
 }
