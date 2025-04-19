@@ -70,5 +70,4 @@ public class AirportController {
         airportService.deleteAirport(airportId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
 }
