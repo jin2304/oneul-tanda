@@ -121,28 +121,10 @@ public class ReservationServiceImpl implements ReservationService {
         // 1. 예약 조회
         Reservation reservation = getReservationOrThrow(command.reservationId());
 
+        // 2. 티켓 확정 (티켓에 탑승객 정보 매핑 -> 티켓 확정)
+        confirmTickets(command, reservation);
 
-        // 2. 티켓 확정 (탑승객 정보 매핑)
-        for (ConfirmReservationCommand.ConfirmTicketCommand ticketCommand : command.tickets()) {
-            // 2-1. 해당 ticketId를 가진 티켓 찾기
-            Ticket ticket = reservation.getTicketList().stream()
-                    .filter(t -> t.getId().equals(ticketCommand.ticketId()))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("해당 티켓을 찾을 수 없습니다."));
-
-            // 2-2. 탑승객 생성 및 티켓에 확정 처리
-            Passenger passenger = Passenger.createPassenger(
-                    command.userId(),
-                    ticketCommand.passenger().name(),
-                    ticketCommand.passenger().birth(),
-                    ticketCommand.passenger().gender(),
-                    ticketCommand.passenger().passportNumber()
-            );
-
-            ticket.confirmTicket(passenger);
-        }
-
-        // 3. 예약 상태를 확정으로 변경
+        // 3. 예약 확정 (티켓 확정 -> 에약 확정)
         reservation.confirmReservation();
 
         // 4. 변경사항 저장 (티켓 및 탑승객 포함)
@@ -196,7 +178,7 @@ public class ReservationServiceImpl implements ReservationService {
     // 예약 조회
     private Reservation getReservationOrThrow(UUID reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> CustomException.from(ReservationErrorCode.NOT_FOUND));
+                .orElseThrow(() -> CustomException.from(ReservationErrorCode.RESERVATION_NOT_FOUND));
     }
 
     // 티켓 생성
@@ -248,6 +230,37 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         return ticketList;
+    }
+
+
+    // 티켓 확정
+    private void confirmTickets(ConfirmReservationCommand command, Reservation reservation) {
+
+        for (ConfirmReservationCommand.ConfirmTicketCommand ticketCommand : command.tickets()) {
+            // 2-1. 예약 내에서 특정 티켓 조회 및 존재 여부 검증
+            Ticket ticket = validateAndGetTicket(reservation, ticketCommand);
+
+            // 2-2. 탑승객 생성
+            Passenger passenger = Passenger.createPassenger(
+                    command.userId(),
+                    ticketCommand.passenger().name(),
+                    ticketCommand.passenger().birth(),
+                    ticketCommand.passenger().gender(),
+                    ticketCommand.passenger().passportNumber()
+            );
+
+            // 2-3. 티켓에 탑승객 정보 매핑
+            ticket.confirmTicket(passenger);
+        }
+    }
+
+
+    // 예약 내에서 특정 티켓 조회 및 존재 여부 검증
+    private Ticket validateAndGetTicket(Reservation reservation, ConfirmReservationCommand.ConfirmTicketCommand ticketCommand) {
+        return reservation.getTicketList().stream()
+                .filter(t -> t.getId().equals(ticketCommand.ticketId()))
+                .findFirst()
+                .orElseThrow(() -> CustomException.from(ReservationErrorCode.TICKET_NOT_FOUND));
     }
 
 
