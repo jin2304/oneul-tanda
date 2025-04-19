@@ -3,7 +3,7 @@ package com.oneul_tanda.flight_service.application.service.flight;
 import com.oneul_tanda.flight_service.application.dtos.flight.CreateFlightCommand;
 import com.oneul_tanda.flight_service.application.dtos.flight.UpdateFlightCommand;
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
-import com.oneul_tanda.flight_service.domain.entity.Airport;
+import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
 import com.oneul_tanda.flight_service.domain.entity.FlightEntity;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepository;
@@ -67,9 +67,9 @@ public class FlightService {
         // AirlineEntity와 Airport 엔티티 조회
         AirlineEntity airline = airlineRepository.findByCode(flightCommand.getAirlineCode())
                 .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
-        Airport departureAirport = airportRepository.findByCode(flightCommand.getDepartureAirportCode())
+        AirportEntity departureAirport = airportRepository.findByCode(flightCommand.getDepartureAirportCode())
                 .orElseThrow(() -> new IllegalArgumentException("Departure Airport not found"));
-        Airport arrivalAirport = airportRepository.findByCode(flightCommand.getArrivalAirportCode())
+        AirportEntity arrivalAirport = airportRepository.findByCode(flightCommand.getArrivalAirportCode())
                 .orElseThrow(() -> new IllegalArgumentException("Arrival Airport not found"));
 
         Duration duration = Duration.between(flightCommand.getDepartureDate(), flightCommand.getArrivalDate());
@@ -101,9 +101,9 @@ public class FlightService {
         // AirlineEntity와 Airport 엔티티 조회
         AirlineEntity airline = airlineRepository.findByCode(flightCommand.getAirlineCode())
                 .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
-        Airport departureAirport = airportRepository.findByCode(flightCommand.getDepartureAirportCode())
+        AirportEntity departureAirport = airportRepository.findByCode(flightCommand.getDepartureAirportCode())
                 .orElseThrow(() -> new IllegalArgumentException("Departure Airport not found"));
-        Airport arrivalAirport = airportRepository.findByCode(flightCommand.getArrivalAirportCode())
+        AirportEntity arrivalAirport = airportRepository.findByCode(flightCommand.getArrivalAirportCode())
                 .orElseThrow(() -> new IllegalArgumentException("Arrival Airport not found"));
 
         Duration duration = Duration.between(flightCommand.getDepartureDate(), flightCommand.getArrivalDate());
@@ -120,7 +120,7 @@ public class FlightService {
                 flightCommand.getRemainingSeats()
         );
 
-        flight.updateModificationInfo("수정자");
+//        flight.updateModificationInfo();
 
         return FlightResponse.from(flight);
     }
@@ -132,7 +132,7 @@ public class FlightService {
         FlightEntity flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
 
-        flight.updateDeletionInfo("삭제자");
+//        flight.updateDeletionInfo();
     }
 
     @Transactional
