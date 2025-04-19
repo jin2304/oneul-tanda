@@ -87,37 +87,16 @@ public class ReservationServiceImpl implements ReservationService {
     public CreateHoldReservationResponseDto createHoldReservation(CreateHoldReservationCommand command) {
 
         // 중복 예약 생성 검증
-        if (reservationRepository.findByUserIdAndFlightId(command.userId(), command.flightId()).isPresent()) {
-            throw new IllegalStateException("이미 해당 항공편에 대한 임시 예약이 존재합니다.");
-        }
-
+        validateDuplicateHoldReservation(command.userId(), command.flightId());
 
         // FeignClient 항공편 조회 및 데이터 획득
-        GetFlightInfo getFlightInfo = flightClient.getFlight(command.flightId());
+        GetFlightInfo flightInfo = flightClient.getFlight(command.flightId());
 
-
-        // 티켓 임시 생성
-        List<Ticket> ticketList = new ArrayList<>();
-
-        for (int i = 0; i < command.seatCount(); i++) {
-            Ticket ticket = Ticket.createTicketWithoutPassenger(
-                    command.flightId(),
-                    command.userId(),
-                    SeatClass.ECONOMY,
-                    getFlightInfo.price(),
-                    getFlightInfo.departureDate(),
-                    getFlightInfo.arrivalDate()
-            );
-
-            ticketList.add(ticket);
-        }
-
+        // 티켓 임시 생성 (탑승객 정보x)
+        List<Ticket> ticketList = createTicketsWithoutPassengers(command, flightInfo);
 
         // 예약 임시 생성
-        Reservation reservation = Reservation.createHoldReservation(
-                command.userId(),
-                ticketList
-        );
+        Reservation reservation = Reservation.createHoldReservation(command.userId(), ticketList);
 
         return CreateHoldReservationResponseDto.from(reservationRepository.save(reservation));
     }
@@ -235,6 +214,36 @@ public class ReservationServiceImpl implements ReservationService {
     private Reservation getReservationOrThrow(UUID reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> CustomException.from(ReservationErrorCode.NOT_FOUND));
+    }
+
+
+
+    // 티켓 임시 생성
+    private List<Ticket> createTicketsWithoutPassengers(CreateHoldReservationCommand command, GetFlightInfo flightInfo) {
+
+        List<Ticket> ticketList = new ArrayList<>();
+
+        for (int i = 0; i < command.seatCount(); i++) {
+            Ticket ticket = Ticket.createTicketWithoutPassenger(
+                    command.flightId(),
+                    command.userId(),
+                    SeatClass.ECONOMY,
+                    flightInfo.price(),
+                    flightInfo.departureDate(),
+                    flightInfo.arrivalDate()
+            );
+            ticketList.add(ticket);
+        }
+
+        return ticketList;
+    }
+
+
+    // 중복 예약 생성 검증
+    private void validateDuplicateHoldReservation(UUID userId, UUID flightId) {
+        if (reservationRepository.findByUserIdAndFlightId(userId, flightId).isPresent()) {
+            throw CustomException.from(ReservationErrorCode.DUPLICATE_HOLD);
+        }
     }
 
 }
