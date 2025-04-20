@@ -60,7 +60,7 @@ public class AirlineService {
                 airlineCommand.getName()
         );
 
-        airline.updateModificationInfo("수정자");
+//        airline.updateModificationInfo();
 
         return AirlineResponse.from(airline);
     }
@@ -71,6 +71,6 @@ public class AirlineService {
         AirlineEntity airline = airlineRepository.findById(airlineId)
                 .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
 
-        airline.updateDeletionInfo("삭제자");
+//        airline.updateDeletionInfo();
     }
 }

@@ -1,5 +1,6 @@
 package com.oneul_tanda.flight_service.domain.entity;
 
+import com.amadeus.Airport;
 import com.oneul_tanda.flight_service.common.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,9 +19,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(access = AccessLevel.PRIVATE)
-@Table(name = "m_airports")
+@Table(name = "p_airports")
 @Entity
-public class Airport extends BaseTimeEntity {
+public class AirportEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,8 +39,8 @@ public class Airport extends BaseTimeEntity {
     @Column(name = "airport_country", nullable = false)
     private String country;
 
-    public static Airport from(String code, String name, String city, String country) {
-        return Airport.builder()
+    public static AirportEntity from(String code, String name, String city, String country) {
+        return AirportEntity.builder()
                 .code(code)
                 .name(name)
                 .city(city)

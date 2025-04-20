@@ -3,9 +3,8 @@ package com.oneul_tanda.flight_service.common;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -24,7 +23,7 @@ public class BaseTimeEntity {
 
     @CreatedBy
     @Column(name = "created_by", updatable = false)
-    private String createdBy;
+    private UUID createdBy;
 
     @LastModifiedDate
     @Column(name = "updated_at")
@@ -32,24 +31,24 @@ public class BaseTimeEntity {
 
     @LastModifiedBy
     @Column(name = "updated_by")
-    private String updatedBy;
+    private UUID updatedBy;
 
     @Column(name = "Deleted_at")
     private LocalDateTime deletedAt;
 
     @Column(name = "deleted_by")
-    private String deletedBy;
+    private UUID deletedBy;
 
-    public void updateCreatedBy(String username) {
-        this.createdBy = username;
+    public void updateCreatedBy(UUID userId) {
+        this.createdBy = userId;
     }
 
-    public void updateModificationInfo(String username) {
+    public void updateModificationInfo(UUID updatedBy) {
         this.updatedAt = LocalDateTime.now();
-        this.updatedBy = username;
+        this.updatedBy = updatedBy;
     }
 
-    public void updateDeletionInfo(String deletedBy) {
+    public void updateDeletionInfo(UUID deletedBy) {
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deletedBy;
     }

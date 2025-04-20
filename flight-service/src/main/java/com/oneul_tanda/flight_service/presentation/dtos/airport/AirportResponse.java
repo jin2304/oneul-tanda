@@ -1,6 +1,6 @@
 package com.oneul_tanda.flight_service.presentation.dtos.airport;
 
-import com.oneul_tanda.flight_service.domain.entity.Airport;
+import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,7 +20,7 @@ public class AirportResponse {
     private String city;
     private String country;
 
-    public static AirportResponse from(Airport airport) {
+    public static AirportResponse from(AirportEntity airport) {
         return AirportResponse.builder()
                 .id(airport.getId())
                 .code(airport.getCode())

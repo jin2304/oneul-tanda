@@ -1,11 +1,12 @@
 package com.oneul_tanda.flight_service.application.service.flight;
 
+import com.amadeus.Airport;
 import com.amadeus.Amadeus;
 import com.amadeus.Params;
 import com.amadeus.resources.FlightOfferSearch;
 import com.oneul_tanda.flight_service.application.service.CacheService;
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
-import com.oneul_tanda.flight_service.domain.entity.Airport;
+import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
 import com.oneul_tanda.flight_service.domain.entity.FlightEntity;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepository;
@@ -127,9 +128,9 @@ public class FlightExternalService {
                 flightNum, departureTime, arrivalTime);
         FlightEntity flight;
         if (existing.isEmpty()) {
-            Airport departureAirport = airportRepository.findByCode(departureAirportCode)
+            AirportEntity departureAirport = airportRepository.findByCode(departureAirportCode)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid departure airport code: " + departureAirportCode));
-            Airport arrivalAirport = airportRepository.findByCode(arrivalAirportCode)
+            AirportEntity arrivalAirport = airportRepository.findByCode(arrivalAirportCode)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid arrival airport code: " + arrivalAirportCode));
 
             flight = FlightEntity.from(

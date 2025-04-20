@@ -4,14 +4,13 @@ import com.amadeus.Amadeus;
 import com.amadeus.Params;
 import com.amadeus.resources.Location;
 import com.oneul_tanda.flight_service.application.service.CacheService;
-import com.oneul_tanda.flight_service.domain.entity.Airport;
+import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepository;
 import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -42,8 +41,8 @@ public class AirportExternalService {
                     String code = location.getIataCode();
 
                     // 중복된 공항은 저장하지 않음
-                    Airport airport = airportRepository.findByCode(code).orElseGet(() -> {
-                        Airport newAirport = Airport.from(
+                    AirportEntity airport = airportRepository.findByCode(code).orElseGet(() -> {
+                        AirportEntity newAirport = AirportEntity.from(
                                 code,
                                 location.getName(),
                                 location.getAddress().getCityName(),
@@ -55,5 +54,4 @@ public class AirportExternalService {
                 })
                 .toList();
     }
-
 }
