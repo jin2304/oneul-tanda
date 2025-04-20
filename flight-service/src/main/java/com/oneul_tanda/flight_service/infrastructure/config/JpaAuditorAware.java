@@ -2,6 +2,7 @@ package com.oneul_tanda.flight_service.infrastructure.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
@@ -17,9 +18,9 @@ public class JpaAuditorAware implements AuditorAware<String> {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes instanceof ServletRequestAttributes servletRequestAttributes) {
             HttpServletRequest request = servletRequestAttributes.getRequest();
-            String username = request.getHeader("X-Username");
+            String userId = request.getHeader("X-UserId");
 
-            return Optional.ofNullable(username);
+            return Optional.ofNullable(userId);
         } else {
             return Optional.empty();
         }

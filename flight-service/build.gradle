@@ -29,6 +29,9 @@ repositories {
 }
 
 dependencies {
+	// interval과 duration을 매핑하기 위한 의존성
+	implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
+
 	// Amadeus
 	implementation 'com.amadeus:amadeus-java:5.0.0'
 
@@ -61,7 +64,10 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
 	// mysql
-	runtimeOnly 'com.mysql:mysql-connector-j'
+//	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// postgresql
+	runtimeOnly 'org.postgresql:postgresql'
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'

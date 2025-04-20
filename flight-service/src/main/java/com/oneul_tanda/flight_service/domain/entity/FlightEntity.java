@@ -1,6 +1,7 @@
 package com.oneul_tanda.flight_service.domain.entity;
 
 import com.oneul_tanda.flight_service.common.BaseTimeEntity;
+import com.vladmihalcea.hibernate.type.interval.PostgreSQLIntervalType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,9 +20,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "m_flights")
+@Table(name = "p_flights")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,11 +43,11 @@ public class FlightEntity extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "departure_airport_id", nullable = false)
-    private Airport departureAirport;
+    private AirportEntity departureAirport;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "arrival_airport_id", nullable = false)
-    private Airport arrivalAirport;
+    private AirportEntity arrivalAirport;
 
     @Column(name = "departure_date", nullable = false)
     private LocalDateTime departureDate;
@@ -53,7 +55,8 @@ public class FlightEntity extends BaseTimeEntity {
     @Column(name = "arrival_date", nullable = false)
     private LocalDateTime arrivalDate;
 
-    @Column(name = "duration", nullable = false)
+    @Column(name = "duration", nullable = false, columnDefinition = "interval")
+    @Type(PostgreSQLIntervalType.class)
     private Duration duration;
 
     @Column(name = "price", nullable = false)
@@ -62,8 +65,8 @@ public class FlightEntity extends BaseTimeEntity {
     @Column(name = "remaining_seats", nullable = false)
     private Integer remainingSeats;
 
-    public static FlightEntity from(String flightNum, AirlineEntity airlineCode, Airport departureAirport,
-                                    Airport arrivalAirport,
+    public static FlightEntity from(String flightNum, AirlineEntity airlineCode, AirportEntity departureAirport,
+                                    AirportEntity arrivalAirport,
                                     LocalDateTime departureDate, LocalDateTime arrivalDate,
                                     Duration duration, BigDecimal price,
                                     Integer remainingSeats
@@ -81,8 +84,8 @@ public class FlightEntity extends BaseTimeEntity {
                 .build();
     }
 
-    public void updateOf(String flightNum, AirlineEntity airlineCode, Airport departureAirport,
-                         Airport arrivalAirport,
+    public void updateOf(String flightNum, AirlineEntity airlineCode, AirportEntity departureAirport,
+                         AirportEntity arrivalAirport,
                          LocalDateTime departureDate, LocalDateTime arrivalDate,
                          Duration duration, BigDecimal price, Integer remainingSeats
     ) {

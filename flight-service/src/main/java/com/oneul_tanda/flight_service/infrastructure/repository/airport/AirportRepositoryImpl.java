@@ -1,7 +1,7 @@
 package com.oneul_tanda.flight_service.infrastructure.repository.airport;
 
-import com.oneul_tanda.flight_service.domain.entity.Airport;
-import com.oneul_tanda.flight_service.domain.entity.QAirport;
+import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
+import com.oneul_tanda.flight_service.domain.entity.QAirportEntity;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepositoryCustom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -20,8 +20,8 @@ public class AirportRepositoryImpl implements AirportRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Airport> searchByKeyword(String keyword, Pageable pageable) {
-        QAirport airport = QAirport.airport;
+    public Page<AirportEntity> searchByKeyword(String keyword, Pageable pageable) {
+        QAirportEntity airport = QAirportEntity.airportEntity;
 
         // BooleanBuilder를 사용하여 조건 생성
         BooleanBuilder whereClause = new BooleanBuilder();
@@ -31,7 +31,7 @@ public class AirportRepositoryImpl implements AirportRepositoryCustom {
                 .or(airport.country.containsIgnoreCase(keyword));
 
         // 결과 조회
-        List<Airport> result = jpaQueryFactory
+        List<AirportEntity> result = jpaQueryFactory
                 .selectFrom(airport)
                 .where(whereClause.and(airport.deletedAt.isNull()))
                 .orderBy(airport.updatedAt.desc())
