@@ -4,13 +4,12 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
 import javax.crypto.SecretKey;
-import java.time.Duration;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -46,13 +45,15 @@ public class JwtUtil {
             int tokenVersionInToken = claims.getPayload().get("tokenVersion", Integer.class);
 
             String key = "token_version:" + userId;
-            Integer cachedVersion = Integer.parseInt(redisTemplate.opsForValue().get(key));
+            Integer cachedVersion = Optional.ofNullable(redisTemplate.opsForValue().get(key))
+                    .map(Integer::parseInt)
+                    .orElse(null); // orElse(0) 도 가능
+
 
             if (cachedVersion != null) {
                 // Redis에 없으면 -> 통과 처리 있으면 -> 같은 값인지 확인
                 // version 변경시 저장되는 redis값의 expire를 token의 유효기간보다 살짝 길게 설정
                 // 토큰이 남아있는 동안에만 블랙리스트 처리하면 되도록 보장
-                log.info("key" + key + " : " + cachedVersion);
                 return cachedVersion == tokenVersionInToken;
             }
 
@@ -65,6 +66,7 @@ public class JwtUtil {
         } catch (UnsupportedJwtException e) {
             log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
         } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
             log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
         }
         return false;

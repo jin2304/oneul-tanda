@@ -14,25 +14,33 @@ services:
     container_name: oneultanda-gateway
     ports:
       - "19091:19091"
+    env_file:
+      - .env
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     depends_on:
       - eureka-server
+      - kafka
+      - redis
 
   user-service:
-        build:
-          context: ./user-service
-          dockerfile: Dockerfile
-        container_name: oneultanda-user-service
-        volumes:
-          - ./user-service:/app/user-service
-        ports:
-          - "19092:19092"
-        env_file:
-          - .env
-        environment:
-          - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-        depends_on:
-          - user-db
-          - eureka-server
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: oneultanda-user-service
+    volumes:
+      - ./user-service:/app/user-service
+    ports:
+      - "19092:19092"
+    env_file:
+      - .env
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    depends_on:
+      - user-db
+      - eureka-server
+      - gateway
+      - redis
 
   user-db:
     image: mysql:8.0
