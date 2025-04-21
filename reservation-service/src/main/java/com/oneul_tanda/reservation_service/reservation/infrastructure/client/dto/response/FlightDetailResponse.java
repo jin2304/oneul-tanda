@@ -1,6 +1,7 @@
 package com.oneul_tanda.reservation_service.reservation.infrastructure.client.dto.response;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.GetFlightInfo;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FlightDetailResponse {
     private UUID id;
     private String flightNum;
