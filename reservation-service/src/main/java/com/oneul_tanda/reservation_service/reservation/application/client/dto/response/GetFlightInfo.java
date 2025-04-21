@@ -1,4 +1,4 @@
-package com.oneul_tanda.reservation_service.reservation.infrastructure.client.dto.response;
+package com.oneul_tanda.reservation_service.reservation.application.client.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
