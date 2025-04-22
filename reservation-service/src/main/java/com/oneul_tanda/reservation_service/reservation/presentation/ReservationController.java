@@ -1,6 +1,7 @@
 package com.oneul_tanda.reservation_service.reservation.presentation;
 
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
+import com.oneul_tanda.reservation_service.reservation.application.command.CreateReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.service.ReservationService;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.update.ConfirmReservationRequestDto;
@@ -8,6 +9,7 @@ import com.oneul_tanda.reservation_service.reservation.presentation.dto.response
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,9 +39,9 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<CreateReservationResponseDto> createReservation(
             @RequestHeader("X-User-ID") UUID userId,
-            @RequestBody CreateReservationRequestDto requestDto
+            @RequestBody @Valid CreateReservationRequestDto requestDto
     ) {
-        return ResponseEntity.ok(reservationService.createReservation(requestDto));
+        return ResponseEntity.ok(reservationService.createReservation(CreateReservationCommand.of(userId, requestDto)));
     }
 
 
@@ -50,7 +52,7 @@ public class ReservationController {
     public ResponseEntity<ConfirmReservationResponseDto> confirmReservation(
             @RequestHeader("X-User-ID") UUID userId,
             @PathVariable UUID reservationId,
-            @RequestBody ConfirmReservationRequestDto requestDto) {
+            @RequestBody @Valid ConfirmReservationRequestDto requestDto) {
         return ResponseEntity.ok(reservationService.confirmReservation(ConfirmReservationCommand.of(userId, reservationId, requestDto)));
     }
 

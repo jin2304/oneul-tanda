@@ -1,36 +1,52 @@
-### 예약 생성
+### 예약 생성 성공
 POST http://localhost:19095/api/v1/reservations
 Content-Type: application/json
 X-User-ID: 9b7f421f-47b0-47f5-aa5c-8f489697a57d
 
 {
-  "userId": "9b7f421f-47b0-47f5-aa5c-8f489697a57d",
-  "tickets": [
+  "flightId": "0e7d0581-2962-40ef-aa92-4105b46cca06",
+  "seatCount": 2,
+  "passengers": [
     {
-      "flightId": "b84b09ef-1e4f-4cb2-9121-3ad86c013551",
-      "seatClass": "ECONOMY",
-      "price": 120000,
-      "passenger": {
-        "name": "홍길동",
-        "birth": "1995-03-15",
-        "gender": "MALE",
-        "passportNumber": "M12345678"
-      }
+      "name": "홍길동",
+      "birth": "1995-03-15",
+      "gender": "MALE",
+      "passportNumber": "M12345678"
     },
-    {
-      "flightId": "a123b09c-2d4f-4cb2-9999-1fdc3e001234",
-      "seatClass": "BUSINESS",
-      "price": 320000,
-      "passenger": {
-        "name": "홍길동2",
-        "birth": "1993-08-21",
-        "gender": "FEMALE",
-        "passportNumber": "F98765432"
-      }
+   {
+      "name": "홍길동2",
+      "birth": "1993-08-21",
+      "gender": "FEMALE",
+      "passportNumber": "F98765432"
     }
   ]
 }
 
+
+
+### 예약 생성 실패 (Valid 테스트)
+POST http://localhost:19095/api/v1/reservations
+Content-Type: application/json
+X-User-ID: 9b7f421f-47b0-47f5-aa5c-8f489697a57d
+
+{
+  "flightId": "49834e83-95e2-4a39-9d6a-36d7fe1d88ee",
+  "seatCount": 2,
+  "passengers": [
+    {
+      "name": "홍길동",
+      "birth": "1995-03-15",
+      "gender": "MALE",
+      "passportNumber": "M1234567822222222222222"
+    },
+    {
+      "name": "홍길동2",
+      "birth": "1993-08-21022",
+      "gender": "FEMALE",
+      "passportNumber": "F98765432"
+    }
+  ]
+}
 
 
 ### 예약 단일 조회

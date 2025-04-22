@@ -2,7 +2,7 @@ package com.oneul_tanda.reservation_service.reservation.application.service;
 
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
-import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
+import com.oneul_tanda.reservation_service.reservation.application.command.CreateReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
@@ -17,7 +17,7 @@ public interface ReservationService {
 
     CreateHoldReservationResponseDto createHoldReservation(CreateHoldReservationCommand command);
 
-    CreateReservationResponseDto createReservation(CreateReservationRequestDto requestDto);
+    CreateReservationResponseDto createReservation(CreateReservationCommand command);
 
     ReadReservationResponseDto readReservation(UUID reservationId);
 
