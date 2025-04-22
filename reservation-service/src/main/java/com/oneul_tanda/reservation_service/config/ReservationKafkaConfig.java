@@ -3,6 +3,7 @@ package com.oneul_tanda.reservation_service.config;
 import com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event.ReservationHeldEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -22,7 +23,8 @@ import java.util.Map;
 @Configuration
 public class ReservationKafkaConfig {
 
-
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
     /**
      * ReservationHeldEvent 타입의 Kafka ConsumerFactory 빈 정의
      * - Kafka 컨슈머 인스턴스를 생성하는 팩토리
@@ -36,7 +38,7 @@ public class ReservationKafkaConfig {
         jsonDeserializer.addTrustedPackages("com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event");
 
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092");
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
