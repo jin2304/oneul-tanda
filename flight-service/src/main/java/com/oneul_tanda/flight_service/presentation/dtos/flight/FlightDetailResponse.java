@@ -23,7 +23,7 @@ public class FlightDetailResponse {
     private String arrivalAirportCode;
     private LocalDateTime departureDate;
     private LocalDateTime arrivalDate;
-    private String  formattedDuration;
+    private String formattedDuration;
     private BigDecimal price;
     private Integer remainingSeats;
 
