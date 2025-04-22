@@ -3,7 +3,6 @@ package com.oneul_tanda.flight_service.application.service.airport;
 import com.amadeus.Amadeus;
 import com.amadeus.Params;
 import com.amadeus.resources.Location;
-import com.oneul_tanda.flight_service.application.service.CacheService;
 import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepository;
 import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
@@ -20,7 +19,6 @@ public class AirportExternalService {
 
     private final Amadeus amadeus;
     private final AirportRepository airportRepository;
-    private final CacheService cacheService;
 
     // 실시간 공항 정보 조회
     public Location[] searchAirports(String keyword) throws Exception {
@@ -50,7 +48,7 @@ public class AirportExternalService {
                         return airportRepository.save(newAirport);
                     });
 
-                    return cacheService.cacheAirport(AirportResponse.from(airport));
+                    return AirportResponse.from(airport);
                 })
                 .toList();
     }

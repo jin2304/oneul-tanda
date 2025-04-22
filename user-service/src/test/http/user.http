@@ -20,11 +20,11 @@ Content-Type: application/json
 }
 
 ### 유저 조회(개인)
-GET http://localhost:19093/api/v1/users/me
+GET http://localhost:19092/api/v1/users/me
 Content-Type: application/json
 X-User-Name: tester
 X-User-Role: CUSTOMER
-X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
+X-User-ID: b3e4849f-69e8-4354-b166-552e05ec81a3
 
 ### 유저 정보 수정
 PUT http://localhost:19093/api/v1/users/me
@@ -40,11 +40,11 @@ X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 }
 
 ### 유저 암호 수정 todo: 추후 feignclient grpc를 통해 수정 작업 진행 - internal
-PUT http://localhost:19093/api/v1/users/password
+PUT http://localhost:19092/api/v1/users/password
 Content-Type: application/json
 X-User-Name: tester
 X-User-Role: CUSTOMER
-X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
+X-User-ID: b3e4849f-69e8-4354-b166-552e05ec81a3
 
 {
   "currentPassword": "12345678a*",

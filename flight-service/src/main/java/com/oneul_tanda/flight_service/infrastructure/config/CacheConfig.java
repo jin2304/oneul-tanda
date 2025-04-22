@@ -1,10 +1,11 @@
 package com.oneul_tanda.flight_service.infrastructure.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oneul_tanda.flight_service.presentation.dtos.flight.FlightResponse;
+import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
+import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
+import com.oneul_tanda.flight_service.presentation.dtos.flight.FlightDetailResponse;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -24,24 +25,53 @@ public class CacheConfig {
 
     @Bean
     RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        // 기본 직렬화기 (다른 캐시용)
+        GenericJackson2JsonRedisSerializer genericSerializer = new GenericJackson2JsonRedisSerializer(
+                objectMapper);
 
+        // 특정 DTO용 직렬화기
+        Jackson2JsonRedisSerializer<AirportResponse> airportSerializer = new Jackson2JsonRedisSerializer<>(
+                objectMapper, AirportResponse.class);
+        Jackson2JsonRedisSerializer<AirlineResponse> airlineSerializer = new Jackson2JsonRedisSerializer<>(
+                objectMapper, AirlineResponse.class);
+        Jackson2JsonRedisSerializer<FlightDetailResponse> flightSerializer = new Jackson2JsonRedisSerializer<>(
+                objectMapper, FlightDetailResponse.class);
+
+        // 기본 캐시 설정
         RedisCacheConfiguration baseConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(genericSerializer))
                 .disableCachingNullValues();
 
-        // 항공편 캐시 설정(10초)
-        RedisCacheConfiguration tenSecConfig = baseConfig.entryTtl(Duration.ofSeconds(10));
-        // 항공편 캐시 설정(5분)
-        RedisCacheConfiguration fiveMinConfig = baseConfig.entryTtl(Duration.ofMinutes(5));
-        // 항공사, 공항 캐시 설정(12시간)
-        RedisCacheConfiguration halfDayConfig = baseConfig.entryTtl(Duration.ofHours(12));
+        // airports 캐시 설정 (12시간 TTL)
+        RedisCacheConfiguration airportConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(airportSerializer))
+                .disableCachingNullValues()
+                .entryTtl(Duration.ofHours(12));
 
+        // airlines 캐시 설정 (12시간 TTL)
+        RedisCacheConfiguration airlineConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(airlineSerializer))
+                .disableCachingNullValues()
+                .entryTtl(Duration.ofHours(12));
+
+        // flights 캐시 설정 (10초 TTL)
+        RedisCacheConfiguration flightConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(flightSerializer))
+                .disableCachingNullValues()
+                .entryTtl(Duration.ofSeconds(10));
+
+        // flightOffers 캐시 설정 (1분 TTL)
+        RedisCacheConfiguration flightOffersConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(flightSerializer))
+                .disableCachingNullValues()
+                .entryTtl(Duration.ofMinutes(1));
+
+        // 캐시별 설정
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("flightOffers", fiveMinConfig);
-        cacheConfigurations.put("flights", tenSecConfig);
-        cacheConfigurations.put("airlines", halfDayConfig);
-        cacheConfigurations.put("airports", halfDayConfig);
+        cacheConfigurations.put("flightOffers", flightOffersConfig);
+        cacheConfigurations.put("flights", flightConfig);
+        cacheConfigurations.put("airlines", airlineConfig);
+        cacheConfigurations.put("airports", airportConfig);
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(baseConfig)
@@ -57,6 +87,7 @@ public class CacheConfig {
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
+
         return template;
     }
 }

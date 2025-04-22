@@ -1,10 +1,10 @@
 package com.oneultanda.userservice.infrastructure.jwt;
 
 import com.oneultanda.userservice.domain.model.Role;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class JwtUtil {
     private final SecretKey secretKey;
@@ -31,6 +32,7 @@ public class JwtUtil {
             @Value("${jwt.access-expiration}") Long accessExpiration,
             @Value("${jwt.refresh-expiration}") Long refreshExpiration
     ) {
+        log.info("-------------------------------------------" + secret);
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
         this.issuer = issuer;
         this.accessExpiration = accessExpiration;
@@ -58,6 +60,7 @@ public class JwtUtil {
     private String generateToken(Duration expiration, String username, Map<String, Object> claims) {
         // aws 의 리전이 어디에 생길지 모르니 타임 존을 명확하게 ...
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        log.info(secretKey.toString());
         return Jwts.builder()
                 .subject(username)
                 .claims(claims)

@@ -1,13 +1,13 @@
 ### 공항 조회 및 저장
-POST http://localhost:19094/internal/amadeus/airports/fetch-and-save?keyword=LON
+POST http://localhost:19094/api/v1/amadeus/airports/fetch-and-save?keyword=LON
 
 
 ### 항공사 조회 및 저장1
-POST http://localhost:19094/internal/amadeus/airlines/fetch-and-save?keyword=MU
+POST http://localhost:19094/api/v1/amadeus/airlines/fetch-and-save?keyword=MU
 
 ### 항공사 조회 및 저장2
-POST http://localhost:19094/internal/amadeus/airlines/fetch-and-save?keyword=BA
+POST http://localhost:19094/api/v1/amadeus/airlines/fetch-and-save?keyword=BA
 
 
 ### 항공편 조회 및 저장
-POST http://localhost:19094/internal/amadeus/flights/fetch-and-save?departureAirportCode=LGW&arrivalAirportCode=KWE&departureDate=2025-04-25T19:45:25&requiredSeats=2
+POST http://localhost:19094/api/v1/amadeus/flights/fetch-and-save?departureAirportCode=LGW&arrivalAirportCode=KWE&departureDate=2025-04-25T19:45:25&requiredSeats=2

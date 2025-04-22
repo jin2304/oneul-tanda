@@ -5,6 +5,7 @@ import com.oneultanda.userservice.domain.model.Role;
 import com.oneultanda.userservice.domain.model.User;
 import com.oneultanda.userservice.presentation.dto.request.*;
 import com.oneultanda.userservice.presentation.dto.response.UserResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class UserController {
      */
     @PostMapping("/signup")
     public ResponseEntity<Void> registerUser(
-            @RequestBody RegisterUserRequest request
+            @RequestBody @Valid RegisterUserRequest request
     ) {
         userservice.registerUser(request.toCommand());
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -36,7 +37,7 @@ public class UserController {
      */
     @PostMapping("/login")
     public ResponseEntity<Void> loginUser(
-            @RequestBody LoginUserRequest request
+            @RequestBody @Valid LoginUserRequest request
     ) {
         String accessToken = userservice.loginUser(request.toCommand());
         return ResponseEntity.ok()

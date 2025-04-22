@@ -1,0 +1,11 @@
+### 대기열 테스트
+POST http://localhost:19096/api/v1/queue
+Content-Type: application/json
+X-User-Name: tester
+X-User-Role: CUSTOMER
+X-User-ID: b3e4849f-69e8-4354-b166-552e05ec81a7
+
+{
+  "flightId": "4b558d03-0cf2-42e5-abcf-64945308646f",
+  "seatCount": 2
+}

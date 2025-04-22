@@ -1,0 +1,7 @@
+### 아마데우스 통한 search + 생성
+POST http://localhost:19094/api/v1/amadeus/flights/fetch-and-save?departureAirportCode=CGQ&arrivalAirportCode=LHR&departureDate=2025-04-22T01:30:00.000-05:00&requiredSeats=2
+Content-Type: application/json
+
+### 캐시테스트
+GET http://localhost:19094/api/v1/flights/4b558d03-0cf2-42e5-abcf-64945308646f
+Content-Type: application/json

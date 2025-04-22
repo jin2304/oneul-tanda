@@ -23,7 +23,7 @@ public class UserJpaEntity extends BaseTimeEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
