@@ -3,7 +3,6 @@ package com.oneul_tanda.flight_service.application.service.airline;
 import com.amadeus.Amadeus;
 import com.amadeus.Params;
 import com.amadeus.resources.Airline;
-import com.oneul_tanda.flight_service.application.service.CacheService;
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
@@ -22,7 +21,6 @@ public class AirlineExternalService {
 
     private final Amadeus amadeus;
     private final AirlineRepository airlineRepository;
-    private final CacheService cacheService;
 
     // 실시간 항공사 정보 조회
     public List<AirlineSearchResponse> searchAirlines(String keyword) throws Exception {
@@ -53,7 +51,7 @@ public class AirlineExternalService {
                         return airlineRepository.save(newAirline);
                     });
 
-                    return cacheService.cacheAirline(AirlineResponse.from(existingAirline));
+                    return AirlineResponse.from(existingAirline);
                 })
                 .toList();
     }
