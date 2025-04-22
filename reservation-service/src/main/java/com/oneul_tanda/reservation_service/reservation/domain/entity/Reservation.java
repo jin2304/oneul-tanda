@@ -2,6 +2,8 @@ package com.oneul_tanda.reservation_service.reservation.domain.entity;
 
 
 import com.oneul_tanda.reservation_service.common.entity.BaseTimeEntity;
+import com.oneul_tanda.reservation_service.common.exception.CustomException;
+import com.oneul_tanda.reservation_service.reservation.application.exception.ReservationErrorCode;
 import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
 import jakarta.persistence.*;
 import lombok.*;
@@ -107,26 +109,30 @@ public class Reservation extends BaseTimeEntity {
      * 예약 취소
      */
     public void cancel() {
-        LocalDateTime now = LocalDateTime.now();
-
-        if (this.status == ReservationStatus.CANCELED) {
-            throw new IllegalStateException("이미 취소된 예약입니다.");
-        }
-
-        // 예약 생성 후 24시간 이내 여부 판단
-        if (!isCreatedWithin24Hours(now)) {
-            throw new IllegalStateException("예약 생성 24시간 지나 취소할 수 없습니다.");
-        }
-
-        // 항공편 출발까지 72시간 이상 남았는지 여부 판단
-        if (!isDepartureAfter72Hours(now)) {
-            throw new IllegalStateException("출발 72시간 이내 항공편은 취소할 수 없습니다.");
-         }
-
+        validateCancelable();
         this.status = ReservationStatus.CANCELED;
     }
 
 
+
+    // 취소 가능 검증
+    private void validateCancelable() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (this.status == ReservationStatus.CANCELED) {
+            throw CustomException.from(ReservationErrorCode.CANNOT_CANCEL_ALREADY_CANCELED);
+        }
+
+        // 예약 생성 후 24시간 이내 여부 판단
+        if (!isCreatedWithin24Hours(now)) {
+            throw CustomException.from(ReservationErrorCode.CANNOT_CANCEL_AFTER_24H_CREATION);
+        }
+
+        // 항공편 출발까지 72시간 이상 남았는지 여부 판단
+        if (!isDepartureAfter72Hours(now)) {
+            throw CustomException.from(ReservationErrorCode.CANNOT_CANCEL_WITHIN_72H_TO_DEPARTURE);
+         }
+    }
 
     public boolean isCreatedWithin24Hours(LocalDateTime now) {
         // 예약 임시 생성 시간 (createdAt) 기준으로 24시간 이내에만 취소 가능

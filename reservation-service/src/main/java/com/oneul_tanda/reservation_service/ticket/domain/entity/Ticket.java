@@ -52,12 +52,14 @@ public class Ticket extends BaseTimeEntity {
     /**
      * 티켓 생성
      */
-    public static Ticket createTicket(Passenger passenger, UUID flightId, UUID userId, SeatClass seatClass, BigDecimal unitPrice) {
+    public static Ticket createTicket(Passenger passenger, UUID flightId, UUID userId, SeatClass seatClass, BigDecimal unitPrice, LocalDateTime departureDate, LocalDateTime arrivalDate) {
         Ticket ticket = Ticket.builder()
                 .passenger(passenger)
                 .flightId(flightId)
                 .seatClass(seatClass)
                 .unitPrice(unitPrice)
+                .departureDate(departureDate)
+                .arrivalDate(arrivalDate)
                 .build();
 
         ticket.registerCreatedBy(userId);
