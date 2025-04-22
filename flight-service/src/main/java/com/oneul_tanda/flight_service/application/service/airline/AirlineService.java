@@ -8,6 +8,8 @@ import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
 import com.oneul_tanda.flight_service.util.PagingUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ public class AirlineService {
 
     private final AirlineRepository airlineRepository;
 
+    @Cacheable(value = "airlines", key = "#airlineId")
     public AirlineResponse getAirline(UUID airlineId) {
         AirlineEntity airline = airlineRepository.findById(airlineId)
                 .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
@@ -35,6 +38,7 @@ public class AirlineService {
     }
 
     @Transactional
+    @CacheEvict(value = "airlines", allEntries = true) // 캐시 무효화
     public AirlineResponse createAirline(CreateAirlineCommand airlineCommand) {
 
         if (airlineRepository.findByCode(airlineCommand.getCode()).isPresent()) {
@@ -50,6 +54,7 @@ public class AirlineService {
     }
 
     @Transactional
+    @CacheEvict(value = "airlines", allEntries = true) // 캐시 무효화
     public AirlineResponse updateAirline(UpdateAirlineCommand airlineCommand) {
 
         AirlineEntity airline = airlineRepository.findById(airlineCommand.getAirlineId())
@@ -66,6 +71,7 @@ public class AirlineService {
     }
 
     @Transactional
+    @CacheEvict(value = "airlines", allEntries = true) // 캐시 무효화
     public void deleteAirline(UUID airlineId) {
 
         AirlineEntity airline = airlineRepository.findById(airlineId)

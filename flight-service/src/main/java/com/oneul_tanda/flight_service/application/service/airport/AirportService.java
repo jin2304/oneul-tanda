@@ -9,6 +9,8 @@ import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepositor
 import com.oneul_tanda.flight_service.util.PagingUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ public class AirportService {
     private final AirportRepository airportRepository;
     private final AirportRepositoryCustom airportRepositoryCustom;
 
+    @Cacheable(value = "airports", key = "#airportId")
     public AirportResponse getAirport(UUID airportId) {
 
         AirportEntity airport = airportRepository.findById(airportId)
@@ -38,6 +41,7 @@ public class AirportService {
     }
 
     @Transactional
+    @CacheEvict(value = "airports", allEntries = true) // 캐시 무효화
     public AirportResponse createAirport(CreateAirportCommand airportCommand) {
 
         if (airportRepository.findByCode(airportCommand.getCode()).isPresent()) {
@@ -57,6 +61,7 @@ public class AirportService {
     }
 
     @Transactional
+    @CacheEvict(value = "airports", allEntries = true) // 캐시 무효화
     public AirportResponse updateAirport(UpdateAirportCommand airportCommand) {
 
         AirportEntity airport = airportRepository.findById(airportCommand.getAirportId())
@@ -75,6 +80,7 @@ public class AirportService {
     }
 
     @Transactional
+    @CacheEvict(value = "airports", allEntries = true) // 캐시 무효화
     public void deleteAirport(UUID airportId) {
 
         AirportEntity airport = airportRepository.findById(airportId)

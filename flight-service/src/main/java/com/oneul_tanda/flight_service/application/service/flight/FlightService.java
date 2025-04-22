@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class FlightService {
     private final AirlineRepository airlineRepository;
     private final AirportRepository airportRepository;
 
+    @Cacheable(value = "flights", key = "#flightId")
     public FlightDetailResponse getFlight(UUID flightId) {
 
         FlightEntity flight = flightRepository.findById(flightId)
@@ -39,7 +41,6 @@ public class FlightService {
 
         return FlightDetailResponse.from(flight);
     }
-
 
     public Page<FlightResponse> searchFlights(String departureAirport, String arrivalAirport,
                                               LocalDateTime departureDate, Integer requiredSeats,
