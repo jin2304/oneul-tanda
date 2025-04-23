@@ -34,10 +34,7 @@ public class ImPortPaymentService implements PaymentService {
 
         OnetimePaymentData onetimePaymentData = new OnetimePaymentData(merchantUid, totalAmount, card);
         onetimePaymentData.setPg("kcp");
-        onetimePaymentData.setName("테스트 상품"); // 상품명
-        onetimePaymentData.setBuyerName("홍길동"); // 구매자 이름
-        onetimePaymentData.setBuyerTel("01012345678"); // 구매자 전화번호
-        onetimePaymentData.setBuyerEmail("test@example.com");
+
         // 결제 요청
         IamportResponse<Payment> paymentResponse = iamportClient.onetimePayment(onetimePaymentData);
 
