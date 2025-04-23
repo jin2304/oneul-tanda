@@ -1,3 +1,6 @@
+server:
+  port: 19093
+
 spring:
   profiles:
     active: local
@@ -5,7 +8,7 @@ spring:
     name: payment-service
 
   datasource:
-    url: jdbc:mysql://payments-db:3306/payments_db
+    url: jdbc:mysql://localhost:3306/payments_db
     username: admin
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -21,3 +24,9 @@ spring:
 #    register-with-eureka: true
 #    fetch-registry: true
 
+import:
+  api:
+    code: iamport01m
+    key: 3514258731134757
+    secret:
+      key: aMGNaO99W6ivPE2tRodLfRWwBWdR2gG5FPifcZ46kUYe13GXLqSfnEcXkbl8LBNIY9z94CrmKKpSrwP9
