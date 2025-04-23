@@ -1,4 +1,4 @@
-package com.oneultanda.userservice.common.exception;
+package com.oneultanda.userservice.common.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

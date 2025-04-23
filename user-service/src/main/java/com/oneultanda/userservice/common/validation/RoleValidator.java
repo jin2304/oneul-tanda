@@ -1,4 +1,4 @@
-package com.oneultanda.userservice.common.exception;
+package com.oneultanda.userservice.common.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
