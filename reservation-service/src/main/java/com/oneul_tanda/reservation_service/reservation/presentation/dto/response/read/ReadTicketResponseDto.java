@@ -13,7 +13,7 @@ public record ReadTicketResponseDto(
         UUID flightId,
         String seatClass,
         BigDecimal unitPrice,
-        CreatePassengerResponseDto passenger
+        ReadPassengerResponseDto passenger
 ) {
 
     // Entity -> DTO 변환 메서드
@@ -23,7 +23,7 @@ public record ReadTicketResponseDto(
                 .flightId(ticket.getFlightId())
                 .seatClass(ticket.getSeatClass().name())
                 .unitPrice(ticket.getUnitPrice())
-                .passenger(CreatePassengerResponseDto.from(ticket.getPassenger()))
+                .passenger(ticket.getPassenger() != null ? ReadPassengerResponseDto.from(ticket.getPassenger()) : null)
                 .build();
     }
 }

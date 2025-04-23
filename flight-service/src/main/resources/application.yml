@@ -31,6 +31,15 @@ amadeus:
   client-id: ${AMADEUS_CLIENT_ID}
   client-secret: ${AMADEUS_CLIENT_SECRET}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus"
+  endpoint:
+    health:
+      show-details: always
+
 eureka:
   client:
     service-url:

@@ -6,6 +6,8 @@ import com.sparta.queueservice.infrastructure.kafka.ProducerService;
 import com.sparta.queueservice.infrastructure.kafka.event.EventStatusEnum;
 import com.sparta.queueservice.infrastructure.client.FlightClient;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -21,14 +24,17 @@ public class QueueService {
     private final FlightClient flightClient;
     private final ProducerService producerService;
     private final RedisTemplate<String, String> redisTemplate;
+    private final RedissonClient redissonClient;
 
     public QueueService(FlightClient airportClient,
                         RedisTemplate<String, String> redisTemplate,
-                        ProducerService producerService) {
+                        ProducerService producerService,
+                        RedissonClient redissonClient) {
         this.flightClient = airportClient;
         this.rankOps = redisTemplate.opsForZSet();
         this.producerService = producerService;
         this.redisTemplate = redisTemplate;
+        this.redissonClient = redissonClient;
     }
 
     // 예약 신청시 대기열 진입후 대기열 선점
@@ -55,16 +61,36 @@ public class QueueService {
         processReserve(flightId);
     }
 
+    public void processReserve(UUID flightId) {
+        RLock lock = redissonClient.getLock("lock:flight:" + flightId);
+
+        boolean isLocked = false;
+        try {
+            isLocked = lock.tryLock(3, 10, TimeUnit.SECONDS);
+
+            if (isLocked) {
+                processReserveWithLock(flightId);
+            } else {
+                log.warn("좌석 선점 락 획득 실패: {}", flightId);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            if (isLocked && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+    }
+
     //대기열 진입 후 선점 과정
-    public synchronized void processReserve(UUID flightId) {
+    public void processReserveWithLock(UUID flightId) {
         String key = "ranks:" +  flightId;
         // flightId를 받아 좌석 수를 조회
         FlightResponse flightResponse = flightClient.getFlight(flightId);
         Integer remainingSeats = flightResponse.getRemainingSeats();
-
-//        // 테스트시 동시성 제어를 위한 redis 저장
+//        테스트시 동시성 제어를 위한 redis 저장
 //        String remainingSeatsStr = redisTemplate.opsForValue().get("seat:" + flightId);
-//        // 값이 없다면, 기본 값인 10을 설정하여 redis 에 저장
+        // 값이 없다면, 기본 값인 10을 설정하여 redis 에 저장
 //        int remainingSeats = (remainingSeatsStr != null) ? Integer.parseInt(remainingSeatsStr) : 50;
 //        if (remainingSeatsStr == null) {
 //            // 최초 저장 시에 redis 에 값 설정
@@ -82,6 +108,11 @@ public class QueueService {
             String[] parts =  reserveInfo.split(":");
             UUID userId = UUID.fromString(parts[0]);
             int seatCount = Integer.parseInt(parts[1]);
+
+            if (!isTopUser(userId, flightId)) {
+                log.info("순서가 아닙니다.");
+                return;
+            }
 
             if(seatCount <= remainingSeats) { // 대기열 선점 성공시 항공편의 좌석 수 차감 후 성공 메세지 전달
                 // 좌석 수 차감 api 필요 (임시 좌석 차감 로직)
@@ -123,5 +154,11 @@ public class QueueService {
     public void deleteExistReserve(UUID flightId, UUID userId) {
         String key = "reserve:" +  flightId + ":" + userId;
         redisTemplate.delete(key);
+    }
+
+    // 본인이 최상위 유저인지 아닌지 체크
+    private boolean isTopUser(UUID userId, UUID flightId) {
+        String topUser = rankOps.range("ranks:" + flightId, 0, 0).stream().findFirst().orElse(null);
+        return topUser != null && topUser.startsWith(userId.toString());
     }
 }

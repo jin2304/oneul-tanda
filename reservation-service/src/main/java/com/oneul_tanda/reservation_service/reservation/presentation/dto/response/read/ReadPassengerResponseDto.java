@@ -2,9 +2,11 @@ package com.oneul_tanda.reservation_service.reservation.presentation.dto.respons
 
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Gender;
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
+import lombok.Builder;
 
 import java.util.UUID;
 
+@Builder
 public record ReadPassengerResponseDto(
         UUID passengerId,
         String birth,
@@ -14,11 +16,11 @@ public record ReadPassengerResponseDto(
 
     // Entity -> DTO 변환 메서드
     public static ReadPassengerResponseDto from(Passenger passenger) {
-        return new ReadPassengerResponseDto(
-                passenger.getId(),
-                passenger.getBirth(),
-                passenger.getGender(),
-                passenger.getPassportNumber()
-        );
+        return ReadPassengerResponseDto.builder()
+                .passengerId(passenger.getId())
+                .birth(passenger.getBirth())
+                .gender(passenger.getGender())
+                .passportNumber(passenger.getPassportNumber())
+                .build();
     }
 }

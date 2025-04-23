@@ -26,17 +26,19 @@ Content-Type: application/json
   "username": "tester",
   "password": "12345678a*"
 }
-
+> {%
+    client.global.set("access_token", response.headers.valueOf("Authorization"))
+%}
 
 ### 항공편 조회 및 저장
 POST http://localhost:19091/api/v1/amadeus/flights/fetch-and-save?departureAirportCode=LGW&arrivalAirportCode=KWE&departureDate=2025-04-25T19:45:25&requiredSeats=2
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImQ3NzE0MDg4LTE4OTEtNDBmOS1iNDNlLTJlOTgwM2U2MzE0ZiIsInRva2VuVmVyc2lvbiI6MSwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDUzMDEwMTUsImV4cCI6MTc0NTMwMjgxNX0.mjvlh3wV97thpEEiXPjfIkRIPrLVcDs3H4ilRNn4Xwg
+Authorization: {{access_token}}
 
 
 ### 특가 항공권 예매 요청
 POST http://localhost:19091/api/v1/queue
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImQ3NzE0MDg4LTE4OTEtNDBmOS1iNDNlLTJlOTgwM2U2MzE0ZiIsInRva2VuVmVyc2lvbiI6MSwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDUzMDEwMTUsImV4cCI6MTc0NTMwMjgxNX0.mjvlh3wV97thpEEiXPjfIkRIPrLVcDs3H4ilRNn4Xwg\
+Authorization: {{access_token}}
 
 {
   "flightId" : "66b08c46-8393-480a-a8bc-3d72dcda80dd",
@@ -47,14 +49,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTV
 ### 예약 단일 조회
 GET http://localhost:19091/api/v1/reservations/9b7f421f-47b0-47f5-aa5c-8f489697a57d
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImQ3NzE0MDg4LTE4OTEtNDBmOS1iNDNlLTJlOTgwM2U2MzE0ZiIsInRva2VuVmVyc2lvbiI6MSwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDUzMDEwMTUsImV4cCI6MTc0NTMwMjgxNX0.mjvlh3wV97thpEEiXPjfIkRIPrLVcDs3H4ilRNn4Xwg\
+Authorization: {{access_token}}
 
 
 ## 예약 목록 조회
 ### 예약 목록 조회 - Default
 GET http://localhost:19091/api/v1/reservations
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImQ3NzE0MDg4LTE4OTEtNDBmOS1iNDNlLTJlOTgwM2U2MzE0ZiIsInRva2VuVmVyc2lvbiI6MSwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDUzMDEwMTUsImV4cCI6MTc0NTMwMjgxNX0.mjvlh3wV97thpEEiXPjfIkRIPrLVcDs3H4ilRNn4Xwg\
+Authorization: {{access_token}}
 
 ### 예약 대기열 서비스 Kafka prodcuer: 예약 선점 성공 이벤트 발행
 
@@ -66,7 +68,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTV
 ### 예약 확정(예약 수정)
 PUT http://localhost:19091/api/v1/reservations/df4aa5d2-2e7b-4728-a5b7-9cbbe1f7d35d/confirm
 Content-Type: application/json
-X-User-ID: 9b7f421f-47b0-47f5-aa5c-8f489697a57d
+Authorization: {{access_token}}
 
 {
   "tickets": [
