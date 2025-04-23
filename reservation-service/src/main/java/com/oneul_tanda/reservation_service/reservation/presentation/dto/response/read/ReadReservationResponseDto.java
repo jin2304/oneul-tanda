@@ -16,7 +16,7 @@ public record ReadReservationResponseDto(
         UUID userId,
         BigDecimal totalPrice,
         ReservationStatus status,
-        List<CreateTicketResponseDto> tickets
+        List<ReadTicketResponseDto> tickets
 ) {
 
     // Entity -> DTO 변환 메서드
@@ -27,7 +27,7 @@ public record ReadReservationResponseDto(
                 .totalPrice(reservation.getTotalPrice())
                 .status(reservation.getStatus())
                 .tickets(reservation.getTicketList().stream()
-                        .map(CreateTicketResponseDto::from)
+                        .map(ReadTicketResponseDto::from)
                         .collect(Collectors.toList()))
                 .build();
     }
