@@ -26,7 +26,6 @@ spring:
 
 import:
   api:
-    code: iamport01m
     key: 3514258731134757
     secret:
       key: aMGNaO99W6ivPE2tRodLfRWwBWdR2gG5FPifcZ46kUYe13GXLqSfnEcXkbl8LBNIY9z94CrmKKpSrwP9
