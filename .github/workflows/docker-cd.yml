@@ -2,7 +2,7 @@ name: Deploy to OCI via SSH
 
 on:
   push:
-    branches: [ main ]
+    branches: [ Ci/#91-cicd-gitaction ]
 
 jobs:
   deploy:
