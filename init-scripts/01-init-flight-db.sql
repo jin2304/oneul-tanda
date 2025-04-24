@@ -23,20 +23,11 @@ CREATE TABLE IF NOT EXISTS p_airlines
     100
 ) NOT NULL,
     created_at TIMESTAMP,
-    created_by VARCHAR
-(
-    100
-),
+    created_by UUID,
     updated_at TIMESTAMP,
-    updated_by VARCHAR
-(
-    100
-),
+    updated_by UUID,
     deleted_at TIMESTAMP,
-    deleted_by VARCHAR
-(
-    100
-)
+    deleted_by UUID
     );
 
 -- 공항 테이블
@@ -65,20 +56,11 @@ CREATE TABLE IF NOT EXISTS p_airports
 ) NOT NULL,
 
     created_at TIMESTAMP,
-    created_by VARCHAR
-(
-    100
-),
+    created_by UUID,
     updated_at TIMESTAMP,
-    updated_by VARCHAR
-(
-    100
-),
+    updated_by UUID,
     deleted_at TIMESTAMP,
-    deleted_by VARCHAR
-(
-    100
-)
+    deleted_by UUID
     );
 
 -- 항공편 테이블
@@ -107,20 +89,11 @@ CREATE TABLE IF NOT EXISTS p_flights
     remaining_seats INTEGER NOT NULL,
 
     created_at TIMESTAMP,
-    created_by VARCHAR
-(
-    100
-),
+    created_by UUID,
     updated_at TIMESTAMP,
-    updated_by VARCHAR
-(
-    100
-),
+    updated_by UUID,
     deleted_at TIMESTAMP,
-    deleted_by VARCHAR
-(
-    100
-),
+    deleted_by UUID,
     CONSTRAINT fk_flight_airline FOREIGN KEY
 (
     airline_id
