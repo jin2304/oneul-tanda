@@ -46,7 +46,7 @@ jobs:
         run: |
           scp ./docker-compose-server.yml ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/docker-compose.yml
           scp ./.env ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/
-          scp ./prometheus.yml ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/prometheus.yml
+          scp ./prometheus.yml ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/
 
 #      - name: Run docker compose on server
 #        run: |
