@@ -1,60 +1,163 @@
 apiVersion: 1
 groups:
-    - orgId: 1
-      name: oneltanda
-      folder: oneltanda
-      interval: 1m
-      rules:
-        - uid: cej5ocua4giyoa
-          title: Up alert
-          condition: C
-          data:
-            - refId: A
-              relativeTimeRange:
-                from: 600
-                to: 0
-              datasourceUid: aej5j0p9ukphcc
-              model:
-                disableTextWrap: false
-                editorMode: builder
-                expr: up{job="spring-boot"}
-                fullMetaSearch: false
-                includeNullMetadata: true
-                instant: true
-                intervalMs: 1000
-                legendFormat: __auto
-                maxDataPoints: 43200
-                range: false
-                refId: A
-                useBackend: false
-            - refId: C
-              datasourceUid: __expr__
-              model:
-                conditions:
-                    - evaluator:
-                        params:
-                            - 1
-                        type: lt
-                      operator:
-                        type: and
-                      query:
-                        params:
-                            - C
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                datasource:
-                    type: __expr__
-                    uid: __expr__
-                expression: A
-                intervalMs: 1000
-                maxDataPoints: 43200
-                refId: C
-                type: threshold
-          noDataState: NoData
-          execErrState: Error
-          for: 1m
-          isPaused: false
-          notification_settings:
-            receiver: slack alert
+  - orgId: 1
+    name: cpu
+    folder: oneltanda
+    interval: 1m
+    rules:
+      - uid: fejt47a1zv7r4e
+        title: CPU Used 50% alert
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: aej5j0p9ukphcc
+            model:
+              editorMode: code
+              expr: 100 * process_cpu_usage{instance=~"host\\.docker\\.internal:19096|host\\.docker\\.internal:19095",job="spring-boot"}
+              instant: true
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: false
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.5
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Error
+        isPaused: false
+        notification_settings:
+          receiver: slack alert
+      - uid: eejt4r89gcvswb
+        title: CPU Used 70% alert
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: aej5j0p9ukphcc
+            model:
+              editorMode: code
+              expr: 100 * process_cpu_usage{instance=~"host\\.docker\\.internal:19096|host\\.docker\\.internal:19095",job="spring-boot"}
+              instant: true
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: false
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.7
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Error
+        isPaused: false
+        notification_settings:
+          receiver: slack alert
+  - orgId: 1
+    name: oneltanda
+    folder: oneltanda
+    interval: 1m
+    rules:
+      - uid: cej5ocua4giyoa
+        title: Up alert
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: aej5j0p9ukphcc
+            model:
+              disableTextWrap: false
+              editorMode: builder
+              expr: up{job="spring-boot"}
+              fullMetaSearch: false
+              includeNullMetadata: true
+              instant: true
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: false
+              refId: A
+              useBackend: false
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        dashboardUid: ""
+        panelId: 0
+        noDataState: NoData
+        execErrState: Error
+        for: 1m
+        isPaused: false
+        notification_settings:
+          receiver: slack alert
