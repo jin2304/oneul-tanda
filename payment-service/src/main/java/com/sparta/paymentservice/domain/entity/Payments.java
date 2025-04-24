@@ -19,24 +19,16 @@ public class Payments {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID paymentId;
 
+    private UUID reservationId;
+
     @Column(nullable = false)
     private Integer totalPrice;
 
-    @Column(nullable = false)
-    private TypeEnum paymentType;
 
-    @Column(nullable = false)
-    private StatusEnum paymentStatus;
-
-    public static Payments create(UUID paymentId,
-                                  Integer totalPrice,
-                                  TypeEnum paymentType,
-                                  StatusEnum paymentStatus) {
+    public static Payments create(Integer totalPrice, UUID reservationId) {
         return Payments.builder()
-                .paymentId(paymentId)
                 .totalPrice(totalPrice)
-                .paymentType(paymentType)
-                .paymentStatus(paymentStatus)
+                .reservationId(reservationId)
                 .build();
     }
 }
