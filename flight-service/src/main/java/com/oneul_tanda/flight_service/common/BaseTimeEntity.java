@@ -39,7 +39,7 @@ public class BaseTimeEntity {
     @Column(name = "deleted_by")
     private UUID deletedBy;
 
-    public void updateCreatedBy(UUID userId) {
+    public void updateCreationInfo(UUID userId) {
         this.createdBy = userId;
     }
 
