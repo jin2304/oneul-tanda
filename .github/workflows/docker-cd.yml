@@ -1,8 +1,10 @@
 name: Deploy to OCI via SSH
 
 on:
-  push:
-    branches: [ Ci/#91-cicd-gitaction ]
+  workflow_run:
+    workflows: [ "Build and Push Docker Images" ]
+    types:
+      - completed
 
 jobs:
   deploy:
@@ -48,9 +50,10 @@ jobs:
 
       - name: Run docker compose on server
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }} << 'EOF'
-            cd /home/ubuntu/app
-            docker compose pull      # 이미지 업데이트 (옵션)
-            docker compose down      # 기존 컨테이너 중지 (옵션)
-            docker compose up -d     # 재시작
-          EOF
+          ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }} "
+            cd /home/ubuntu/app &&
+            docker compose pull &&
+            docker compose down &&
+            docker compose up -d
+          "
+      
