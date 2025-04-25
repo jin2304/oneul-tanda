@@ -37,6 +37,10 @@ public class ImPortPaymentService implements PaymentService {
             IamportResponse<Payment> response = iamportClient.onetimePayment(onetimePaymentData);
             Payment payment = response.getResponse();
 
+            if(payment == null) {
+              throw new IllegalArgumentException("결제 실패: " + response.getMessage());
+            }
+
             PaymentResponseDto responseDto = PaymentResponseDto.toDto(payment);
             // 결제 기록 저장
             paymentRepository.save(responseDto.toEntity());
