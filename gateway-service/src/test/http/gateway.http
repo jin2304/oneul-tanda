@@ -19,15 +19,20 @@ Content-Type: application/json
   "password": "12345678a*"
 }
 
+> {%
+    // 로그인 응답에서 access_token 값을 추출해서 `access_token` 변수에 저장
+    client.global.set("access_token", response.headers.valueOf("Authorization"));
+%}
+
 ### 유저 조회(개인)
 GET http://localhost:19091/api/v1/users/me
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJ0b2tlblZlcnNpb24iOjEsImlkIjoiYjNlNDg0OWYtNjllOC00MzU0LWIxNjYtNTUyZTA1ZWM4MWEzIiwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDUyMDQxMDcsImV4cCI6MTc0NTIwNTkwN30.9fZp38aeYgZcXvW8BqKA30Nx40Al__M6jw6gsg3Ermo
+Authorization: Bearer {{access_token}}
 
 ### 유저 정보 수정
 PUT http://localhost:19091/api/v1/users/me
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJ0b2tlblZlcnNpb24iOjEsImlkIjoiYjNlNDg0OWYtNjllOC00MzU0LWIxNjYtNTUyZTA1ZWM4MWEzIiwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDUyMDQxMDcsImV4cCI6MTc0NTIwNTkwN30.9fZp38aeYgZcXvW8BqKA30Nx40Al__M6jw6gsg3Ermo
+Authorization: Bearer {{access_token}}
 
 {
   "nickname": "테스터",
@@ -38,7 +43,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTV
 ### 유저 암호 수정
 PUT http://localhost:19091/api/v1/users/password
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJ0b2tlblZlcnNpb24iOjEsImlkIjoiYjNlNDg0OWYtNjllOC00MzU0LWIxNjYtNTUyZTA1ZWM4MWEzIiwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDUyMDQxMDcsImV4cCI6MTc0NTIwNTkwN30.9fZp38aeYgZcXvW8BqKA30Nx40Al__M6jw6gsg3Ermo
+Authorization: BBearer {{access_token}}
 
 {
   "currentPassword": "12345678a*",
@@ -48,7 +53,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTV
 ### 유저 탈퇴 todo: 추후 feignclient grpc를 통해 수정 작업 진행
 DELETE http://localhost:19091/api/v1/users/me
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImFhZGFlYjFlLTdhNmUtNDVjZC1hZTgzLWU1YjY2NTBjZWYyNCIsInRva2VuVmVyc2lvbiI6MSwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDQ5NzA4MDQsImV4cCI6MTc0NDk3MjYwNH0.Ox4FPo5JST6nGttFVkklweWUE3NddZen6YHKAl_Z_Ao
+Authorization: Bearer {{access_token}}
 
 {
   "password": "12345678a"
@@ -57,19 +62,19 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTV
 ### 유저 조회 username기반
 GET http://localhost:19091/api/v1/users/admin/tester
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImFhZGFlYjFlLTdhNmUtNDVjZC1hZTgzLWU1YjY2NTBjZWYyNCIsInRva2VuVmVyc2lvbiI6MSwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDQ5NzA4MDQsImV4cCI6MTc0NDk3MjYwNH0.Ox4FPo5JST6nGttFVkklweWUE3NddZen6YHKAl_Z_Ao
+Authorization: Bearer {{access_token}}
 
 ### 유저 권한 상승 username기반
 PUT http://localhost:19091/api/v1/users/admin/tester
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpZCI6ImFhZGFlYjFlLTdhNmUtNDVjZC1hZTgzLWU1YjY2NTBjZWYyNCIsInRva2VuVmVyc2lvbiI6MSwiaXNzIjoib25ldWwtdGFuZGEiLCJpYXQiOjE3NDQ5NzA4MDQsImV4cCI6MTc0NDk3MjYwNH0.Ox4FPo5JST6nGttFVkklweWUE3NddZen6YHKAl_Z_Ao
+Authorization: Bearer {{access_token}}
 
 {
   "role": "MANAGER"
 }
 
 ### 유저 조회 userId기반
-GET http://localhost:19091/api/v1/users/43392dc4-3848-426d-bdfa-99946b3bedbb
+GET http://localhost:19091/internal/v1/users/09a6b989-86e0-4244-a120-683aef98a599
 Content-Type: application/json
 
 

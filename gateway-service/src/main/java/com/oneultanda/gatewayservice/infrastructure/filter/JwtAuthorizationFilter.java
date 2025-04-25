@@ -7,14 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -31,9 +30,14 @@ public class JwtAuthorizationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().toString();
+        HttpMethod method = exchange.getRequest().getMethod();
 
         //토큰 없이 통과
-        if (path.startsWith("/api/v1/users/signup") || path.startsWith("/api/v1/users/login")) {
+        if (path.startsWith("/api/v1/users/signup") && method.equals(HttpMethod.POST)
+                || path.startsWith("/api/v1/users/login") && method.equals(HttpMethod.POST)
+                || path.startsWith("/api/v1/flights") && method.equals(HttpMethod.GET)
+                || path.startsWith("/api/v1/amadeus/flights/fetch-and-save") && method.equals(HttpMethod.POST)
+        ) {
             log.info("토큰없이 통과");
             return chain.filter(exchange);
         }
@@ -63,7 +67,6 @@ public class JwtAuthorizationFilter implements GlobalFilter, Ordered {
                 .build();
 
         log.info("토큰 검즘확인: " + username);
-        log.info(userId.toString());
 
         return chain.filter(mutatedExchange);
     }
