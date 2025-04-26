@@ -106,26 +106,10 @@ public class Reservation extends BaseTimeEntity {
     }
 
 
-    /**
-     * 예약 확정
-     */
-    public void confirmReservation() {
-        this.status = ReservationStatus.RESERVED;
-    }
 
 
 
-
-    /**
-     * 예약 취소
-     */
-    public void cancel() {
-        validateCancelable();
-        this.status = ReservationStatus.CANCELED;
-    }
-
-
-
+    // === 검증 메서드 === //
     // 취소 가능 검증
     private void validateCancelable() {
         LocalDateTime now = LocalDateTime.now();
@@ -145,6 +129,8 @@ public class Reservation extends BaseTimeEntity {
          }
     }
 
+
+    // 예약 생성 후 24시간 이내 여부 확인
     public boolean isCreatedWithin24Hours(LocalDateTime now) {
         // 예약 임시 생성 시간 (createdAt) 기준으로 24시간 이내에만 취소 가능
         return this.getCreatedAt().isAfter(now.minusHours(24));
@@ -152,6 +138,7 @@ public class Reservation extends BaseTimeEntity {
         //return this.getCreatedAt().isAfter(now.minusMinutes(1));
     }
 
+    // 항공편 출발 72시간 이상 남았는지 여부 확인
     private boolean isDepartureAfter72Hours(LocalDateTime now) {
         // 항공편 출발 시간 (departureDate) 기준으로 72시간 이후에만 취소 가능
         return ticketList.stream()
@@ -159,25 +146,43 @@ public class Reservation extends BaseTimeEntity {
                 .allMatch(departureDate -> departureDate.isAfter(now.plusHours(72)));
     }
 
-
+    // 결제 가능 여부 확인
     public boolean isPayable() {
         return this.status == ReservationStatus.PENDING ||
                this.status == ReservationStatus.PASSENGER_INFO_ENTERED ||
                this.status == ReservationStatus.PAYMENT_FAILED;
     }
 
-
+    // 탑승객 정보 입력 가능 여부 확인
     public boolean isPassengerInfoInputPossible() {
         return this.status == ReservationStatus.PENDING;
     }
 
 
-    public void completePaymentFailure() {
-        this.status = ReservationStatus.PAYMENT_FAILED;
+
+
+    // === 상태 변경 메서드 === //
+    //탑승객 정보 입력 완료 상태로 변경
+    public void completePassengerInfo() {
+        this.status = ReservationStatus.PASSENGER_INFO_ENTERED;
     }
 
 
-    public void completePassengerInfo() {
-        this.status = ReservationStatus.PASSENGER_INFO_ENTERED;
+    // 예약 확정 상태로 변경
+    public void confirmReservation() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
+
+    // 예약 취소 상태로 변경
+    public void cancel() {
+        validateCancelable();
+        this.status = ReservationStatus.CANCELED;
+    }
+
+
+    // 결제 실패 상태로 변경
+    public void completePaymentFailure() {
+        this.status = ReservationStatus.PAYMENT_FAILED;
     }
 }
