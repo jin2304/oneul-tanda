@@ -147,4 +147,26 @@ public class Reservation extends BaseTimeEntity {
                 .map(Ticket::getDepartureDate)
                 .allMatch(departureDate -> departureDate.isAfter(now.plusHours(72)));
     }
+
+
+    public boolean isPayable() {
+        return this.status == ReservationStatus.PENDING ||
+               this.status == ReservationStatus.PASSENGER_INFO_ENTERED ||
+               this.status == ReservationStatus.PAYMENT_FAILED;
+    }
+
+
+    public boolean isPassengerInfoInputPossible() {
+        return this.status == ReservationStatus.PENDING;
+    }
+
+
+    public void completePaymentFailure() {
+        this.status = ReservationStatus.PAYMENT_FAILED;
+    }
+
+
+    public void completePassengerInfo() {
+        this.status = ReservationStatus.PASSENGER_INFO_ENTERED;
+    }
 }

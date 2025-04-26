@@ -3,6 +3,8 @@ package com.oneul_tanda.reservation_service.reservation.application.service;
 import com.oneul_tanda.reservation_service.common.exception.CustomException;
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
 import com.oneul_tanda.reservation_service.reservation.application.client.FlightClient;
+import com.oneul_tanda.reservation_service.reservation.application.client.PaymentClient;
+import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.CreatePaymentInfo;
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateReservationCommand;
@@ -36,6 +38,8 @@ public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final FlightClient flightClient;
+    private final PaymentClient paymentClient;
+
 
     /**
      * 예약 생성 (동기 처리)
@@ -114,23 +118,34 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     /**
-     * 예약 확정 (예약 수정)
+     * 예약 확정 (1.탑승객 정보 입력 + 2.결제 -> 예약 확정)
      */
     @Override
     public ConfirmReservationResponseDto confirmReservation(ConfirmReservationCommand command) {
-        // 1. 예약 조회
+        // 예약 조회
         Reservation reservation = getReservationOrThrow(command.reservationId());
 
-        // 2. 티켓 확정 (티켓에 탑승객 정보 매핑 -> 티켓 확정)
-        confirmTickets(command, reservation);
+        // 1. 탑승객 정보 입력 (티켓에 탑승객 정보 매핑)
+        if (reservation.isPassengerInfoInputPossible()) {
+            registerPassengerInfo(command, reservation);
+            reservation.completePassengerInfo();
+            reservationRepository.save(reservation);
+        }
 
-        // 3. 예약 확정 (티켓 확정 -> 에약 확정)
+        // 2. 결제 요청
+        CreatePaymentInfo paymentInfo = requestPayment(reservation);
+
+        // 결제 실패 처리
+        if (paymentInfo == null || !paymentInfo.status().equalsIgnoreCase("PAID")) {
+            reservation.completePaymentFailure();
+            reservationRepository.save(reservation);
+            throw new CustomException(ReservationErrorCode.PAYMENT_FAILED);
+        }
+
+        // 결제 성공 -> 예약 확정 처리
         reservation.confirmReservation();
-
-        // 4. 변경사항 저장 (티켓 및 탑승객 포함)
         reservationRepository.save(reservation);
 
-        // 5. 응답 반환
         return ConfirmReservationResponseDto.from(reservation);
     }
 
@@ -217,14 +232,14 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
 
-    // 티켓 확정
-    private void confirmTickets(ConfirmReservationCommand command, Reservation reservation) {
+    // 탑승객 정보 입력(티켓 확정)
+    private void registerPassengerInfo(ConfirmReservationCommand command, Reservation reservation) {
 
         for (ConfirmReservationCommand.ConfirmTicketCommand ticketCommand : command.tickets()) {
-            // 2-1. 예약 내에서 특정 티켓 조회 및 존재 여부 검증
+            // 예약 내에서 특정 티켓 조회 및 존재 여부 검증
             Ticket ticket = validateAndGetTicket(reservation, ticketCommand);
 
-            // 2-2. 탑승객 생성
+            // 탑승객 생성
             Passenger passenger = Passenger.createPassenger(
                     command.userId(),
                     ticketCommand.passenger().name(),
@@ -233,8 +248,30 @@ public class ReservationServiceImpl implements ReservationService {
                     ticketCommand.passenger().passportNumber()
             );
 
-            // 2-3. 티켓에 탑승객 정보 매핑
+            // 티켓에 탑승객 정보 매핑
             ticket.confirmTicket(passenger);
+        }
+    }
+
+
+    // 결제 요청
+    public CreatePaymentInfo requestPayment(Reservation reservation) {
+
+        // 결제 가능 상태 검증
+        if (!reservation.isPayable()) {
+            throw new CustomException(ReservationErrorCode.PAYMENT_NOT_ALLOWED);
+        }
+
+        // 결제 요청
+        try {
+            return paymentClient.confirmPayment(
+                    reservation.getId(),
+                    reservation.getTotalPrice()
+            );
+
+        } catch (Exception e) {
+            log.error("결제 예외 발생 - ReservationId: {}", reservation.getId(), e);
+            return null;
         }
     }
 
