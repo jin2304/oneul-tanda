@@ -1,5 +1,7 @@
 package com.sparta.paymentservice.domain.repository;
 
-public interface PaymentRepository {
+import com.sparta.paymentservice.domain.entity.Payments;
 
+public interface PaymentRepository {
+    Payments save(Payments payments);
 }
