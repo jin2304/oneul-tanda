@@ -71,7 +71,7 @@ public class Reservation extends BaseTimeEntity {
         Reservation reservation = Reservation.builder()
                 .userId(userId)
                 .ticketList(new ArrayList<>())
-                .totalPrice(BigDecimal.ZERO) // 임시 0원 설정
+                .totalPrice(BigDecimal.ZERO)
                 .status(ReservationStatus.PENDING)
                 .build();
 
@@ -79,6 +79,9 @@ public class Reservation extends BaseTimeEntity {
         for (Ticket ticket : ticketList) {
             reservation.addTicket(ticket);
         }
+
+        // 총 가격 계산
+        reservation.calculateTotalPrice();
 
         reservation.registerCreatedBy(userId);
 
@@ -93,6 +96,14 @@ public class Reservation extends BaseTimeEntity {
     }
 
 
+    // 총 가격 계산
+    public void calculateTotalPrice() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (Ticket ticket : ticketList) {
+            total = total.add(ticket.getUnitPrice());
+        }
+        this.totalPrice = total;
+    }
 
 
     /**
