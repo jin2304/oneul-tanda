@@ -1,6 +1,5 @@
 package com.oneultanda.userservice.infrastructure.repository;
 
-import com.oneultanda.userservice.domain.model.User;
 import com.oneultanda.userservice.infrastructure.entity.UserJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 

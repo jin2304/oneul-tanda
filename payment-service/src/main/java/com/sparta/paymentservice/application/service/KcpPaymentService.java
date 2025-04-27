@@ -9,32 +9,27 @@ import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import com.sparta.paymentservice.application.dto.PaymentRequestDto;
 import com.sparta.paymentservice.application.dto.PaymentResponseDto;
+import com.sparta.paymentservice.domain.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ImPortPaymentService implements PaymentService {
+public class KcpPaymentService implements PaymentService {
     private final IamportClient iamportClient;
+    private final PaymentRepository paymentRepository;
 
     @Override
-    public PaymentResponseDto confirmPayment(PaymentRequestDto request) {
+    public PaymentResponseDto confirmPayment(PaymentRequestDto request, CardInfo card) {
         try {
             // 테스트용 결제 정보 설정
             String merchantUid = request.getReservationId().toString();
-            BigDecimal totalPrice = new BigDecimal(request.getTotalPrice());
-
-            String card_number = "5388-1500-0000-0000";
-            String expiry = "2025-12";
-            String birth = "700101";
-            String pwd_2digit = "11";
-            CardInfo card = new CardInfo(card_number, expiry, birth, pwd_2digit);
+            BigDecimal totalPrice = request.getTotalPrice();
 
             OnetimePaymentData onetimePaymentData = new OnetimePaymentData(merchantUid, totalPrice, card);
             onetimePaymentData.setPg("kcp");
@@ -42,12 +37,14 @@ public class ImPortPaymentService implements PaymentService {
             IamportResponse<Payment> response = iamportClient.onetimePayment(onetimePaymentData);
             Payment payment = response.getResponse();
 
-            return PaymentResponseDto.builder()
-                    .paymentId(payment.getImpUid())
-                    .reservationId(UUID.fromString(payment.getMerchantUid()))
-                    .totalPrice(payment.getAmount().intValue())
-                    .status(payment.getStatus())
-                    .build();
+            if(payment == null) {
+              throw new IllegalArgumentException("결제 실패: " + response.getMessage());
+            }
+
+            PaymentResponseDto responseDto = PaymentResponseDto.toDto(payment);
+            // 결제 기록 저장
+            paymentRepository.save(responseDto.toEntity());
+            return responseDto;
 
         } catch (IamportResponseException | IOException e) {
             throw new RuntimeException("결제 처리 중 오류 발생", e);

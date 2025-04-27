@@ -29,7 +29,7 @@ spring:
 
 
 server:
-  port: 19093
+  port: 19092
 
 eureka:
   client:

@@ -29,7 +29,10 @@ public enum ReservationErrorCode implements ErrorCode {
 
   // 외부 시스템
   FLIGHT_SEAT_NOT_ENOUGH("항공편 잔여 좌석이 부족합니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-  FLIGHT_SEAT_RESTORE_FAILED("항공편 좌석 복원이 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+  FLIGHT_SEAT_RESTORE_FAILED("항공편 좌석 복원이 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
+  PAYMENT_NOT_ALLOWED("결제 가능한 예약 상태가 아닙니다.", HttpStatus.BAD_REQUEST),
+  PAYMENT_FAILED("결제 요청에 실패하였습니다.", HttpStatus.BAD_GATEWAY);
 
 
 

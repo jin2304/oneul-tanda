@@ -2,11 +2,11 @@ package com.oneultanda.userservice.application.service;
 
 import com.oneultanda.userservice.application.dto.comand.*;
 import com.oneultanda.userservice.application.exception.ApplicationErrorCode;
+import com.oneultanda.userservice.common.exception.CustomException;
 import com.oneultanda.userservice.domain.model.Role;
 import com.oneultanda.userservice.domain.model.User;
 import com.oneultanda.userservice.domain.repository.UserRepository;
 import com.oneultanda.userservice.infrastructure.jwt.JwtUtil;
-import com.oneultanda.userservice.common.exception.CustomException;
 import com.oneultanda.userservice.infrastructure.kafka.KafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +42,30 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public Boolean checkUsername(final String username) {
+        try {
+            User user = checkUserFromUsername(username);
+            return true;
+        } catch (CustomException e) {
+            return false;
+        }
+    }
+
+    @Transactional(readOnly = true)
     public String loginUser(LoginUserCommand command) {
-        User user = checkUserFromUsername(command.username());
-        checkPassword(user, command.password());
-        String accessToken = jwtUtil.createAccessToken(user.getUsername(), user.getRole(), user.getId(), user.getTokenVersion());
-        return accessToken;
+        try {
+            User user = checkUserFromUsername(command.username());
+            checkPassword(user, command.password());
+            String accessToken = jwtUtil.createAccessToken(
+                    user.getUsername(),
+                    user.getRole(),
+                    user.getId(),
+                    user.getTokenVersion()
+            );
+            return accessToken;
+        } catch (CustomException e) {
+            throw new CustomException(ApplicationErrorCode.LOGIN_MISMATCH);
+        }
     }
 
     /**
@@ -123,20 +142,20 @@ public class UserService {
     private User checkUser(final UUID userId) {
         return userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() ->
-                new CustomException(ApplicationErrorCode.RESOURCE_NOT_FOUND));
+                new CustomException(ApplicationErrorCode.USER_NOT_FOUND));
     }
 
 
     private void checkPassword(final User user, final String rawPassword) {
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new CustomException(ApplicationErrorCode.INVALID_REQUEST);
+            throw new CustomException(ApplicationErrorCode.PASSWORD_MISMATCH);
         }
     }
 
     private User checkUserFromUsername(final String username) {
         User user = userRepository.findByUsernameAndDeletedAtIsNull(username)
                 .orElseThrow(() ->
-                        new CustomException(ApplicationErrorCode.RESOURCE_NOT_FOUND));
+                        new CustomException(ApplicationErrorCode.USER_NOT_FOUND));
         return user;
     }
 

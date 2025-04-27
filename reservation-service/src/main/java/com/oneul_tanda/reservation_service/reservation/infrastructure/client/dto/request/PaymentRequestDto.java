@@ -1,4 +1,4 @@
-package com.sparta.paymentservice.application.dto;
+package com.oneul_tanda.reservation_service.reservation.infrastructure.client.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,4 +13,11 @@ import java.util.UUID;
 public class PaymentRequestDto {
     private UUID reservationId;
     private BigDecimal totalPrice;
+
+    public static PaymentRequestDto of(UUID reservationId, BigDecimal totalPrice) {
+        return new PaymentRequestDto(
+                reservationId,
+                totalPrice
+        );
+    }
 }

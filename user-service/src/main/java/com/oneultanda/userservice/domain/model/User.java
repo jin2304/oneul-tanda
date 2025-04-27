@@ -1,6 +1,5 @@
 package com.oneultanda.userservice.domain.model;
 
-import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

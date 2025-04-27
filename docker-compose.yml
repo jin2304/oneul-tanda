@@ -53,7 +53,6 @@ services:
       - MYSQL_PASSWORD=${USER_DB_PASSWORD}
     ports:
       - "3309:3306"
-    #todo: 추후에 port 확인, 변경 필요
     volumes:
       - user-mysql-data:/var/lib/mysql
 
@@ -163,6 +162,8 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zookeeper
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -174,6 +175,9 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_READONLY: "false"
+    depends_on:
+      - zookeeper
+
 
   grafana:
     image: grafana/grafana:latest
@@ -186,6 +190,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+    depends_on:
+      - prometheus
 
   prometheus:
     image: prom/prometheus:latest
