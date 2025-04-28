@@ -47,10 +47,10 @@ services:
     container_name: oneultanda-user-db
     restart: always
     environment:
-      - MYSQL_DB_ROOT_PASSWORD=${USER_DB_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${USER_DB_ROOT_PASSWORD}
       - MYSQL_DATABASE=user_db
-      - USER_DB_ID=${USER_DB_ID}
-      - USER_DB_PASSWORD=${USER_DB_PASSWORD}
+      - MYSQL_USER=${USER_DB_ID}
+      - MYSQL_PASSWORD=${USER_DB_PASSWORD}
     ports:
       - "3309:3306"
     volumes:
@@ -79,9 +79,9 @@ services:
     image: postgres:16.3
     container_name: oneultanda-flight-db
     environment:
-      - FLIGHT_DB_ID=${FLIGHT_DB_ID}
       - POSTGRES_DB=flight_db
-      - FLIGHT_DB_PASSWORD=${FLIGHT_DB_PASSWORD}
+      - POSTGRES_USER=${FLIGHT_DB_ID}
+      - POSTGRES_PASSWORD=${FLIGHT_DB_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
@@ -108,10 +108,10 @@ services:
     image: mysql:8.0
     container_name: oneultanda-reservation-db
     environment:
-      - MYSQL_DB_ROOT_PASSWORD=${RESERVATION_DB_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${RESERVATION_DB_ROOT_PASSWORD}
       - MYSQL_DATABASE=reservation_db
-      - RESERVATION_DB_ID=${RESERVATION_DB_ID}
-      - RESERVATION_DB_PASSWORD=${RESERVATION_DB_PASSWORD}
+      - MYSQL_USER=${RESERVATION_DB_ID}
+      - MYSQL_PASSWORD=${RESERVATION_DB_PASSWORD}
     ports:
       - "3307:3306"
     volumes:
@@ -157,12 +157,12 @@ services:
 
   payments-db:
     image: mysql:8.0
-    container_name: oneultanda-reservation-db
+    container_name: oneultanda-payment-db
     environment:
-      - MYSQL_DB_ROOT_PASSWORD=${PAYMENT_DB_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${PAYMENT_DB_ROOT_PASSWORD}
       - MYSQL_DATABASE=payments_db
-      - PAYMENT_DB_USERNAME=${PAYMENT_DB_USERNAME}
-      - PAYMENT_DB_PASSWORD=${PAYMENT_DB_PASSWORD}
+      - MYSQL_USER=${PAYMENT_DB_USERNAME}
+      - MYSQL_PASSWORD=${PAYMENT_DB_PASSWORD}
       - IMPORT_API_KEY=${IMPORT_API_KEY}
       - IMPORT_API_SECRET_KEY=${IMPORT_API_SECRET_KEY}
     ports:

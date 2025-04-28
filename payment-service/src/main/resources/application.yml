@@ -7,8 +7,8 @@ spring:
 
   datasource:
     url: jdbc:mysql://payments-db:3306/payments_db
-    username: ${"PAYMENT_USERNAME"}
-    password: ${"PAYMENT_PASSWORD"}
+    username: ${PAYMENT_DB_USERNAME}
+    password: ${PAYMENT_DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -23,6 +23,6 @@ eureka:
 
 import:
   api:
-    key: ${"IMPORT_API_KEY"}
+    key: ${IMPORT_API_KEY}
     secret:
-      key: ${"IMPORT_API_SECRET_KEY"}
+      key: ${IMPORT_API_SECRET_KEY}
