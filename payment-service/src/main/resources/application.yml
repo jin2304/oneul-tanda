@@ -20,6 +20,7 @@ eureka:
     service-url:
       defaultZone: http://eureka-server:19090/eureka/
     register-with-eureka: true
+    fetch-registry: true
 
 import:
   api:
