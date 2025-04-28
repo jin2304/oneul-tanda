@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
-@FeignClient(name = "flight-service", url = "${flight-service.url}")
+@FeignClient(name = "flight-service")
 public interface FlightFeignClient {
 
     /**
