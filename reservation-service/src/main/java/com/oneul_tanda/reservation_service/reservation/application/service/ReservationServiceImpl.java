@@ -1,7 +1,10 @@
 package com.oneul_tanda.reservation_service.reservation.application.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneul_tanda.reservation_service.common.exception.CustomException;
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
+import com.oneul_tanda.reservation_service.reservation.application.dto.HoldReservationData;
 import com.oneul_tanda.reservation_service.reservation.application.client.FlightClient;
 import com.oneul_tanda.reservation_service.reservation.application.client.PaymentClient;
 import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.CreatePaymentInfo;
@@ -23,9 +26,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +44,8 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
     private final FlightClient flightClient;
     private final PaymentClient paymentClient;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ObjectMapper objectMapper;
 
 
     /**
@@ -68,7 +75,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     /**
-     * 예약 임시 생성
+     * 예약 임시 생성 V1
      */
     @Override
     public CreateHoldReservationResponseDto createHoldReservation(CreateHoldReservationCommand command) {
@@ -86,6 +93,41 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation = Reservation.createHoldReservation(command.userId(), ticketList);
 
         return CreateHoldReservationResponseDto.from(reservationRepository.save(reservation));
+    }
+
+
+
+    /**
+     * 예약 임시 생성 V2
+     */
+    @Override
+    public void createHoldReservationV2(CreateHoldReservationCommand command) {
+
+        UUID flightId = command.flightId();
+        UUID userId = command.userId();
+        int seatCount = command.seatCount();
+
+        String key = "HoldReservation:" + flightId + ":" + userId;
+
+        // 중복 임시 예약 생성 검증
+        validateDuplicateHoldReservation(key);
+
+        // 임시 예약 데이터 생성
+        HoldReservationData holdData = HoldReservationData.of(seatCount, new ArrayList<>());
+
+        // 임시 예약 데이터 Redis에 저장
+        try {
+            String value = objectMapper.writeValueAsString(holdData);
+            redisTemplate.opsForValue().set(key, value, Duration.ofMinutes(5));
+            log.info("임시 예약 생성 완료: {}", key);
+
+        } catch (JsonProcessingException e) {
+            log.error("임시 예약 저장 실패: {}", e.getMessage(), e);
+            // Todo 좌석 복구 or 알림 시스템에 예약 임시 생성 실패 전송
+            throw new CustomException(ReservationErrorCode.REDIS_SAVE_FAILED);
+        }
+
+        // Todo 예약 임시 생성 완료 이벤트 발행 or 알림 시스템에 예약 임시 생성 완료 전송
     }
 
 
@@ -294,6 +336,11 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
 
+
+
+
+
+    // === 검증 메서드 === //
     // 예약 내에서 특정 티켓 조회 및 존재 여부 검증
     private Ticket validateAndGetTicket(Reservation reservation, ConfirmReservationCommand.ConfirmTicketCommand ticketCommand) {
         return reservation.getTicketList().stream()
@@ -320,4 +367,10 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
 
+    // 중복 임시 예약 생성 검증
+    private void validateDuplicateHoldReservation(String key) {
+        if (redisTemplate.hasKey(key)) {
+            throw CustomException.from(ReservationErrorCode.RESERVATION_DUPLICATE);
+        }
+    }
 }

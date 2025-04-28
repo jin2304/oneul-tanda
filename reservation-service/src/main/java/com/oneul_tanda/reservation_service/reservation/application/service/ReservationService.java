@@ -1,6 +1,7 @@
 package com.oneul_tanda.reservation_service.reservation.application.service;
 
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
+import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommandV2;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
@@ -16,6 +17,8 @@ import java.util.UUID;
 public interface ReservationService {
 
     CreateHoldReservationResponseDto createHoldReservation(CreateHoldReservationCommand command);
+
+    void createHoldReservationV2(CreateHoldReservationCommand command);
 
     CreateReservationResponseDto createReservation(CreateReservationCommand command);
 
