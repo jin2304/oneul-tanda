@@ -28,5 +28,7 @@ public interface ReservationService {
 
     ConfirmReservationResponseDto confirmReservation(ConfirmReservationCommand command);
 
+    ConfirmReservationResponseDto confirmReservationV2(ConfirmReservationCommandV2 command);
+
     CancelReservationResponseDto cancelReservation(UUID reservationId);
 }

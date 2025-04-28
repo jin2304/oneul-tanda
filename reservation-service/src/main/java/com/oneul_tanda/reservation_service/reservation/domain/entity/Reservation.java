@@ -58,6 +58,11 @@ public class Reservation extends BaseTimeEntity {
             reservation.addTicket(ticket);
         }
 
+        // 총 가격 계산
+        reservation.calculateTotalPrice();
+
+        reservation.registerCreatedBy(userId);
+
         return reservation;
     }
 

@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneul_tanda.reservation_service.common.exception.CustomException;
 import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
 import com.oneul_tanda.reservation_service.reservation.application.dto.HoldReservationData;
+import com.oneul_tanda.reservation_service.reservation.application.dto.PassengerDto;
 import com.oneul_tanda.reservation_service.reservation.application.client.FlightClient;
 import com.oneul_tanda.reservation_service.reservation.application.client.PaymentClient;
 import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.CreatePaymentInfo;
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
+import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommandV2;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.exception.ReservationErrorCode;
@@ -160,7 +162,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     /**
-     * 예약 확정 (1.탑승객 정보 입력 + 2.결제 -> 예약 확정)
+     * 예약 확정 V1 (1.탑승객 정보 입력 + 2.결제 -> 예약 확정)
      */
     @Override
     public ConfirmReservationResponseDto confirmReservation(ConfirmReservationCommand command) {
@@ -190,6 +192,79 @@ public class ReservationServiceImpl implements ReservationService {
 
         return ConfirmReservationResponseDto.from(reservation);
     }
+
+
+
+
+    /**
+     * 예약 확정 V2 (1.임시 예약 조회 및 검증 -> 2.탑승객 정보 입력 -> 3.예약 생성 -> 4.결제 -> 5.예약 확정)
+     */
+    @Override
+    public ConfirmReservationResponseDto confirmReservationV2(ConfirmReservationCommandV2 command) {
+
+        UUID flightId = command.flightId();
+        UUID userId = command.userId();
+        String key = "HoldReservation:" + flightId + ":" + userId;
+        List<PassengerDto> passengers;
+
+
+        // 1. Redis에서 임시 예약 조회 및 검증
+        HoldReservationData holdData = validateAndGetHoldReservation(key);
+        log.info("임시 예약 조회: {}", holdData);
+
+
+
+        // 2. 탑승객 정보 입력
+        if (command.passengers() != null && !command.passengers().isEmpty()) {
+            // 탑승객 정보가 요청에 있으면 (사용자가 처음 요청할 때)
+            passengers = command.passengers();
+            holdData = HoldReservationData.of(holdData.seatCount(), passengers);
+
+            try {
+                String updatedValue = objectMapper.writeValueAsString(holdData);
+                redisTemplate.opsForValue().set(key, updatedValue, Duration.ofMinutes(5));
+            } catch (JsonProcessingException e) {
+                log.error("Redis 탑승객 정보 업데이트 실패: {}", e.getMessage(), e);
+                throw new CustomException(ReservationErrorCode.REDIS_SAVE_FAILED);
+            }
+
+
+        } else {
+            // 탑승객 정보가 요청에 없으면 (결제 실패 후, 재시도할 때 -> Redis에 있는 탑승객 정보 사용)
+            if (holdData.passengers() == null || holdData.passengers().isEmpty()) {
+                throw new CustomException(ReservationErrorCode.PASSENGERS_NOT_FOUND);
+            }
+            passengers = holdData.passengers();
+        }
+
+
+
+        // 3. 예약 생성
+        GetFlightInfo flightInfo = flightClient.getFlight(flightId);
+        List<Ticket> ticketList = createTicketsFromHoldData(userId, flightInfo, passengers);
+        Reservation reservation = Reservation.createReservation(userId, ticketList);
+
+
+
+        // 4. 결제 요청
+        CreatePaymentInfo paymentInfo = requestPayment(reservation);
+        if (paymentInfo == null || !"PAID".equalsIgnoreCase(paymentInfo.status())) {
+            throw new CustomException(ReservationErrorCode.PAYMENT_FAILED);
+        }
+
+
+
+        // 5. 결제 성공 -> 예약 확정
+        reservation.confirmReservation();
+        reservationRepository.save(reservation);
+
+        // Redis 키 삭제
+        redisTemplate.delete(key);
+
+        return ConfirmReservationResponseDto.from(reservation);
+    }
+
+
 
 
 
@@ -250,6 +325,35 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         return ticketList;
+    }
+
+    // userId, flightInfo, Redis passengers 기반 티켓 리스트 생성
+    private List<Ticket> createTicketsFromHoldData(UUID userId, GetFlightInfo flightInfo, List<PassengerDto> passengers) {
+
+        List<Ticket> tickets = new ArrayList<>();
+
+        for (PassengerDto p : passengers) {
+            Passenger passenger = Passenger.createPassenger(
+                    userId,
+                    p.name(),
+                    p.birth(),
+                    p.gender(),
+                    p.passportNumber()
+            );
+
+            Ticket ticket = Ticket.createTicket(
+                    passenger,
+                    flightInfo.id(),
+                    userId,
+                    SeatClass.ECONOMY,
+                    flightInfo.price(),
+                    flightInfo.departureDate(),
+                    flightInfo.arrivalDate()
+            );
+
+            tickets.add(ticket);
+        }
+        return tickets;
     }
 
 
@@ -373,4 +477,23 @@ public class ReservationServiceImpl implements ReservationService {
             throw CustomException.from(ReservationErrorCode.RESERVATION_DUPLICATE);
         }
     }
+
+
+    // Redis에서 임시 예약 조회 및 검증
+    private HoldReservationData validateAndGetHoldReservation(String key) {
+
+        String value = redisTemplate.opsForValue().get(key);
+        if (value == null) {
+            throw new CustomException(ReservationErrorCode.HOLD_RESERVATION_EXPIRED);
+        }
+
+        try {
+            return objectMapper.readValue(value, HoldReservationData.class);
+        } catch (JsonProcessingException e) {
+            log.error("Redis 데이터 역직렬화 실패: {}", e.getMessage(), e);
+            throw new CustomException(ReservationErrorCode.REDIS_LOAD_FAILED);
+        }
+    }
+
+
 }
