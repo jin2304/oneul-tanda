@@ -20,7 +20,11 @@ public class Payments {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID paymentId;
 
+    @Column(nullable = false)
     private UUID reservationId;
+
+    @Column(nullable = false)
+    private String merchantId;
 
     @Column(nullable = false)
     private BigDecimal totalPrice;
@@ -28,11 +32,16 @@ public class Payments {
     @Column(nullable = false)
     private String status;
 
-    public static Payments create(UUID reservationId, BigDecimal totalPrice, String status) {
+    public static Payments create(UUID reservationId, String merchantId, BigDecimal totalPrice, String status) {
         return Payments.builder()
                 .reservationId(reservationId)
+                .merchantId(merchantId)
                 .totalPrice(totalPrice)
                 .status(status)
                 .build();
+    }
+
+    public void updateStatus(String status) {
+        this.status = status;
     }
 }
