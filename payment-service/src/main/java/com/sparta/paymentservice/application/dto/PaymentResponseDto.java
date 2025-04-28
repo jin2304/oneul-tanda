@@ -20,10 +20,10 @@ public class PaymentResponseDto {
     private BigDecimal totalPrice;
     private String status;
 
-    public static PaymentResponseDto toDto(Payment payment) {
+    public static PaymentResponseDto toDto(Payment payment, UUID reservationId) {
         return PaymentResponseDto.builder()
                 .paymentId(payment.getImpUid())
-                .reservationId(UUID.fromString(payment.getMerchantUid()))
+                .reservationId(reservationId)
                 .totalPrice(payment.getAmount())
                 .status(payment.getStatus())
                 .build();
