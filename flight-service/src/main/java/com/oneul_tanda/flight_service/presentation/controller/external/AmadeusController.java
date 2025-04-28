@@ -1,4 +1,4 @@
-package com.oneul_tanda.flight_service.presentation.controller;
+package com.oneul_tanda.flight_service.presentation.controller.external;
 
 import com.amadeus.resources.Location;
 import com.oneul_tanda.flight_service.application.service.airline.AirlineExternalService;
@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,61 +39,44 @@ public class AmadeusController {
     @GetMapping("/airports/live-search")
     public ResponseEntity<List<AirportSearchResponse>> searchAirports(
             @RequestParam String keyword,
-            @RequestHeader ("X-User-Role") String userRole
+            @RequestHeader("X-User-Role") String userRole
     ) {
-        try {
-            Location[] locations = airportExternalService.searchAirports(keyword, userRole);
-            List<AirportSearchResponse> response = Arrays.stream(locations)
-                    .map(AirportSearchResponse::from)
-                    .toList();
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("Error while searching airports", e);  // 예외 로깅 추가
-            return ResponseEntity.internalServerError().build();  // 서버 오류 상태 코드 반환
-        }
+        Location[] locations = airportExternalService.searchAirports(keyword, userRole);
+        List<AirportSearchResponse> response = Arrays.stream(locations)
+                .map(AirportSearchResponse::from)
+                .toList();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     // 실시간 공항 정보 조회 및 DB 저장용
     @PostMapping("/airports/fetch-and-save")
-    public ResponseEntity<List<AirportResponse>> searchAndSaveAirports(
+    public ResponseEntity<List<AirportResponse>> fetchAndSaveAirports(
             @RequestParam String keyword,
-            @RequestHeader ("X-User-Role") String userRole
+            @RequestHeader("X-User-Role") String userRole
     ) {
-        try {
-            return ResponseEntity.ok(airportExternalService.searchAndSaveAirports(keyword, userRole));
-        } catch (Exception e) {
-            log.error("Error fetching and saving airports: {}", e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(airportExternalService.fetchAndSaveAirports(keyword, userRole));
     }
+
 
     // 실시간 항공사 정보 조회용
     @GetMapping("/airlines/live-search")
     public ResponseEntity<List<AirlineSearchResponse>> searchAirlines(
             @RequestParam String keyword,
-            @RequestHeader ("X-User-Role") String userRole
+            @RequestHeader("X-User-Role") String userRole
     ) {
-        try {
-            List<AirlineSearchResponse> airlineResponses = airlineExternalService.searchAirlines(keyword, userRole);
-            return ResponseEntity.ok(airlineResponses);
-        } catch (Exception e) {
-            log.error("Error while fetching airlines", e);
-            return ResponseEntity.internalServerError().build();
-        }
+        List<AirlineSearchResponse> airlineResponses = airlineExternalService.searchAirlines(keyword, userRole);
+        return ResponseEntity.status(HttpStatus.OK).body(airlineResponses);
     }
 
     // 실시간 항공사 정보 조회 및 DB 저장용
     @PostMapping("/airlines/fetch-and-save")
-    public ResponseEntity<List<AirlineResponse>> searchAndSaveAirlines(
+    public ResponseEntity<List<AirlineResponse>> fetchAndSaveAirlines(
             @RequestParam String keyword,
-            @RequestHeader ("X-User-Role") String userRole
+            @RequestHeader("X-User-Role") String userRole
     ) {
-        try {
-            return ResponseEntity.ok(airlineExternalService.searchAndSaveAirlines(keyword, userRole));
-        } catch (Exception e) {
-            log.error("Error fetching and saving airlines: {}", e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
+        List<AirlineResponse> airlineResponses = airlineExternalService.fetchAndSaveAirlines(keyword, userRole);
+        return ResponseEntity.status(HttpStatus.OK).body(airlineResponses);
     }
 
     // 실시간 항공편 정보 조회용
@@ -102,33 +86,23 @@ public class AmadeusController {
             @RequestParam String arrivalAirportCode,
             @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime departureDate,
             @RequestParam Integer requiredSeats,
-            @RequestHeader ("X-User-Role") String userRole
+            @RequestHeader("X-User-Role") String userRole
     ) {
-        try {
-            List<FlightResponse> flightResponses = flightExternalService.searchFlights(
-                    departureAirportCode, arrivalAirportCode, departureDate, requiredSeats, userRole);
-            return ResponseEntity.ok(flightResponses);
-        } catch (Exception e) {
-            log.error("Error while searching flights", e);
-            return ResponseEntity.internalServerError().build();
-        }
+        List<FlightResponse> flightResponses = flightExternalService.searchFlights(
+                departureAirportCode, arrivalAirportCode, departureDate, requiredSeats, userRole);
+        return ResponseEntity.status(HttpStatus.OK).body(flightResponses);
     }
 
     // 실시간 항공편 정보 조회 및 DB 저장용
     @PostMapping("/flights/fetch-and-save")
-    public ResponseEntity<List<FlightResponse>> searchAndSaveFlights(
+    public ResponseEntity<List<FlightResponse>> fetchAndSaveFlights(
             @RequestParam String departureAirportCode,
             @RequestParam String arrivalAirportCode,
             @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime departureDate,
             @RequestParam Integer requiredSeats
     ) {
-        try {
-            List<FlightResponse> response = flightExternalService.searchAndSaveFlights(
-                    departureAirportCode, arrivalAirportCode, departureDate, requiredSeats);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("Error while searching and saving flights", e);
-            return ResponseEntity.internalServerError().build();
-        }
+        List<FlightResponse> response = flightExternalService.fetchAndSaveFlights(
+                departureAirportCode, arrivalAirportCode, departureDate, requiredSeats);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

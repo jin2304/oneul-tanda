@@ -4,12 +4,15 @@ import com.amadeus.Amadeus;
 import com.amadeus.Params;
 import com.amadeus.resources.Location;
 import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
+import com.oneul_tanda.flight_service.domain.exception.common.GlobalException;
+import com.oneul_tanda.flight_service.domain.exception.common.ErrorMessage;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepository;
 import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -21,45 +24,54 @@ public class AirportExternalService {
     private final AirportRepository airportRepository;
 
     // 실시간 공항 정보 조회
-    public Location[] searchAirports(String keyword, String userRole) throws Exception {
+    public Location[] searchAirports(String keyword, String userRole) {
         validateUserRole(userRole);
 
-        return amadeus.referenceData.locations.get(
-                Params.with("subType", "AIRPORT")
-                        .and("keyword", keyword)
-                        .and("page[limit]", "10")
-                        .and("sort", "analytics.travelers.score"));
+        try {
+            return amadeus.referenceData.locations.get(
+                    Params.with("subType", "AIRPORT")
+                            .and("keyword", keyword)
+                            .and("page[limit]", "10")
+                            .and("sort", "analytics.travelers.score"));
+        } catch (Exception e) {
+            log.error("Error while searching airports: {}", e.getMessage());
+            throw new GlobalException(HttpStatus.BAD_GATEWAY, ErrorMessage.EXTERNAL_API_ERROR);
+        }
     }
 
     // 실시간 공항 정보 조회 및 DB 저장
-    public List<AirportResponse> searchAndSaveAirports(String keyword, String userRole) throws Exception {
+    public List<AirportResponse> fetchAndSaveAirports(String keyword, String userRole) {
         validateUserRole(userRole);
 
-        Location[] locations = amadeus.referenceData.locations
-                .get(Params.with("keyword", keyword).and("subType", "AIRPORT"));
+        try {
+            Location[] locations = amadeus.referenceData.locations
+                    .get(Params.with("keyword", keyword).and("subType", "AIRPORT"));
 
-        return Arrays.stream(locations)
-                .map(location -> {
-                    String code = location.getIataCode();
+            return Arrays.stream(locations)
+                    .map(location -> {
+                        String code = location.getIataCode();
 
-                    // 중복된 공항은 저장하지 않음
-                    AirportEntity airport = airportRepository.findByCode(code).orElseGet(() -> {
-                        AirportEntity newAirport = AirportEntity.from(
-                                code,
-                                location.getName(),
-                                location.getAddress().getCityName(),
-                                location.getAddress().getCountryName());
-                        return airportRepository.save(newAirport);
-                    });
-
-                    return AirportResponse.from(airport);
-                })
-                .toList();
+                        // 중복된 공항은 저장하지 않음
+                        AirportEntity airport = airportRepository.findByCode(code).orElseGet(() -> {
+                            AirportEntity newAirport = AirportEntity.from(
+                                    code,
+                                    location.getName(),
+                                    location.getAddress().getCityName(),
+                                    location.getAddress().getCountryName());
+                            return airportRepository.save(newAirport);
+                        });
+                        return AirportResponse.from(airport);
+                    })
+                    .toList();
+        } catch (Exception e) {
+            log.error("Error while searching and saving airports: {}", e.getMessage());
+            throw new GlobalException(HttpStatus.BAD_GATEWAY, ErrorMessage.EXTERNAL_API_ERROR);
+        }
     }
 
     private void validateUserRole(String userRole) {
-        if(userRole.equals("CUSTOMER")) {
-            throw new IllegalArgumentException("Access denied");
+        if (userRole.equals("CUSTOMER")) {
+            throw new GlobalException(HttpStatus.FORBIDDEN, ErrorMessage.ACCESS_DENIED);
         }
     }
 }

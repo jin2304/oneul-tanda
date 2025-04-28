@@ -2,8 +2,6 @@ server:
   port: 19093
 
 spring:
-  profiles:
-    active: local
   application:
     name: payment-service
 
