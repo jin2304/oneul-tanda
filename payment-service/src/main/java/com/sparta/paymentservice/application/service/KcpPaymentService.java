@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -37,7 +36,7 @@ public class KcpPaymentService implements PaymentService {
         try {
             // 테스트용 결제 정보 설정
             UUID reservationId = request.getReservationId();
-            String merchantUid = UUID.randomUUID().toString();
+            String merchantUid = reservationId.toString();
             BigDecimal totalPrice = request.getTotalPrice();
 
             existPayment(reservationId);
@@ -52,16 +51,11 @@ public class KcpPaymentService implements PaymentService {
             }
 
             Payment payment = response.getResponse();
-            PaymentResponseDto responseDto = PaymentResponseDto.toDto(payment, reservationId);
-            Payments payments = Payments.create(
-                    reservationId,
-                    merchantUid,
-                    totalPrice,
-                    responseDto.getStatus());
             // 결제 기록 저장
+            Payments payments = Payments.create(reservationId, totalPrice, payment.getStatus());
             paymentRepository.save(payments);
 
-            return responseDto;
+            return PaymentResponseDto.toDto(payment);
 
         } catch (IamportResponseException e) {
             throw new IamPortException(e.getHttpStatusCode(), "결제 응답 오류: " +  e.getMessage());
@@ -74,35 +68,22 @@ public class KcpPaymentService implements PaymentService {
     @Transactional
     public PaymentResponseDto cancelPayment(UUID reservationId) {
         try {
-            List<Payments> payments = paymentRepository.findAllByReservationId(reservationId);
+            Payments payments = paymentRepository.findByReservationId(reservationId);
 
-            if (payments.isEmpty()) {
+            if (payments == null || !payments.getStatus().equals("paid")) {
                 throw new PaymentException(ErrorCode.PAYMENT_NOT_FOUND);
             }
-            Payments paidPayment = null;
-            for (Payments payment : payments) {
-                if ("paid".equals(payment.getStatus())) {
-                    paidPayment = payment;
-                    break;
-                }
-            }
 
-            if (paidPayment == null) {
-                throw new PaymentException(ErrorCode.PAYMENT_NOT_FOUND_PAID);
-            }
-
-
-            String merchantUid = paidPayment.getMerchantId();
+            String merchantUid = payments.getReservationId().toString();
 
             CancelData cancelData = new CancelData(merchantUid, false);
             cancelData.setReason("사용자 요청에 의한 취소");
             IamportResponse<Payment> response = iamportClient.cancelPaymentByImpUid(cancelData);
             Payment payment = response.getResponse();
-            PaymentResponseDto responseDto = PaymentResponseDto.toDto(payment, reservationId);
 
-            paidPayment.updateStatus(responseDto.getStatus());
+            payments.updateStatus(payment.getStatus());
 
-            return  responseDto;
+            return PaymentResponseDto.toDto(payment);
         }  catch (IamportResponseException e) {
             throw new IamPortException(e.getHttpStatusCode(), "결제 응답 오류: " +  e.getMessage());
         } catch (IOException e) {

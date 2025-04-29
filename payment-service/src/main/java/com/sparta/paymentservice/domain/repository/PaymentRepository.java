@@ -8,5 +8,4 @@ import java.util.UUID;
 public interface PaymentRepository {
     Payments save(Payments payments);
     Payments findByReservationId(UUID reservationId);
-    List<Payments> findAllByReservationId(UUID reservationId);
 }
