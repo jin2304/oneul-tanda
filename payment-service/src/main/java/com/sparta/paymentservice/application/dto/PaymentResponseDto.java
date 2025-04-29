@@ -23,7 +23,7 @@ public class PaymentResponseDto {
     public static PaymentResponseDto toDto(Payment payment) {
         return PaymentResponseDto.builder()
                 .impUid(payment.getImpUid())
-                .reservationId(payment.getMerchantUid())
+                .reservationId(UUID.fromString(payment.getMerchantUid()))
                 .totalPrice(payment.getAmount())
                 .status(payment.getStatus())
                 .build();
