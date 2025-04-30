@@ -2,13 +2,13 @@ name: Deploy to aws via SSH
 
 on:
   workflow_run:
-    workflows:
-      - "Build and Push Docker Images"
-    types:
-      - completed
-#  push:
-#    branches:
-#    - Ci/#91-cicd-gitaction
+#    workflows:
+#      - "Build and Push Docker Images"
+#    types:
+#      - completed
+  push:
+    branches:
+    - Ci/#91-cicd-gitaction
 
 jobs:
   deploy:

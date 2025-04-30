@@ -3,7 +3,7 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - Ci/#91-cicd-gitaction
+#      - Ci/#91-cicd-gitaction
       - main
       # todo: 추후 main으로 수정할 것
 
