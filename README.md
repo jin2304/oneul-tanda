@@ -60,15 +60,15 @@ API 명세서 ☞ [여기로](https://www.notion.so/teamsparta/API-1cb2dc3ef5148
 
 
 ## Trouble Shooting
-Trouble Shooting 1 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/1.-대기열-선점-중-과도한-항공편-조회-발생-및-캐시를-통한-DB-부하-완화)
+대기열 선점중 과도한 항공편 조회 발생 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/1.-대기열-선점-중-과도한-항공편-조회-발생-및-캐시를-통한-DB-부하-완화)
 
-Trouble Shooting 2 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/2.-사용자-서비스-개발과정에서-dsm을-통한-의존성-체크-후-리팩토링-진행)
+사용자 서비스 개발과정에서 과도한 의존성 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/2.-사용자-서비스-개발과정에서-dsm을-통한-의존성-체크-후-리팩토링-진행)
 
-Trouble Shooting 3 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/3.-MySQL-정적-데이터-삽입시-타입-불일치-오류)
+MySQL 정적 데이터 삽입시 타입 불일치 오류 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/3.-MySQL-정적-데이터-삽입시-타입-불일치-오류)
 
-Trouble Shooting 4 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/4.-Redis-Cache-역직렬화-과정-오류)
+Redis Cache 역직렬화 과정 오류 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/4.-Redis-Cache-역직렬화-과정-오류)
 
-Trouble Shooting 5 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/5.-Kafka-컨슈머-무한-재시도-이슈)
+Kafka consumer 무한 재시도 이슈 ☞[여기로](https://github.com/homeProtector/oneul-tanda/wiki/5.-Kafka-컨슈머-무한-재시도-이슈)
 
 ## Technologies & Tools
 ### Technologies
