@@ -1,9 +1,13 @@
 name: Deploy to OCI via SSH
 
 on:
-  push:
-    branches:
-    - Ci/#91-cicd-gitaction
+  workflow_run:
+    workflows: [ "CI" ]
+    types:
+      - completed
+#  push:
+#    branches:
+#    - Ci/#91-cicd-gitaction
 
 jobs:
   deploy:
