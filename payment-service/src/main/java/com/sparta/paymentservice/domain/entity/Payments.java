@@ -55,8 +55,8 @@ public class Payments {
                 .toLocalDateTime();
     }
 
-    public void setCancelledAt(Date cancelAt) {
-        this.cancelledAt = cancelAt.toInstant()
+    public void setCancelledAt(Date cancelledAt) {
+        this.cancelledAt = cancelledAt.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
     }
