@@ -21,21 +21,19 @@ jobs:
 
       - name: set up .env
         run: |
-          cat <<EOF > .env
-          JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }}
-          USER_DB_ROOT_PASSWORD=${{ env.USER_DB_ROOT_PASSWORD }}
-          USER_DB_ID=${{ env.USER_DB_ID }}
-          USER_DB_PASSWORD=${{ env.USER_DB_PASSWORD }}
-          RESERVATION_DB_ROOT_PASSWORD=${{ env.RESERVATION_DB_ROOT_PASSWORD }}
-          RESERVATION_DB_ID=${{ env.RESERVATION_DB_ID }}
-          RESERVATION_DB_PASSWORD=${{ env.RESERVATION_DB_PASSWORD }}
-          FLIGHT_DB_ID=${{ env.FLIGHT_DB_ID }}
-          FLIGHT_DB_PASSWORD=${{ env.FLIGHT_DB_PASSWORD }}
-          AMADEUS_CLIENT_ID=${{ env.AMADEUS_CLIENT_ID }}
-          AMADEUS_CLIENT_SECRET=${{ env.AMADEUS_CLIENT_SECRET }}
-          GF_SECURITY_ADMIN_USER=${{ env.GF_SECURITY_ADMIN_USER }}
-          GF_SECURITY_ADMIN_PASSWORD=${{ env.GF_SECURITY_ADMIN_PASSWORD }}
-          EOF
+          echo "JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }}" >> .env
+          echo "USER_DB_ROOT_PASSWORD=${{ env.USER_DB_ROOT_PASSWORD }}" >> .env
+          echo "USER_DB_ID=${{ env.USER_DB_ID }}" >> .env
+          echo "USER_DB_PASSWORD=${{ env.USER_DB_PASSWORD }}" >> .env
+          echo "RESERVATION_DB_ROOT_PASSWORD=${{ env.RESERVATION_DB_ROOT_PASSWORD }}" >> .env
+          echo "RESERVATION_DB_ID=${{ env.RESERVATION_DB_ID }}" >> .env
+          echo "RESERVATION_DB_PASSWORD=${{ env.RESERVATION_DB_PASSWORD }}" >> .env
+          echo "FLIGHT_DB_ID=${{ env.FLIGHT_DB_ID }}" >> .env
+          echo "FLIGHT_DB_PASSWORD=${{ env.FLIGHT_DB_PASSWORD }}" >> .env
+          echo "AMADEUS_CLIENT_ID=${{ env.AMADEUS_CLIENT_ID }}" >> .env
+          echo "AMADEUS_CLIENT_SECRET=${{ env.AMADEUS_CLIENT_SECRET }}" >> .env
+          echo "GF_SECURITY_ADMIN_USER=${{ env.GF_SECURITY_ADMIN_USER }}" >> .env
+          echo "GF_SECURITY_ADMIN_PASSWORD=${{ env.GF_SECURITY_ADMIN_PASSWORD }}" >> .env
 
       - name: Set up SSH
         run: |
