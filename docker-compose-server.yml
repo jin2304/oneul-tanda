@@ -37,7 +37,6 @@ services:
   user-db:
     image: mysql:8.0
     container_name: oneultanda-user-db
-    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=${USER_DB_ROOT_PASSWORD}
       - MYSQL_DATABASE=user_db
