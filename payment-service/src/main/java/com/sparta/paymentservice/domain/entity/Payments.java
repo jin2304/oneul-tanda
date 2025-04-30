@@ -35,7 +35,6 @@ public class Payments {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
     private LocalDateTime cancelledAt;
 
     public static Payments create(UUID reservationId, BigDecimal totalPrice, String status) {
