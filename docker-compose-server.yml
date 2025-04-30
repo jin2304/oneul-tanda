@@ -45,7 +45,7 @@ services:
     ports:
       - "3309:3306"
     volumes:
-      - user-mysql-data:/var/lib/mysql
+      - /data/user-mysql-data:/var/lib/mysql
 
   flight-service:
     image: duckori/flight-service:latest
@@ -74,7 +74,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - flight-postgres-data:/var/lib/postgresql/data
+      - /data/flight-postgres-data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
 
   reservation-service:
@@ -102,7 +102,7 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - reservation-mysql-data:/var/lib/mysql
+      - /data/reservation-mysql-data:/var/lib/mysql
 
   queue-service:
     image: duckori/queue-service:latest
@@ -169,7 +169,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - grafana-storage:/var/lib/grafana
+      - /data/grafana-storage:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
       - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
@@ -184,7 +184,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
+      - /data/prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
 
