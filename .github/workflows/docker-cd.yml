@@ -48,11 +48,11 @@ jobs:
           scp ./.env ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/
           scp ./prometheus.yml ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/
 
-#      - name: Run docker compose on server
-#        run: |
-#          ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }} "
-#            cd /home/${{ secrets.SSH_USER }}/app &&
-#            docker compose pull &&
-#            docker compose down &&
-#            docker compose up -d
-#          "
+      - name: Run docker compose on server
+        run: |
+          ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }} "
+            cd /home/${{ secrets.SSH_USER }}/app &&
+            docker compose pull &&
+            docker compose down &&
+            docker compose up -d
+          "
