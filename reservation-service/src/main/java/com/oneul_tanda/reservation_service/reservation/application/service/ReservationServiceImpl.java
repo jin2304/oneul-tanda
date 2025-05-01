@@ -243,7 +243,7 @@ public class ReservationServiceImpl implements ReservationService {
         GetFlightInfo flightInfo = flightClient.getFlight(flightId);
         List<Ticket> ticketList = createTicketsFromHoldData(userId, flightInfo, passengers);
         Reservation reservation = Reservation.createReservation(userId, ticketList);
-
+        reservationRepository.save(reservation);
 
 
         // 4. 결제 요청
@@ -251,7 +251,6 @@ public class ReservationServiceImpl implements ReservationService {
         if (paymentInfo == null || !"PAID".equalsIgnoreCase(paymentInfo.status())) {
             throw new CustomException(ReservationErrorCode.PAYMENT_FAILED);
         }
-
 
 
         // 5. 결제 성공 -> 예약 확정
