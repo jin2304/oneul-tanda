@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ReservationHeldEvent {
         private UUID eventId;
-        private EventStatusEnum status;
+        private String eventType;
         private LocalDateTime reservationTime;
         private Data data;
 
@@ -28,10 +28,10 @@ public class ReservationHeldEvent {
     public static ReservationHeldEvent createReservationEvent(UUID flightId,
                                                               UUID userId,
                                                               Integer seatCount,
-                                                              EventStatusEnum status) {
+                                                              String eventType) {
         return ReservationHeldEvent.builder()
                 .eventId(UUID.randomUUID())
-                .status(status)
+                .eventType(eventType)
                 .reservationTime(LocalDateTime.now())
                 .data(ReservationHeldEvent.Data.builder()
                         .flightId(flightId)

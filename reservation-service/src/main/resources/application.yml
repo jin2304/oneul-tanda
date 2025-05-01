@@ -37,9 +37,13 @@ spring:
   kafka:
     bootstrap-servers: kafka:29092
     consumer:
+      group-id: reservation-service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        allow.auto.create.topics: true
 
 
 ## actuator and prometheus setting

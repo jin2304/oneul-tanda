@@ -52,46 +52,6 @@ Authorization: Bearer {{access_token}}
 ### 예약 서비스 Kafka Consumer: 예약 임시 생성
 
 
-### 예약 단일 조회
-GET http://localhost:19091/api/v1/reservations/9b7f421f-47b0-47f5-aa5c-8f489697a57d
-Content-Type: application/json
-Authorization: Bearer {{access_token}}
-
-
-## 예약 목록 조회
-### 예약 목록 조회 - Default
-GET http://localhost:19091/api/v1/reservations
-Content-Type: application/json
-Authorization: Bearer {{access_token}}
-
-
-### 예약 확정 V1(예약 수정)
-PUT http://localhost:19091/api/v1/reservations/df4aa5d2-2e7b-4728-a5b7-9cbbe1f7d35d/confirm
-Content-Type: application/json
-Authorization: Bearer {{access_token}}
-
-{
-  "tickets": [
-    {
-      "ticketId": "650662ec-d79d-4dfb-8aa6-e90a54f31f13",
-      "passenger": {
-        "name": "홍길동1",
-        "birth": "1990-01-01",
-        "gender": "MALE",
-        "passportNumber": "P12345678"
-      }
-    },
-    {
-      "ticketId": "b66c461c-ef14-4424-a5b6-d4c71d771842",
-      "passenger": {
-        "name": "홍길동",
-        "birth": "1995-06-10",
-        "gender": "FEMALE",
-        "passportNumber": "P87654321"
-      }
-    }
-  ]
-}
 
 
 ### 예약 확정 V2
@@ -126,3 +86,18 @@ Authorization: Bearer {{access_token}}
 {
   "flightId": "57944490-33fb-4bb1-9254-1eae30a1a25c"
 }
+
+
+
+
+### 예약 단일 조회
+GET http://localhost:19091/api/v1/reservations/9b7f421f-47b0-47f5-aa5c-8f489697a57d
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+
+## 예약 목록 조회
+### 예약 목록 조회 - Default
+GET http://localhost:19091/api/v1/reservations
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
