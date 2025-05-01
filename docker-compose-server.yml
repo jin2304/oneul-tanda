@@ -44,9 +44,11 @@ services:
       - MYSQL_PASSWORD=${USER_DB_PASSWORD}
     ports:
       - "3309:3306"
-    command: --tmpdir=/var/tmp
     volumes:
       - user-mysql-data:/var/lib/mysql
+    tmpfs:
+      - /tmp
+
 
   flight-service:
     image: duckori/flight-service:latest
@@ -102,9 +104,11 @@ services:
       - MYSQL_PASSWORD=${RESERVATION_DB_PASSWORD}
     ports:
       - "3307:3306"
-    command: --tmpdir=/var/tmp
     volumes:
       - reservation-mysql-data:/var/lib/mysql
+    tmpfs:
+      - /tmp
+
 
   queue-service:
     image: duckori/queue-service:latest
@@ -152,9 +156,11 @@ services:
       - IMPORT_API_SECRET_KEY=${IMPORT_API_SECRET_KEY}
     ports:
       - "3308:3306"
-    command: --tmpdir=/var/tmp
     volumes:
       - payments-mysql-data:/var/lib/mysql
+    tmpfs:
+      - /tmp
+
 
 
   zookeeper:
