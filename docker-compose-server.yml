@@ -45,7 +45,7 @@ services:
     ports:
       - "3309:3306"
     volumes:
-      - /data/user-mysql-data:/var/lib/mysql
+      - user-mysql-data:/var/lib/mysql
 
   flight-service:
     image: duckori/flight-service:latest
@@ -74,7 +74,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - /data/flight-postgres-data:/var/lib/postgresql/data
+      - flight-postgres-data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
 
   reservation-service:
@@ -102,7 +102,7 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - /data/reservation-mysql-data:/var/lib/mysql
+      - reservation-mysql-data:/var/lib/mysql
 
   queue-service:
     image: duckori/queue-service:latest
@@ -124,6 +124,35 @@ services:
     ports:
       - "6379:6379"
     restart: always
+
+  payment-service:
+    image: duckori/payment-service:latest
+    container_name: oneultanda-payment-service
+    volumes:
+      - ./payment-service:/app/payment-service
+    ports:
+      - "19093:19093"
+    env_file:
+      - .env
+    depends_on:
+      - payments-db
+      - eureka-server
+
+  payments-db:
+    image: mysql:8.0
+    container_name: oneultanda-payment-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${PAYMENT_DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=payments_db
+      - MYSQL_USER=${PAYMENT_DB_USERNAME}
+      - MYSQL_PASSWORD=${PAYMENT_DB_PASSWORD}
+      - IMPORT_API_KEY=${IMPORT_API_KEY}
+      - IMPORT_API_SECRET_KEY=${IMPORT_API_SECRET_KEY}
+    ports:
+      - "3308:3306"
+    volumes:
+      - payments-mysql-data:/var/lib/mysql
+
 
   zookeeper:
     image: wurstmeister/zookeeper:latest
@@ -169,7 +198,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /data/grafana-storage:/var/lib/grafana
+      - grafana-storage:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
       - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
@@ -184,7 +213,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - /data/prometheus-data:/prometheus
+      - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
 
