@@ -53,6 +53,8 @@ public class KcpPaymentService implements PaymentService {
             Payment payment = response.getResponse();
             // 결제 기록 저장
             Payments payments = Payments.create(reservationId, totalPrice, payment.getStatus());
+            payments.setCreatedAt(payment.getPaidAt());
+
             paymentRepository.save(payments);
 
             return PaymentResponseDto.toDto(payment);
@@ -82,6 +84,7 @@ public class KcpPaymentService implements PaymentService {
             Payment payment = response.getResponse();
 
             payments.updateStatus(payment.getStatus());
+            payments.setCancelledAt(payment.getCancelledAt());
 
             return PaymentResponseDto.toDto(payment);
         }  catch (IamportResponseException e) {

@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -29,6 +32,11 @@ public class Payments {
     @Column(nullable = false)
     private String status;
 
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime cancelledAt;
+
     public static Payments create(UUID reservationId, BigDecimal totalPrice, String status) {
         return Payments.builder()
                 .reservationId(reservationId)
@@ -39,5 +47,17 @@ public class Payments {
 
     public void updateStatus(String status) {
         this.status = status;
+    }
+
+    public void setCreatedAt(Date paidAt) {
+        this.createdAt = paidAt.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
+    public void setCancelledAt(Date cancelledAt) {
+        this.cancelledAt = cancelledAt.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 }

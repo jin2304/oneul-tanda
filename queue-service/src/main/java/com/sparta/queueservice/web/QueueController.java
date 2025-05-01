@@ -22,9 +22,7 @@ public class QueueController {
                                      @RequestHeader("X-User-ID") UUID userId) {
 
         QueueResponseDto response = queueService.tryReserve(request, userId);
-        HttpStatus status = response.getStatus() == EventStatusEnum.SUCCESS
-                ? HttpStatus.NO_CONTENT
-                : HttpStatus.CONFLICT;
-        return new ResponseEntity<>(response, status);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
