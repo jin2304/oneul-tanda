@@ -91,6 +91,7 @@ jobs:
           scp ./.env ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/
           scp ./prometheus.yml ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/
           scp -r ./init-scripts ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/
+          scp -r ./grafana ${{ secrets.SSH_USER }}@${{ secrets.INSTANCE_IP }}:/home/ubuntu/app/
 
       - name: Run docker compose on server
         run: |
