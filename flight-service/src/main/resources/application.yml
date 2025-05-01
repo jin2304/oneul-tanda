@@ -8,8 +8,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://flight-db:5432/flight_db
-    username: admin
-    password: 1234
+    username: ${FLIGHT_DB_ID}
+    password: ${FLIGHT_DB_PASSWORD}
 
   jpa:
     hibernate:

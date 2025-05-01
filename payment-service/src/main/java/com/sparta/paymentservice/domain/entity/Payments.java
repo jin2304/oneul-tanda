@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -19,16 +20,24 @@ public class Payments {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID paymentId;
 
+    @Column(nullable = false)
     private UUID reservationId;
 
     @Column(nullable = false)
-    private Integer totalPrice;
+    private BigDecimal totalPrice;
 
+    @Column(nullable = false)
+    private String status;
 
-    public static Payments create(Integer totalPrice, UUID reservationId) {
+    public static Payments create(UUID reservationId, BigDecimal totalPrice, String status) {
         return Payments.builder()
-                .totalPrice(totalPrice)
                 .reservationId(reservationId)
+                .totalPrice(totalPrice)
+                .status(status)
                 .build();
+    }
+
+    public void updateStatus(String status) {
+        this.status = status;
     }
 }

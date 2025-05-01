@@ -1,6 +1,7 @@
 package com.sparta.queueservice.application.service;
 
 import com.sparta.queueservice.application.dto.FlightRequestDto;
+import com.sparta.queueservice.application.dto.QueueResponseDto;
 import com.sparta.queueservice.infrastructure.client.FlightResponse;
 import com.sparta.queueservice.infrastructure.kafka.ProducerService;
 import com.sparta.queueservice.infrastructure.kafka.event.EventStatusEnum;
@@ -38,7 +39,7 @@ public class QueueService {
     }
 
     // 예약 신청시 대기열 진입후 대기열 선점
-    public void tryReserve(FlightRequestDto request, UUID userId) {
+    public QueueResponseDto tryReserve(FlightRequestDto request, UUID userId) {
         // 예약 신청한 flightId 와 좌석 수
         UUID flightId = request.getFlightId();
         Integer seatCount = request.getSeatCount();
@@ -48,8 +49,7 @@ public class QueueService {
         // 중복 예약 체크
         if(existReserve(flightId, userId)) {
             log.info("중복된 항공편 입니다. flightId: {} ", flightId);
-            producerService.sendReserveFailed(flightId, userId, seatCount, EventStatusEnum.DUPLICATE);
-            return;
+            return QueueResponseDto.of(EventStatusEnum.DUPLICATE, "중복된 항공편 입니다.");
         }
 
         setExistReserve(flightId, userId);
@@ -58,10 +58,10 @@ public class QueueService {
         String reserveInfo = userId + ":" + seatCount;
         rankOps.add("ranks:" +  flightId, reserveInfo, score);
 
-        processReserve(flightId);
+       return processReserve(flightId);
     }
 
-    public void processReserve(UUID flightId) {
+    public QueueResponseDto processReserve(UUID flightId) {
         RLock lock = redissonClient.getLock("lock:flight:" + flightId);
 
         boolean isLocked = false;
@@ -69,12 +69,14 @@ public class QueueService {
             isLocked = lock.tryLock(3, 10, TimeUnit.SECONDS);
 
             if (isLocked) {
-                processReserveWithLock(flightId);
+                return processReserveWithLock(flightId);
             } else {
                 log.warn("좌석 선점 락 획득 실패: {}", flightId);
+                return QueueResponseDto.of(EventStatusEnum.FAILED, "좌석 락 획득에 실패했습니다.");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            return QueueResponseDto.of(EventStatusEnum.FAILED, "스레드 인터셉트가 발생했습니다.");
         } finally {
             if (isLocked && lock.isHeldByCurrentThread()) {
                 lock.unlock();
@@ -83,15 +85,15 @@ public class QueueService {
     }
 
     //대기열 진입 후 선점 과정
-    public void processReserveWithLock(UUID flightId) {
+    public QueueResponseDto processReserveWithLock(UUID flightId) {
         String key = "ranks:" +  flightId;
         // flightId를 받아 좌석 수를 조회
         FlightResponse flightResponse = flightClient.getFlight(flightId);
         Integer remainingSeats = flightResponse.getRemainingSeats();
 //        테스트시 동시성 제어를 위한 redis 저장
 //        String remainingSeatsStr = redisTemplate.opsForValue().get("seat:" + flightId);
-        // 값이 없다면, 기본 값인 10을 설정하여 redis 에 저장
-//        int remainingSeats = (remainingSeatsStr != null) ? Integer.parseInt(remainingSeatsStr) : 50;
+////         값이 없다면, 기본 값인 10을 설정하여 redis 에 저장
+//        int remainingSeats = (remainingSeatsStr != null) ? Integer.parseInt(remainingSeatsStr) : 4;
 //        if (remainingSeatsStr == null) {
 //            // 최초 저장 시에 redis 에 값 설정
 //            redisTemplate.opsForValue().set("seat:" + flightId, String.valueOf(remainingSeats));
@@ -101,7 +103,7 @@ public class QueueService {
         // 대기열에 있는 모든 유저 조회
         Set<String> topUsers = rankOps.range(key, 0, -1);
         if (topUsers == null || topUsers.isEmpty()) {
-            return;
+            return QueueResponseDto.of(EventStatusEnum.FAILED, "대기열에 없는 유저 입니다.");
         }
         // 좌석 수가 남아 있을때 대기열 선점 좌석 수가 0이면 실패 메시지를 보낸 후 대기열에서 삭제
         for(String reserveInfo : topUsers) {
@@ -111,7 +113,7 @@ public class QueueService {
 
             if (!isTopUser(userId, flightId)) {
                 log.info("순서가 아닙니다.");
-                return;
+                return QueueResponseDto.of(EventStatusEnum.FAILED, "순서가 아닙니다.");
             }
 
             if(seatCount <= remainingSeats) { // 대기열 선점 성공시 항공편의 좌석 수 차감 후 성공 메세지 전달
@@ -123,18 +125,15 @@ public class QueueService {
                 log.info("대기열 선점에 성공 했습니다. 남은 좌석 수: {}", remainingSeats);
                 rankOps.remove(key, reserveInfo);
                 producerService.sendReserveSuccess(flightId, userId, seatCount, EventStatusEnum.SUCCESS);
-
-            } else { // 대기열 선점 실패서 실패 메세지 전달
-                log.info("대기열 선점에 실패했습니다. 남은 좌석 수: {}", remainingSeats);
-                deleteExistReserve(flightId, userId);
-                rankOps.remove(key, reserveInfo);
-                producerService.sendReserveFailed(flightId, userId, seatCount, EventStatusEnum.FAILED);
-            }
-
-            if(remainingSeats <= 0) {
+                return QueueResponseDto.of(EventStatusEnum.SUCCESS, "대기열 선점에 성공했습니다.");
+            } else {
                 log.info("남은 좌석이 없습니다. 남은 좌석 수: {}", remainingSeats);
+                rankOps.remove(key, reserveInfo);
+                deleteExistReserve(flightId, userId);
+                return QueueResponseDto.of(EventStatusEnum.FAILED, "남은 좌석이 없습니다.");
             }
         }
+        return QueueResponseDto.of(EventStatusEnum.FAILED, "예약 신청에 실패하셨습니다.");
     }
 
     // 중복 유저가 있는지 체크
@@ -147,7 +146,7 @@ public class QueueService {
     private void setExistReserve(UUID flightId, UUID userId) {
         String key = "reserve:" +  flightId + ":" + userId;
         log.info("중복 예약 방지 키: {}", key);
-        redisTemplate.opsForValue().set(key, "1", Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set(key, "1", Duration.ofSeconds(30));
     }
 
     // 대기열 선점 실패시 sortedSet 과 같이 삭제

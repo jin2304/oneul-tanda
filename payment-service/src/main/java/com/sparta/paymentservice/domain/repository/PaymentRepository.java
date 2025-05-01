@@ -1,5 +1,11 @@
 package com.sparta.paymentservice.domain.repository;
 
-public interface PaymentRepository {
+import com.sparta.paymentservice.domain.entity.Payments;
 
+import java.util.List;
+import java.util.UUID;
+
+public interface PaymentRepository {
+    Payments save(Payments payments);
+    Payments findByReservationId(UUID reservationId);
 }

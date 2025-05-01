@@ -1,8 +1,13 @@
 package com.sparta.paymentservice.application.service;
 
+import com.siot.IamportRestClient.request.CardInfo;
 import com.sparta.paymentservice.application.dto.PaymentRequestDto;
 import com.sparta.paymentservice.application.dto.PaymentResponseDto;
 
+import java.util.UUID;
+
 public interface PaymentService {
-    PaymentResponseDto confirmPayment(PaymentRequestDto request);
+    PaymentResponseDto confirmPayment(PaymentRequestDto request, CardInfo card);
+
+    PaymentResponseDto cancelPayment(UUID reservationId);
 }

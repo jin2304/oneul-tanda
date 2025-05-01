@@ -3,6 +3,10 @@ package com.oneul_tanda.flight_service.application.service.airport;
 import com.oneul_tanda.flight_service.application.dtos.airport.CreateAirportCommand;
 import com.oneul_tanda.flight_service.application.dtos.airport.UpdateAirportCommand;
 import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
+import com.oneul_tanda.flight_service.domain.exception.airport.AirportDuplicatedException;
+import com.oneul_tanda.flight_service.domain.exception.airport.AirportNotFoundException;
+import com.oneul_tanda.flight_service.domain.exception.common.GlobalException;
+import com.oneul_tanda.flight_service.domain.exception.common.ErrorMessage;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepository;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepositoryCustom;
 import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
@@ -13,6 +17,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,20 +96,20 @@ public class AirportService {
         airport.updateDeletionInfo(userId);
     }
 
-    private void getAirportByCode(CreateAirportCommand airportCommand) {
-        if (airportRepository.findByCode(airportCommand.getCode()).isPresent()) {
-            throw new IllegalArgumentException("Airport code " + airportCommand.getCode() + " already exists");
-        }
-    }
-
     private AirportEntity getAirportById(UUID airportId) {
         return airportRepository.findById(airportId)
-                .orElseThrow(() -> new IllegalArgumentException("Airport not found"));
+                .orElseThrow(AirportNotFoundException::new);
+    }
+
+    private void getAirportByCode(CreateAirportCommand airportCommand) {
+        if (airportRepository.findByCode(airportCommand.getCode()).isPresent()) {
+            throw new AirportDuplicatedException();
+        }
     }
 
     private void validateUserRole(String userRole) {
         if (userRole.equals("CUSTOMER")) {
-            throw new IllegalArgumentException("Access denied");
+            throw new GlobalException(HttpStatus.FORBIDDEN, ErrorMessage.ACCESS_DENIED);
         }
     }
 }

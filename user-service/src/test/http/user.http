@@ -1,5 +1,5 @@
 ### 유저 생성 - internal
-POST http://localhost:19093/api/v1/users/signup
+POST http://localhost:19092/api/v1/users/signup
 Content-Type: application/json
 
 {
@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ### 로그인
-POST http://localhost:19093/api/v1/users/login
+POST http://localhost:19092/api/v1/users/login
 Content-Type: application/json
 
 {
@@ -27,7 +27,7 @@ X-User-Role: CUSTOMER
 X-User-ID: b3e4849f-69e8-4354-b166-552e05ec81a3
 
 ### 유저 정보 수정
-PUT http://localhost:19093/api/v1/users/me
+PUT http://localhost:19092/api/v1/users/me
 Content-Type: application/json
 X-User-Name: tester
 X-User-Role: CUSTOMER
@@ -52,7 +52,7 @@ X-User-ID: b3e4849f-69e8-4354-b166-552e05ec81a3
 }
 
 ### 유저 탈퇴 todo: 추후 feignclient grpc를 통해 수정 작업 진행
-DELETE http://localhost:19093/api/v1/users/me
+DELETE http://localhost:19092/api/v1/users/me
 Content-Type: application/json
 X-User-Name: tester
 X-User-Role: CUSTOMER
@@ -63,14 +63,14 @@ X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 }
 
 ### 유저 조회 username기반
-GET http://localhost:19093/api/v1/users/admin/tester
+GET http://localhost:19092/api/v1/users/admin/tester
 Content-Type: application/json
 X-User-Name: admin
 X-User-Role: ADMIN
 X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 
 ### 유저 권한 상승 username기반
-PUT http://localhost:19093/api/v1/users/admin/tester
+PUT http://localhost:19092/api/v1/users/admin/tester
 Content-Type: application/json
 X-User-Name: admin
 X-User-Role: ADMIN
@@ -81,7 +81,7 @@ X-User-ID: b862cf8b-46cd-4b24-9d01-08426466692f
 }
 
 ### 유저 조회 userId기반
-GET http://localhost:19093/api/v1/users/4728aa0c-2277-4d1c-89a8-b5b28ec32472
+GET http://localhost:19092/internal/v1/users/09a6b989-86e0-4244-a120-683aef98a599
 Content-Type: application/json
 
 

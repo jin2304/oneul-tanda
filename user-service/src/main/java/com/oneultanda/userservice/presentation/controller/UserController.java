@@ -22,7 +22,7 @@ public class UserController {
     private final UserService userservice;
 
     /**
-     * todo: auth를 통해 암호화 등의 작업을 거친뒤 단순 저장 작업을 여기서 진행
+     * 회원가입
      */
     @PostMapping("/signup")
     public ResponseEntity<Void> registerUser(
@@ -30,6 +30,17 @@ public class UserController {
     ) {
         userservice.registerUser(request.toCommand());
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * 회원가입시 username 중복체크
+     */
+    @GetMapping("/exists")
+    public ResponseEntity<Boolean> checkUsername(
+            @RequestParam String username
+    ) {
+        boolean isUsername= userservice.checkUsername(username);
+        return ResponseEntity.ok(isUsername);
     }
 
     /**
@@ -41,7 +52,7 @@ public class UserController {
     ) {
         String accessToken = userservice.loginUser(request.toCommand());
         return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", accessToken)
                 .build();
     }
 
@@ -67,9 +78,6 @@ public class UserController {
     }
 
     /**
-     * todo: 비밀번호 변경시 로그아웃 처리 필요(blacklist 등록) - auth에서 진행
-     * todo: auth에서 암호화까지 거친뒤 값을 받아옴
-     * todo: 추후 feignclient grpc를 통해 수정 작업 진행
      * todo: 시간 여유나면 email 인증 or email로 변경된 비밀번호 or 비빌번호 변경 링크 보내기 형식
      */
     @PutMapping("/password")
@@ -81,7 +89,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
     /**
-     * todo: 비밀번호 변경과 동일한 과정 필요
+     * 계정 삭제(소프트 딜리트0
      */
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteUser(
@@ -93,9 +101,7 @@ public class UserController {
     }
 
     /**
-     * todo: 관리자 대상 (get, seardh)(username 기반) gateway에서 토큰처리 함에 있어서도 필요함
-     * todo: gateway에서 권한 있는 사람만 사용가능하게 설정 + id값 필요시 feignclient 요청
-     * todo: gateway에서 권한 있는 사람만 사용가능하게 설정 + gateway에서 feignclient 요청시 header에 권한담아서 요청 + 내부에서 권한 검증 진행
+     * admin만 가능한 유저정보 조회
      */
     @GetMapping("/admin/{username}")
     public ResponseEntity<UserResponse> getUserFromUsername(
@@ -107,6 +113,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+
+    /**
+     * username으로 관리자 권한 변경
+     */
     @PutMapping("/admin/{username}")
     public ResponseEntity<Void> updateRole(
             @RequestHeader("X-User-Role") final Role role,
@@ -116,14 +126,4 @@ public class UserController {
         URI location = userservice.updateRole(role, username, request.toCommand());
         return ResponseEntity.ok().location(location).build();
     }
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserResponse> getUserFromUserId(
-            @PathVariable final UUID userId
-    ) {
-        User user = userservice.getUser(userId);
-        UserResponse response = UserResponse.fromUser(user);
-        return ResponseEntity.ok(response);
-    }
-
 }

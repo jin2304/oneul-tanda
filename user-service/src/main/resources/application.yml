@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: jdbc:mysql://oneultanda-user-db:3306/user_db
-    username: admin
-    password: 1234
+    username: ${USER_DB_ID}
+    password: ${USER_DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -29,7 +29,7 @@ spring:
 
 
 server:
-  port: 19093
+  port: 19092
 
 eureka:
   client:

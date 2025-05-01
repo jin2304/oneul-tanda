@@ -6,6 +6,9 @@ import com.amadeus.resources.FlightOfferSearch;
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
 import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
 import com.oneul_tanda.flight_service.domain.entity.FlightEntity;
+import com.oneul_tanda.flight_service.domain.exception.common.GlobalException;
+import com.oneul_tanda.flight_service.domain.exception.common.ErrorMessage;
+import com.oneul_tanda.flight_service.domain.exception.common.InvalidRequestException;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepository;
 import com.oneul_tanda.flight_service.domain.repository.flight.FlightRepository;
@@ -22,6 +25,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -38,42 +42,61 @@ public class FlightExternalService {
     @Cacheable(value = "flightOffers",
             key = "#departureAirportCode + '#' + #arrivalAirportCode + '#' + #departureDate.toLocalDate().toString() + '#' + #requiredSeats")
     public List<FlightResponse> searchFlights(String departureAirportCode, String arrivalAirportCode,
-                                              LocalDateTime departureDate, Integer requiredSeats, String userRole) throws Exception {
+                                              LocalDateTime departureDate, Integer requiredSeats, String userRole
+    ) {
         validateUserRole(userRole);
-        // 과거 날짜 검증
+        // 과거 날짜 검증(검색하고 있는 현재 시점보다 과거일 경우 예외 발생)
         checkDepartureDateInPast(departureDate);
-
+        // 입력값 검증
         validateInputs(departureDate, requiredSeats);
 
-        FlightOfferSearch[] offers = fetchFlightOffers(departureAirportCode, arrivalAirportCode,
-                departureDate.toLocalDate().toString(), requiredSeats);
-        return extractFlightResponses(offers, false);
+        try {
+            FlightOfferSearch[] offers = fetchFlightOffers(departureAirportCode, arrivalAirportCode,
+                    departureDate.toLocalDate().toString(), requiredSeats);
+            return extractFlightResponses(offers, false);
+        } catch (Exception e) {
+            log.error("Error while searching flights: {}", e.getMessage());
+            throw new GlobalException(HttpStatus.BAD_GATEWAY, ErrorMessage.EXTERNAL_API_ERROR);
+        }
     }
 
     @Cacheable(value = "flightOffers",
             key = "#departureAirportCode + '#' + #arrivalAirportCode + '#' + #departureDate.toLocalDate().toString() + '#' + #requiredSeats")
-    public List<FlightResponse> searchAndSaveFlights(String departureAirportCode, String arrivalAirportCode,
-                                                     LocalDateTime departureDate, Integer requiredSeats) throws Exception {
-        // 과거 날짜 검증
+    public List<FlightResponse> fetchAndSaveFlights(
+            String departureAirportCode, String arrivalAirportCode,
+            LocalDateTime departureDate, Integer requiredSeats
+    ) {
+        // 과거 날짜 검증(검색하고 있는 현재 시점보다 과거일 경우 예외 발생)
         checkDepartureDateInPast(departureDate);
-
+        // 입력값 검증
         validateInputs(departureDate, requiredSeats);
 
-        FlightOfferSearch[] offers = fetchFlightOffers(departureAirportCode, arrivalAirportCode,
-                departureDate.toLocalDate().toString(), requiredSeats);
-        return extractFlightResponses(offers, true);
+        try {
+            FlightOfferSearch[] offers = fetchFlightOffers(departureAirportCode, arrivalAirportCode,
+                    departureDate.toLocalDate().toString(), requiredSeats);
+            return extractFlightResponses(offers, true);
+        } catch (Exception e) {
+            log.error("Error while searching and saving flights: {}", e.getMessage());
+            throw new GlobalException(HttpStatus.BAD_GATEWAY, ErrorMessage.EXTERNAL_API_ERROR);
+        }
     }
 
-    private FlightOfferSearch[] fetchFlightOffers(String departureAirportCode, String arrivalAirportCode,
-                                                  String departureDate, Integer requiredSeats) throws Exception {
-
-        return amadeus.shopping.flightOffersSearch.get(
-                Params.with("originLocationCode", departureAirportCode)
-                        .and("destinationLocationCode", arrivalAirportCode)
-                        .and("departureDate", departureDate)
-                        .and("adults", requiredSeats)
-                        .and("travelClass", "ECONOMY")
-                        .and("max", 10));
+    private FlightOfferSearch[] fetchFlightOffers(
+            String departureAirportCode, String arrivalAirportCode,
+            String departureDate, Integer requiredSeats
+    ) {
+        try {
+            return amadeus.shopping.flightOffersSearch.get(
+                    Params.with("originLocationCode", departureAirportCode)
+                            .and("destinationLocationCode", arrivalAirportCode)
+                            .and("departureDate", departureDate)
+                            .and("adults", requiredSeats)
+                            .and("travelClass", "ECONOMY")
+                            .and("max", 10));
+        } catch (Exception e) {
+            log.error("Error while fetching flight offers: {}", e.getMessage());
+            throw new GlobalException(HttpStatus.BAD_GATEWAY, ErrorMessage.EXTERNAL_API_ERROR);
+        }
     }
 
     private List<FlightResponse> extractFlightResponses(
@@ -154,7 +177,7 @@ public class FlightExternalService {
     }
 
     private Optional<FlightEntity> getExistingFlight(String flightNum, LocalDateTime departureTime,
-                                                   LocalDateTime arrivalTime) {
+                                                     LocalDateTime arrivalTime) {
         return flightRepository.findByFlightNumAndDepartureDateAndArrivalDate(
                 flightNum, departureTime, arrivalTime);
     }
@@ -166,33 +189,30 @@ public class FlightExternalService {
 
     private AirportEntity getArrivalAirport(String arrivalAirportCode) {
         return airportRepository.findByCode(arrivalAirportCode)
-                .orElseThrow(
-                        () -> new IllegalArgumentException("Invalid arrival airport code: " + arrivalAirportCode));
+                .orElseThrow(InvalidRequestException::new);
     }
 
     private AirportEntity getDepartureAirport(String departureAirportCode) {
         return airportRepository.findByCode(departureAirportCode)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Invalid departure airport code: " + departureAirportCode));
+                .orElseThrow(InvalidRequestException::new);
     }
 
     private void checkDepartureDateInPast(LocalDateTime departureDate) {
         LocalDateTime now = LocalDateTime.now();
         if (departureDate.toLocalDate().isBefore(now.toLocalDate())) {
-            log.warn("Requested departureDate {} is in the past", departureDate);
-            throw new IllegalArgumentException("departureDate cannot be in the past");
+            throw new InvalidRequestException();
         }
     }
 
     private void validateUserRole(String userRole) {
-        if(userRole.equals("CUSTOMER")) {
-            throw new IllegalArgumentException("Access denied");
+        if (userRole.equals("CUSTOMER")) {
+            throw new GlobalException(HttpStatus.FORBIDDEN, ErrorMessage.ACCESS_DENIED);
         }
     }
 
     private void validateInputs(LocalDateTime departureDate, Integer requiredSeats) {
         if (departureDate == null) {
-            throw new IllegalArgumentException("departureDate is required");
+            throw new InvalidRequestException();
         }
         if (requiredSeats == null || requiredSeats <= 0) {
             requiredSeats = 1;

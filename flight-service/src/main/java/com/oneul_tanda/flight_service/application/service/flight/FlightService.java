@@ -5,6 +5,12 @@ import com.oneul_tanda.flight_service.application.dtos.flight.UpdateFlightComman
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
 import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
 import com.oneul_tanda.flight_service.domain.entity.FlightEntity;
+import com.oneul_tanda.flight_service.domain.exception.airline.AirlineNotFoundException;
+import com.oneul_tanda.flight_service.domain.exception.airport.AirportNotFoundException;
+import com.oneul_tanda.flight_service.domain.exception.common.GlobalException;
+import com.oneul_tanda.flight_service.domain.exception.common.ErrorMessage;
+import com.oneul_tanda.flight_service.domain.exception.flight.FlightDuplicatedException;
+import com.oneul_tanda.flight_service.domain.exception.flight.FlightNotFoundException;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.domain.repository.airport.AirportRepository;
 import com.oneul_tanda.flight_service.domain.repository.flight.FlightRepository;
@@ -20,6 +26,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,11 +68,7 @@ public class FlightService {
     public FlightResponse createFlight(CreateFlightCommand flightCommand, UUID userId, String userRole) {
         validateUserRole(userRole);
 
-        if (flightRepository.findByFlightNumAndDepartureDate(flightCommand.getFlightNum(),
-                        flightCommand.getDepartureDate())
-                .isPresent()) {
-            throw new IllegalArgumentException("Flight with this flight number and departure date already exists");
-        }
+        checkFlightDuplicate(flightCommand);
 
         // AirlineEntity와 Airport 엔티티 조회
         AirlineEntity airline = getAirlineForCreateFlight(flightCommand);
@@ -149,42 +152,49 @@ public class FlightService {
 
     private AirportEntity getArrivalAirportForUpdateFlight(UpdateFlightCommand flightCommand) {
         return airportRepository.findByCode(flightCommand.getArrivalAirportCode())
-                .orElseThrow(() -> new IllegalArgumentException("Arrival Airport not found"));
+                .orElseThrow(AirportNotFoundException::new);
     }
 
     private AirportEntity getDepartureAirportForUpdateFlight(UpdateFlightCommand flightCommand) {
         return airportRepository.findByCode(flightCommand.getDepartureAirportCode())
-                .orElseThrow(() -> new IllegalArgumentException("Departure Airport not found"));
-    }
-
-    private AirlineEntity getAirlineForUpdateFlight(UpdateFlightCommand flightCommand) {
-        return airlineRepository.findByCode(flightCommand.getAirlineCode())
-                .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
+                .orElseThrow(AirportNotFoundException::new);
     }
 
     private AirportEntity getArrivalAirportForCreateFlight(CreateFlightCommand flightCommand) {
         return airportRepository.findByCode(flightCommand.getArrivalAirportCode())
-                .orElseThrow(() -> new IllegalArgumentException("Arrival Airport not found"));
+                .orElseThrow(AirportNotFoundException::new);
     }
 
     private AirportEntity getDepartureAirportForCreateFlight(CreateFlightCommand flightCommand) {
         return airportRepository.findByCode(flightCommand.getDepartureAirportCode())
-                .orElseThrow(() -> new IllegalArgumentException("Departure Airport not found"));
+                .orElseThrow(AirportNotFoundException::new);
+    }
+
+    private AirlineEntity getAirlineForUpdateFlight(UpdateFlightCommand flightCommand) {
+        return airlineRepository.findByCode(flightCommand.getAirlineCode())
+                .orElseThrow(AirlineNotFoundException::new);
     }
 
     private AirlineEntity getAirlineForCreateFlight(CreateFlightCommand flightCommand) {
         return airlineRepository.findByCode(flightCommand.getAirlineCode())
-                .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
+                .orElseThrow(AirlineNotFoundException::new);
     }
 
     private FlightEntity getFlightById(UUID flightId) {
         return flightRepository.findById(flightId)
-                .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
+                .orElseThrow(FlightNotFoundException::new);
+    }
+
+    private void checkFlightDuplicate(CreateFlightCommand flightCommand) {
+        if (flightRepository.findByFlightNumAndDepartureDate(flightCommand.getFlightNum(),
+                flightCommand.getDepartureDate()).isPresent()) {
+            throw new FlightDuplicatedException();
+        }
     }
 
     private void validateUserRole(String userRole) {
-        if(userRole.equals("CUSTOMER")) {
-            throw new IllegalArgumentException("Access denied");
+        if (userRole.equals("CUSTOMER")) {
+            throw new GlobalException(HttpStatus.FORBIDDEN, ErrorMessage.ACCESS_DENIED);
         }
     }
 }

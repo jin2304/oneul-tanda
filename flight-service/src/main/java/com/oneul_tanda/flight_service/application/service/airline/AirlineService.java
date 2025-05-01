@@ -3,6 +3,10 @@ package com.oneul_tanda.flight_service.application.service.airline;
 import com.oneul_tanda.flight_service.application.dtos.airline.CreateAirlineCommand;
 import com.oneul_tanda.flight_service.application.dtos.airline.UpdateAirlineCommand;
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
+import com.oneul_tanda.flight_service.domain.exception.airline.AirlineDuplicatedException;
+import com.oneul_tanda.flight_service.domain.exception.airline.AirlineNotFoundException;
+import com.oneul_tanda.flight_service.domain.exception.common.GlobalException;
+import com.oneul_tanda.flight_service.domain.exception.common.ErrorMessage;
 import com.oneul_tanda.flight_service.domain.repository.airline.AirlineRepository;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
 import com.oneul_tanda.flight_service.util.PagingUtil;
@@ -12,6 +16,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,20 +91,19 @@ public class AirlineService {
     }
 
     private AirlineEntity getAirlineById(UUID airlineId) {
-        AirlineEntity airline = airlineRepository.findById(airlineId)
-                .orElseThrow(() -> new IllegalArgumentException("Airline not found"));
-        return airline;
+        return airlineRepository.findById(airlineId)
+                .orElseThrow(AirlineNotFoundException::new);
     }
 
     private void getAirlineByCode(CreateAirlineCommand airlineCommand) {
         if (airlineRepository.findByCode(airlineCommand.getCode()).isPresent()) {
-            throw new IllegalArgumentException("Airline code " + airlineCommand.getCode() + " already exists");
+            throw new AirlineDuplicatedException();
         }
     }
 
     private void validateUserRole(String userRole) {
-        if(userRole.equals("CUSTOMER")){
-            throw new IllegalArgumentException("Access denied");
+        if (userRole.equals("CUSTOMER")) {
+            throw new GlobalException(HttpStatus.FORBIDDEN, ErrorMessage.ACCESS_DENIED);
         }
     }
 }

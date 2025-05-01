@@ -30,7 +30,7 @@ public class KafkaConsumerService {
             redisTemplate.opsForValue().set(key, String.valueOf(event.tokenVersion()), Duration.ofMinutes(toKenVersionExpiration));
 
         } catch(Exception e) {
-            // todo: 실패에 대한 보상처리 과정
+            // todo: 실패에 대한 보상처리 과정(redis 이상인 경우)
             log.error("토큰 만료 처리 실패", e.getMessage(), e);
         }
     }

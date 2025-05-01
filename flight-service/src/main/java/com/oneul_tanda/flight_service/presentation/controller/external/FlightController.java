@@ -1,4 +1,4 @@
-package com.oneul_tanda.flight_service.presentation.controller;
+package com.oneul_tanda.flight_service.presentation.controller.external;
 
 import com.oneul_tanda.flight_service.application.service.flight.FlightService;
 import com.oneul_tanda.flight_service.presentation.dtos.flight.CreateFlightRequest;

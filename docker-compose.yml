@@ -53,7 +53,6 @@ services:
       - MYSQL_PASSWORD=${USER_DB_PASSWORD}
     ports:
       - "3309:3306"
-    #todo: 추후에 port 확인, 변경 필요
     volumes:
       - user-mysql-data:/var/lib/mysql
 
@@ -80,8 +79,8 @@ services:
     image: postgres:16.3
     container_name: oneultanda-flight-db
     environment:
-      - POSTGRES_USER=${FLIGHT_DB_ID}
       - POSTGRES_DB=flight_db
+      - POSTGRES_USER=${FLIGHT_DB_ID}
       - POSTGRES_PASSWORD=${FLIGHT_DB_PASSWORD}
     ports:
       - "5433:5432"
@@ -141,6 +140,36 @@ services:
       - "6379:6379"
     restart: always
 
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: oneultanda-payment-service
+    volumes:
+      - ./payment-service:/app/payment-service
+    ports:
+      - "19093:19093"
+    env_file:
+      - .env
+    depends_on:
+      - payments-db
+      - eureka-server
+
+  payments-db:
+    image: mysql:8.0
+    container_name: oneultanda-payment-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${PAYMENT_DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=payments_db
+      - MYSQL_USER=${PAYMENT_DB_USERNAME}
+      - MYSQL_PASSWORD=${PAYMENT_DB_PASSWORD}
+      - IMPORT_API_KEY=${IMPORT_API_KEY}
+      - IMPORT_API_SECRET_KEY=${IMPORT_API_SECRET_KEY}
+    ports:
+      - "3308:3306"
+    volumes:
+      - payments-mysql-data:/var/lib/mysql
+
   zookeeper:
     image: wurstmeister/zookeeper:latest
     platform: linux/amd64
@@ -163,6 +192,8 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zookeeper
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -174,6 +205,9 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_READONLY: "false"
+    depends_on:
+      - zookeeper
+
 
   grafana:
     image: grafana/grafana:latest
@@ -186,6 +220,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+    depends_on:
+      - prometheus
 
   prometheus:
     image: prom/prometheus:latest
@@ -202,5 +238,6 @@ volumes:
   user-mysql-data:
   reservation-mysql-data:
   flight-postgres-data:
+  payments-mysql-data:
   prometheus_data:
   grafana-storage:

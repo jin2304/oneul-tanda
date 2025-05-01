@@ -2,30 +2,28 @@ server:
   port: 19093
 
 spring:
-  profiles:
-    active: local
   application:
     name: payment-service
 
   datasource:
-    url: jdbc:mysql://localhost:3306/payments_db
-    username: admin
-    password: 1234
+    url: jdbc:mysql://payments-db:3306/payments_db
+    username: ${PAYMENT_DB_USERNAME}
+    password: ${PAYMENT_DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
       ddl-auto: update
 
-#eureka:
-#  client:
-#    service-url:
-#      defaultZone: http://eureka-server:19090/eureka/
-#    register-with-eureka: true
-#    fetch-registry: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:19090/eureka/
+    register-with-eureka: true
+    fetch-registry: true
 
 import:
   api:
-    key: 3514258731134757
+    key: ${IMPORT_API_KEY}
     secret:
-      key: aMGNaO99W6ivPE2tRodLfRWwBWdR2gG5FPifcZ46kUYe13GXLqSfnEcXkbl8LBNIY9z94CrmKKpSrwP9
+      key: ${IMPORT_API_SECRET_KEY}
