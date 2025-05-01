@@ -20,7 +20,7 @@ public class UserJpaEntity extends BaseTimeEntity {
     @Id
     @GeneratedValue
     @UuidGenerator
-    @Column(columnDefinition = "BINARY(16)")
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
     @Column(nullable = false, unique = true)
