@@ -1,4 +1,4 @@
-name: Build and Push Docker Images
+name: CI CD
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       # todo: 추후 main으로 수정할 것
 
 jobs:
-  build-and-push:
+  CI:
     runs-on: ubuntu-latest
 
     strategy:
@@ -20,6 +20,7 @@ jobs:
           - flight-service
           - reservation-service
           - queue-service
+          - payment-service
 
     steps:
       - name: Checkout source
@@ -40,8 +41,8 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
 
 # 추후 분리가 필요할 수 있음
-  deploy:
-    needs: build-and-push
+  CD:
+    needs: CI
     environment: oneul-tanda
     runs-on: ubuntu-latest
 
@@ -65,6 +66,9 @@ jobs:
           AMADEUS_CLIENT_SECRET=${{ secrets.AMADEUS_CLIENT_SECRET }}
           GF_SECURITY_ADMIN_USER=${{ secrets.GF_SECURITY_ADMIN_USER }}
           GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
+          PAYMENT_DB_USERNAME=${{ secrets.PAYMENT_DB_USERNAME }}
+          PAYMENT_DB_ROOT_PASSWORD=${{ secrets.PAYMENT_DB_ROOT_PASSWORD }}
+          PAYMENT_DB_PASSWORD=${{ secrets.PAYMENT_DB_PASSWORD }}
           EOF
 
       - name: Set up SSH
