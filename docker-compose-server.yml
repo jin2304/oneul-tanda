@@ -230,6 +230,6 @@ volumes:
   payments-mysql-data:
   user-mysql-tmp:
   reservation-mysql-tmp:
-  payment-mysql-tmp:
+  payments-mysql-tmp:
   prometheus_data:
   grafana-storage:
