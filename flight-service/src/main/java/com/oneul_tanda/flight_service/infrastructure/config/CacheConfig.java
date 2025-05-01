@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneul_tanda.flight_service.presentation.dtos.airline.AirlineResponse;
 import com.oneul_tanda.flight_service.presentation.dtos.airport.AirportResponse;
 import com.oneul_tanda.flight_service.presentation.dtos.flight.FlightDetailResponse;
+import com.oneul_tanda.flight_service.presentation.dtos.flight.FlightResponse;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +37,8 @@ public class CacheConfig {
                 objectMapper, AirlineResponse.class);
         Jackson2JsonRedisSerializer<FlightDetailResponse> flightSerializer = new Jackson2JsonRedisSerializer<>(
                 objectMapper, FlightDetailResponse.class);
+        Jackson2JsonRedisSerializer<FlightResponse> flightOfferSerializer = new Jackson2JsonRedisSerializer<>(
+                objectMapper, FlightResponse.class);
 
         // 기본 캐시 설정
         RedisCacheConfiguration baseConfig = RedisCacheConfiguration.defaultCacheConfig()
@@ -62,7 +65,7 @@ public class CacheConfig {
 
         // flightOffers 캐시 설정 (1분 TTL)
         RedisCacheConfiguration flightOffersConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(flightSerializer))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(flightOfferSerializer))
                 .disableCachingNullValues()
                 .entryTtl(Duration.ofMinutes(1));
 
