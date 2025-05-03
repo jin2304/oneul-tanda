@@ -106,7 +106,7 @@ public class ReservationController {
      * 예약 삭제
      */
     @DeleteMapping("/{reservationId}")
-    public ResponseEntity<DeleteReservationResponseDto> DeleteReservation(
+    public ResponseEntity<DeleteReservationResponseDto> deleteReservation(
             @RequestHeader("X-User-Id") UUID userId,
             @PathVariable UUID reservationId
     ) {
