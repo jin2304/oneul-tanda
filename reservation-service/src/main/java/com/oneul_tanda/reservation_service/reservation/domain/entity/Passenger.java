@@ -1,6 +1,7 @@
-package com.oneul_tanda.reservation_service.passenger.domain.entity;
+package com.oneul_tanda.reservation_service.reservation.domain.entity;
 
 import com.oneul_tanda.reservation_service.common.entity.BaseTimeEntity;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 

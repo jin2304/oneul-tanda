@@ -1,4 +1,4 @@
-package com.oneul_tanda.reservation_service.reservation.domain.entity;
+package com.oneul_tanda.reservation_service.reservation.domain.entity.vo;
 
 public enum ReservationStatus {
     PENDING,                    // 예약 대기

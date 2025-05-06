@@ -1,7 +1,6 @@
 package com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read;
 
-import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreatePassengerResponseDto;
-import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.Ticket;
 import lombok.Builder;
 
 import java.math.BigDecimal;

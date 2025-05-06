@@ -4,7 +4,7 @@ package com.oneul_tanda.reservation_service.reservation.domain.entity;
 import com.oneul_tanda.reservation_service.common.entity.BaseTimeEntity;
 import com.oneul_tanda.reservation_service.common.exception.CustomException;
 import com.oneul_tanda.reservation_service.reservation.application.exception.ReservationErrorCode;
-import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.oneul_tanda.reservation_service.passenger.domain.entity;
+package com.oneul_tanda.reservation_service.reservation.domain.entity.vo;
 
 public enum Gender {
     MALE,

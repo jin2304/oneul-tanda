@@ -1,8 +1,7 @@
-package com.oneul_tanda.reservation_service.ticket.domain.entity;
+package com.oneul_tanda.reservation_service.reservation.domain.entity;
 
 import com.oneul_tanda.reservation_service.common.entity.BaseTimeEntity;
-import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
-import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.SeatClass;
 import jakarta.persistence.*;
 import lombok.*;
 

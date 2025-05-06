@@ -1,6 +1,6 @@
 package com.oneul_tanda.reservation_service.reservation.application.command;
 
-import com.oneul_tanda.reservation_service.passenger.domain.entity.Gender;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.Gender;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
 
 import java.util.List;
