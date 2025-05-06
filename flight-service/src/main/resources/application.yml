@@ -26,6 +26,19 @@ spring:
       host: redis
       port: 6379
 
+  kafka:
+    bootstrap-servers: kafka:29092
+    consumer:
+      group-id: flight-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        allow.auto.create.topics: true
+        spring.json.trusted.packages: "*"
+
+
 amadeus:
   base-url: https://test.api.amadeus.com
   client-id: ${AMADEUS_CLIENT_ID}
