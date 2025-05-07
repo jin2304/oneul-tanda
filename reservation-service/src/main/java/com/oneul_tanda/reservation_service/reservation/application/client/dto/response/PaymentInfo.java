@@ -3,7 +3,7 @@ package com.oneul_tanda.reservation_service.reservation.application.client.dto.r
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record CreatePaymentInfo(
+public record PaymentInfo(
         UUID id,
         String paymentId,
         BigDecimal totalPrice,
