@@ -125,6 +125,7 @@ public class QueueService {
 //                redisTemplate.opsForValue().set("seat:" + flightId, String.valueOf(remainingSeats));
                 // 실제 항공편 서비스 좌석 차감
                 flightClient.decreaseSeats(flightId, seatCount);
+//                producerService.sendDecreaseSeats(flightId, userId, seatCount);
                 log.info("대기열 선점에 성공 했습니다. 남은 좌석 수: {}", remainingSeats - seatCount);
                 rankOps.remove(key, topUser);
                 producerService.sendReserveSuccess(flightId, userId, seatCount);
@@ -135,7 +136,6 @@ public class QueueService {
                 deleteExistReserve(flightId, userId);
                 return QueueResponseDto.of(EventStatusEnum.FAILED, "남은 좌석이 없습니다.");
             }
-//        return QueueResponseDto.of(EventStatusEnum.FAILED, "예약 신청에 실패하셨습니다.");
     }
 
     // 중복 유저가 있는지 체크
