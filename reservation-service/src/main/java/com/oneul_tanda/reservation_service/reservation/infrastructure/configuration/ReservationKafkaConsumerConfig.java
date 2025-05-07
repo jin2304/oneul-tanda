@@ -1,4 +1,4 @@
-package com.oneul_tanda.reservation_service.config;
+package com.oneul_tanda.reservation_service.reservation.infrastructure.configuration;
 
 import com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event.ReservationHeldEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ import java.util.Map;
 @Slf4j
 @EnableKafka
 @Configuration
-public class ReservationKafkaConfig {
+public class ReservationKafkaConsumerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
