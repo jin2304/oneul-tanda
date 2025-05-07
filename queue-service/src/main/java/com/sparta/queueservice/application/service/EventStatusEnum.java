@@ -1,4 +1,4 @@
-package com.sparta.queueservice.infrastructure.kafka.event;
+package com.sparta.queueservice.application.service;
 
 public enum EventStatusEnum {
     SUCCESS,
