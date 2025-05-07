@@ -106,7 +106,7 @@ public class ReservationController {
     /**
      * 예약 취소 V2
      */
-    @PutMapping("/{reservationId}/cancel")
+    @PutMapping("/{reservationId}/cancelV2")
     public ResponseEntity<CancelReservationResponseDtoV2> cancelReservationV2(@PathVariable UUID reservationId) {
         return ResponseEntity.ok(reservationService.cancelReservationV2(reservationId));
     }

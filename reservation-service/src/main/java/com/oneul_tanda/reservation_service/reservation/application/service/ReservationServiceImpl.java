@@ -511,7 +511,7 @@ public class ReservationServiceImpl implements ReservationService {
     // 결제 취소(환불) 요청
     private void cancelPayment(Reservation reservation) {
         try {
-            paymentClient.cancelPayment(reservation.getUserId());
+            paymentClient.cancelPayment(reservation.getId());
 
         } catch (Exception e) {
             log.error("결제 취소 실패 - reservationId={}, error={}", reservation.getId(), e.getMessage(), e);
