@@ -186,6 +186,13 @@ public class Reservation extends BaseTimeEntity {
     }
 
 
+    // 예약 취소 요청 상태로 변경
+    public void requestCancellation() {
+        validateCancelable();
+        this.status = ReservationStatus.CANCEL_REQUESTED;
+    }
+
+
     // 결제 실패 상태로 변경
     public void completePaymentFailure() {
         this.status = ReservationStatus.PAYMENT_FAILED;

@@ -17,10 +17,12 @@ import com.oneul_tanda.reservation_service.reservation.application.exception.Res
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
 import com.oneul_tanda.reservation_service.reservation.domain.repository.ReservationRepository;
 import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.GetFlightInfo;
+import com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.KafkaReservationProducer;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDtoV2;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.SeatClass;
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Ticket;
@@ -48,6 +50,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final PaymentClient paymentClient;
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
+    private final KafkaReservationProducer producer;
 
 
     /**
@@ -269,7 +272,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     /**
-     * 예약 취소 (예약 수정)
+     * 예약 취소
      */
     @Override
     @Transactional
@@ -289,7 +292,31 @@ public class ReservationServiceImpl implements ReservationService {
 
 
 
-    
+
+    /**
+     * 예약 취소 V2
+     */
+    @Override
+    @Transactional
+    public CancelReservationResponseDtoV2 cancelReservationV2(UUID reservationId) {
+        // 1. 예약 조회
+        Reservation reservation = getReservationOrThrow(reservationId);
+
+        // 2. 예약 취소
+        reservation.requestCancellation();
+
+        // 3. 이벤트 발행
+        UUID flightId = reservation.getTicketList().get(0).getFlightId();
+        int seatCount = reservation.getTicketList().size();
+        producer.sendReservationCanceledEvent(reservation.getId(), flightId, reservation.getUserId(), seatCount);
+
+        // 4. 응답 반환
+        return CancelReservationResponseDtoV2.of(reservation.getId());
+    }
+
+
+
+
     // 예약 조회
     private Reservation getReservationOrThrow(UUID reservationId) {
         return reservationRepository.findById(reservationId)
