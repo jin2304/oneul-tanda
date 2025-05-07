@@ -4,6 +4,7 @@ import com.oneul_tanda.reservation_service.reservation.application.command.Confi
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommandV2;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.service.ReservationService;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.DeleteReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.update.ConfirmReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.update.ConfirmReservationRequestDtoV2;
@@ -108,5 +109,18 @@ public class ReservationController {
     @PutMapping("/{reservationId}/cancel")
     public ResponseEntity<CancelReservationResponseDtoV2> cancelReservationV2(@PathVariable UUID reservationId) {
         return ResponseEntity.ok(reservationService.cancelReservationV2(reservationId));
+    }
+
+
+
+    /**
+     * 예약 삭제
+     */
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<DeleteReservationResponseDto> deleteReservation(
+            @RequestHeader("X-User-Id") UUID userId,
+            @PathVariable UUID reservationId
+    ) {
+        return ResponseEntity.ok(reservationService.deleteReservation(userId, reservationId));
     }
 }
