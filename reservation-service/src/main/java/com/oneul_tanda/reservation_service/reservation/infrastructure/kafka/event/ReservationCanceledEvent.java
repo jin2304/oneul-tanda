@@ -24,14 +24,12 @@ public class ReservationCanceledEvent {
     @AllArgsConstructor
     public static class Data {
         private UUID flightId;
-        private UUID userId;
         private Integer seatCount;
     }
 
 
     public static ReservationCanceledEvent of(UUID reservationId,
                                               UUID flightId,
-                                              UUID userId,
                                               Integer seatCount,
                                               String eventType) {
 
@@ -41,7 +39,6 @@ public class ReservationCanceledEvent {
                 .reservationTime(LocalDateTime.now())
                 .data(ReservationCanceledEvent.Data.builder()
                         .flightId(flightId)
-                        .userId(userId)
                         .seatCount(seatCount)
                         .build())
                 .build();

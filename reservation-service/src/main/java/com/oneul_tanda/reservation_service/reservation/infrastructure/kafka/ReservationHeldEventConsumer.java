@@ -2,8 +2,8 @@ package com.oneul_tanda.reservation_service.reservation.infrastructure.kafka;
 
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.service.ReservationService;
+import com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event.ReservationCanceledEvent;
 import com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event.ReservationHeldEvent;
-import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,4 +49,15 @@ public class ReservationHeldEventConsumer {
 
     }
 
+
+
+
+    @KafkaListener(
+            topics = "flight-seatRecovered",
+            groupId = "reservation-service",
+            containerFactory = "reservationCanceledListenerFactory"
+    )
+    public void handleSeatRecovered(ReservationCanceledEvent event) {
+        reservationService.cancelReservationConfirm(event.getEventId());
+    }
 }
