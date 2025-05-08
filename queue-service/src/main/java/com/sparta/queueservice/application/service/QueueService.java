@@ -2,9 +2,9 @@ package com.sparta.queueservice.application.service;
 
 import com.sparta.queueservice.application.dto.FlightRequestDto;
 import com.sparta.queueservice.application.dto.QueueResponseDto;
+import com.sparta.queueservice.infrastructure.client.FlightClient;
 import com.sparta.queueservice.infrastructure.client.FlightResponse;
 import com.sparta.queueservice.infrastructure.kafka.ProducerService;
-import com.sparta.queueservice.infrastructure.client.FlightClient;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -13,7 +13,6 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
