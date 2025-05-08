@@ -1,6 +1,6 @@
 package com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create;
 
-import com.oneul_tanda.reservation_service.passenger.domain.entity.Gender;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.Gender;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 

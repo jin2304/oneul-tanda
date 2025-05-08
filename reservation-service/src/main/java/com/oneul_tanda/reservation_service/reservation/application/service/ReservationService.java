@@ -8,6 +8,7 @@ import com.oneul_tanda.reservation_service.reservation.presentation.dto.DeleteRe
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDtoV2;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,10 @@ public interface ReservationService {
     ConfirmReservationResponseDto confirmReservationV2(ConfirmReservationCommandV2 command);
 
     CancelReservationResponseDto cancelReservation(UUID reservationId);
+
+    CancelReservationResponseDtoV2 cancelReservationV2(UUID reservationId);
+
+    void cancelReservationConfirm(UUID reservationId);
 
     DeleteReservationResponseDto deleteReservation(UUID userId, UUID reservationId);
 }

@@ -1,5 +1,6 @@
-package com.oneul_tanda.reservation_service.config;
+package com.oneul_tanda.reservation_service.reservation.infrastructure.configuration;
 
+import com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event.ReservationCanceledEvent;
 import com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event.ReservationHeldEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -34,7 +35,7 @@ import java.util.Map;
 @Slf4j
 @EnableKafka
 @Configuration
-public class ReservationKafkaConfig {
+public class ReservationKafkaConsumerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
@@ -124,6 +125,58 @@ public class ReservationKafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, ReservationHeldEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setCommonErrorHandler(errorHandler);
         factory.setConsumerFactory(reservationHeldConsumerFactory());
+        return factory;
+    }
+
+
+
+
+
+
+    @Bean
+    public ConsumerFactory<String, ReservationCanceledEvent> reservationCanceledConsumerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+
+        configProps.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        configProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
+
+        configProps.put(JsonDeserializer.VALUE_DEFAULT_TYPE,
+                "com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event.ReservationCanceledEvent");
+
+        configProps.put(JsonDeserializer.TRUSTED_PACKAGES,
+                "com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.event");
+
+        return new DefaultKafkaConsumerFactory<>(configProps);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ReservationCanceledEvent> reservationCanceledListenerFactory(
+            KafkaTemplate<String, byte[]> dlqKafkaTemplate) {
+
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(dlqKafkaTemplate,
+                (record, ex) -> {
+                    log.warn("[DLQ] ReservationCanceledEvent 실패 메시지 전송. key={}, cause={}", record.key(), ex.getMessage());
+                    return new TopicPartition("reservation-canceled-dlq", 0);
+                });
+
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 3));
+        errorHandler.addRetryableExceptions(RuntimeException.class, DeserializationException.class);
+
+        errorHandler.setRetryListeners((record, ex, deliveryAttempt) -> {
+            if (deliveryAttempt == 1) {
+                log.warn("[ReservationCanceledEvent] 초기 처리 실패 - key={}, value={}, cause={}", record.key(), record.value(), ex.getMessage());
+            } else {
+                log.warn("[ReservationCanceledEvent] {}번째 재시도 실패 - key={}, value={}, cause={}",
+                        deliveryAttempt - 1, record.key(), record.value(), ex.getMessage());
+            }
+        });
+
+        ConcurrentKafkaListenerContainerFactory<String, ReservationCanceledEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(reservationCanceledConsumerFactory());
+        factory.setCommonErrorHandler(errorHandler);
         return factory;
     }
 

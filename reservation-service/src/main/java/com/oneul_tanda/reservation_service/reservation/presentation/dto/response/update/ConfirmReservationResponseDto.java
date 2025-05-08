@@ -1,7 +1,7 @@
 package com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update;
 
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
-import com.oneul_tanda.reservation_service.reservation.domain.entity.ReservationStatus;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.ReservationStatus;
 import lombok.Builder;
 
 import java.math.BigDecimal;

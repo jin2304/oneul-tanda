@@ -1,4 +1,4 @@
-package com.oneul_tanda.reservation_service.ticket.domain.entity;
+package com.oneul_tanda.reservation_service.reservation.domain.entity.vo;
 
 public enum SeatClass {
     ECONOMY,    // 이코노미

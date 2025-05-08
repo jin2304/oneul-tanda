@@ -3,12 +3,12 @@ package com.oneul_tanda.reservation_service.reservation.application.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneul_tanda.reservation_service.common.exception.CustomException;
-import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.Passenger;
 import com.oneul_tanda.reservation_service.reservation.application.dto.HoldReservationData;
 import com.oneul_tanda.reservation_service.reservation.application.dto.PassengerDto;
 import com.oneul_tanda.reservation_service.reservation.application.client.FlightClient;
 import com.oneul_tanda.reservation_service.reservation.application.client.PaymentClient;
-import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.CreatePaymentInfo;
+import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.PaymentInfo;
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommandV2;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
@@ -17,14 +17,16 @@ import com.oneul_tanda.reservation_service.reservation.application.exception.Res
 import com.oneul_tanda.reservation_service.reservation.domain.entity.Reservation;
 import com.oneul_tanda.reservation_service.reservation.domain.repository.ReservationRepository;
 import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.GetFlightInfo;
+import com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.KafkaReservationProducer;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.DeleteReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDtoV2;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
-import com.oneul_tanda.reservation_service.ticket.domain.entity.SeatClass;
-import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.SeatClass;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.Ticket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -49,6 +51,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final PaymentClient paymentClient;
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
+    private final KafkaReservationProducer producer;
 
 
     /**
@@ -178,7 +181,7 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         // 2. 결제 요청
-        CreatePaymentInfo paymentInfo = requestPayment(reservation);
+        PaymentInfo paymentInfo = requestPayment(reservation);
 
         // 결제 실패 처리
         if (paymentInfo == null || !paymentInfo.status().equalsIgnoreCase("PAID")) {
@@ -248,7 +251,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 
         // 4. 결제 요청
-        CreatePaymentInfo paymentInfo = requestPayment(reservation);
+        PaymentInfo paymentInfo = requestPayment(reservation);
         if (paymentInfo == null || !"PAID".equalsIgnoreCase(paymentInfo.status())) {
             throw new CustomException(ReservationErrorCode.PAYMENT_FAILED);
         }
@@ -270,24 +273,84 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     /**
-     * 예약 취소 (예약 수정)
+     * 예약 취소
      */
     @Override
     @Transactional
     public CancelReservationResponseDto cancelReservation(UUID reservationId) {
+        // 예약 조회
+        Reservation reservation = getReservationOrThrow(reservationId);
+
+        try {
+            // 1. 좌석 복구
+            restoreReservedSeats(reservation);
+
+            // 2. 결제 취소(환불) 요청
+            cancelPayment(reservation);
+
+            // 3. 예약 취소
+            reservation.cancel();
+
+            return CancelReservationResponseDto.of(reservation.getId());
+
+        } catch (CustomException e) {
+
+            // 좌석 복구 자체 실패 -> 보상 필요 없음
+            if (e.getErrorCode() == ReservationErrorCode.FLIGHT_SEAT_RESTORE_FAILED) {
+                log.warn("좌석 복구 실패 - 보상 생략");
+                throw e;
+            }
+
+            // 좌석 복구는 성공, 결제 취소 실패 -> 보상 트랜잭션 수행
+            try {
+                log.warn("결제 취소 실패 - 보상 트랜잭션 수행");
+                compensateReservedSeats(reservation); // 좌석 복구 롤백 -> 다시 차감
+            } catch (Exception rollbackEx) {
+                log.error("좌석 복구 보상(롤백) 실패 - 수동 조치 필요: flightId={}, error={}",
+                        reservation.getTicketList().get(0).getFlightId(), rollbackEx.getMessage(), rollbackEx);
+                // TODO: Slack 알림, DLQ 등
+            }
+            throw e;
+        }
+
+    }
+
+
+
+    /**
+     * 예약 취소 V2
+     */
+    @Override
+    @Transactional
+    public CancelReservationResponseDtoV2 cancelReservationV2(UUID reservationId) {
         // 1. 예약 조회
         Reservation reservation = getReservationOrThrow(reservationId);
 
         // 2. 예약 취소
-        reservation.cancel();
+        reservation.requestCancellation();
 
-        // 3. 선점된 좌석 복구
-        restoreReservedSeats(reservation);
+        // 3. 이벤트 발행
+        UUID flightId = reservation.getTicketList().get(0).getFlightId();
+        int seatCount = reservation.getTicketList().size();
+        producer.sendReservationCanceledEvent(reservation.getId(), flightId, reservation.getUserId(), seatCount);
 
         // 4. 응답 반환
-        return CancelReservationResponseDto.of(reservation.getId());
+        return CancelReservationResponseDtoV2.of(reservation.getId());
     }
 
+
+
+
+    /**
+     * 예약 취소 확정
+     */
+    @Override
+    public void cancelReservationConfirm(UUID reservationId) {
+         // 예약 조회
+         Reservation reservation = getReservationOrThrow(reservationId);
+
+         reservation.cancel();
+     }
 
 
 
@@ -298,10 +361,10 @@ public class ReservationServiceImpl implements ReservationService {
     public DeleteReservationResponseDto deleteReservation(UUID userId, UUID reservationId) {
         // 예약 조회
         Reservation reservation = getReservationOrThrow(reservationId);
-        
+
         // 예약 삭제
         reservation.markDeleted(userId);
-        
+
         return DeleteReservationResponseDto.of(reservation.getId());
     }
 
@@ -418,7 +481,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     // 결제 요청
-    public CreatePaymentInfo requestPayment(Reservation reservation) {
+    public PaymentInfo requestPayment(Reservation reservation) {
 
         // 결제 가능 상태 검증
         if (!reservation.isPayable()) {
@@ -457,6 +520,31 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
 
+    // 결제 취소(환불) 요청
+    private void cancelPayment(Reservation reservation) {
+        try {
+            paymentClient.cancelPayment(reservation.getId());
+
+        } catch (Exception e) {
+            log.error("결제 취소 실패 - reservationId={}, error={}", reservation.getId(), e.getMessage(), e);
+            throw CustomException.from(ReservationErrorCode.PAYMENT_REFUND_FAILED);
+        }
+    }
+
+
+    // 보상 트랜잭션: 좌석 차감 보상(복구 취소)
+    private void compensateReservedSeats(Reservation reservation) {
+        Integer seatCount = reservation.getTicketList().size();
+        UUID flightId = reservation.getTicketList().get(0).getFlightId();
+
+        try {
+            flightClient.decreaseSeats(flightId, seatCount);
+        } catch (Exception e) {
+            log.error("좌석 차감 보상 실패 - flightId={}, seatCount={}, error={}",
+                    flightId, seatCount, e.getMessage(), e);
+            throw CustomException.from(ReservationErrorCode.FLIGHT_SEAT_COMPENSATION_FAILED);
+        }
+    }
 
 
 

@@ -1,6 +1,6 @@
 package com.oneul_tanda.reservation_service.reservation.infrastructure.client.dto.response;
 
-import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.CreatePaymentInfo;
+import com.oneul_tanda.reservation_service.reservation.application.client.dto.response.PaymentInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,8 +19,8 @@ public class PaymentResponseDto {
     private BigDecimal totalPrice;
     private String status;
 
-    public CreatePaymentInfo toInfo() {
-        return new CreatePaymentInfo(
+    public PaymentInfo toInfo() {
+        return new PaymentInfo(
                 reservationId,
                 paymentId,
                 totalPrice,

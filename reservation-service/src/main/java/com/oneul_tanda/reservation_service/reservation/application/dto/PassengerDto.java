@@ -1,6 +1,6 @@
 package com.oneul_tanda.reservation_service.reservation.application.dto;
 
-import com.oneul_tanda.reservation_service.passenger.domain.entity.Gender;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.Gender;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.update.ConfirmReservationRequestDtoV2;
 
 public record PassengerDto(

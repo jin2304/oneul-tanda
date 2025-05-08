@@ -1,7 +1,7 @@
 package com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read;
 
-import com.oneul_tanda.reservation_service.passenger.domain.entity.Gender;
-import com.oneul_tanda.reservation_service.passenger.domain.entity.Passenger;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.Gender;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.Passenger;
 import lombok.Builder;
 
 import java.util.UUID;

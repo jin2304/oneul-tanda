@@ -4,7 +4,7 @@ package com.oneul_tanda.reservation_service.reservation.domain.entity;
 import com.oneul_tanda.reservation_service.common.entity.BaseTimeEntity;
 import com.oneul_tanda.reservation_service.common.exception.CustomException;
 import com.oneul_tanda.reservation_service.reservation.application.exception.ReservationErrorCode;
-import com.oneul_tanda.reservation_service.ticket.domain.entity.Ticket;
+import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -181,8 +181,14 @@ public class Reservation extends BaseTimeEntity {
 
     // 예약 취소 상태로 변경
     public void cancel() {
-        validateCancelable();
         this.status = ReservationStatus.CANCELED;
+    }
+
+
+    // 예약 취소 요청 상태로 변경
+    public void requestCancellation() {
+        validateCancelable();
+        this.status = ReservationStatus.CANCEL_REQUESTED;
     }
 
 
