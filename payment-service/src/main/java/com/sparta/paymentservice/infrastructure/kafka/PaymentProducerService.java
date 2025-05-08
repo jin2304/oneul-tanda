@@ -16,8 +16,8 @@ public class PaymentProducerService {
 
     public void sendPaymentCanceled(UUID reservationId, UUID flightId, int seatCount) {
         ReservationCanceledEvent event = ReservationCanceledEvent
-                .createReservationCanceledEvent(reservationId, flightId, seatCount, "payment-cancelled");
+                .createReservationCanceledEvent(reservationId, flightId, seatCount, "payment-canceled");
 
-        kafkaTemplate.send("payment-cancelled", reservationId.toString(), event);
+        kafkaTemplate.send("payment-canceled", reservationId.toString(), event);
     }
 }
