@@ -40,6 +40,9 @@ dependencies {
 //    runtimeOnly 'com.mysql:mysql-connector-j'
     // postsql
     runtimeOnly 'org.postgresql:postgresql'
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

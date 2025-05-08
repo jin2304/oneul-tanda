@@ -15,9 +15,12 @@ import com.sparta.paymentservice.common.exception.IamPortException;
 import com.sparta.paymentservice.common.exception.PaymentException;
 import com.sparta.paymentservice.domain.entity.Payments;
 import com.sparta.paymentservice.domain.repository.PaymentRepository;
+import com.sparta.paymentservice.infrastructure.kafka.PaymentProducerService;
+import com.sparta.paymentservice.infrastructure.kafka.event.ReservationCanceledEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -30,6 +33,7 @@ import java.util.UUID;
 public class KcpPaymentService implements PaymentService {
     private final IamportClient iamportClient;
     private final PaymentRepository paymentRepository;
+    private final PaymentProducerService  paymentProducerService;
 
     @Override
     public PaymentResponseDto confirmPayment(PaymentRequestDto request, CardInfo card) {
@@ -85,14 +89,51 @@ public class KcpPaymentService implements PaymentService {
 
             payments.updateStatus(payment.getStatus());
             payments.setCancelledAt(payment.getCancelledAt());
-
             return PaymentResponseDto.toDto(payment);
-        }  catch (IamportResponseException e) {
-            throw new IamPortException(e.getHttpStatusCode(), "결제 응답 오류: " +  e.getMessage());
+        } catch (IamportResponseException e) {
+            throw new IamPortException(e.getHttpStatusCode(), "결제 응답 오류: " + e.getMessage());
         } catch (IOException e) {
             throw new PaymentException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Override
+    @Transactional
+    @KafkaListener(topics = "reservation-canceled",
+            groupId = "payment-service",
+            containerFactory = "reservationCancelledListenerFactory")
+    public PaymentResponseDto cancelPaymentV2(ReservationCanceledEvent event){
+        try {
+            Payments payments = paymentRepository.findByReservationId(event.getEventId());
+
+            if (payments == null || !payments.getStatus().equals("paid")) {
+                throw new PaymentException(ErrorCode.PAYMENT_NOT_FOUND);
+            }
+
+            String merchantUid = payments.getReservationId().toString();
+
+            CancelData cancelData = new CancelData(merchantUid, false);
+            cancelData.setReason("사용자 요청에 의한 취소");
+            IamportResponse<Payment> response = iamportClient.cancelPaymentByImpUid(cancelData);
+            Payment payment = response.getResponse();
+
+            payments.updateStatus(payment.getStatus());
+            payments.setCancelledAt(payment.getCancelledAt());
+            return PaymentResponseDto.toDto(payment);
+        } catch (IamportResponseException e) {
+            throw new IamPortException(e.getHttpStatusCode(), "결제 응답 오류: " + e.getMessage());
+        } catch (IOException e) {
+            throw new PaymentException(ErrorCode.INTERNAL_SERVER_ERROR);
+        } finally {
+            ReservationCanceledEvent.Data data = event.getData();
+
+            paymentProducerService.sendPaymentCanceled(
+                    event.getEventId(),
+                    data.getFlightId(),
+                    data.getSeatCount());
+        }
+    }
+
 
     private void existPayment(UUID reservationId) {
         Payments payments = paymentRepository.findByReservationId(reservationId);

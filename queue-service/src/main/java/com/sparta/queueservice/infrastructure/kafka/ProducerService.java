@@ -16,7 +16,7 @@ public class ProducerService {
     private final KafkaTemplate<String, ReservationHeldEvent> kafkaTemplate;
 
     // 대기열 선점 성공시 성공 메시지 전달
-    public void sendReserveSuccess(UUID flightId, UUID userId, int seatCount) {
+    public void sendReserveSuccess(UUID flightId, UUID userId, Integer seatCount) {
         ReservationHeldEvent event = ReservationHeldEvent
                 .createReservationEvent(flightId, userId, seatCount, "reservation-held");
 
