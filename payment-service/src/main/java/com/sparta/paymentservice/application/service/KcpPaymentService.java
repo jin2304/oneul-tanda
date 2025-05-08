@@ -99,7 +99,7 @@ public class KcpPaymentService implements PaymentService {
 
     @Override
     @Transactional
-    @KafkaListener(topics = "reservation-cancelled",
+    @KafkaListener(topics = "reservation-canceled",
             groupId = "payment-service",
             containerFactory = "reservationCancelledListenerFactory")
     public PaymentResponseDto cancelPaymentV2(ReservationCanceledEvent event){
