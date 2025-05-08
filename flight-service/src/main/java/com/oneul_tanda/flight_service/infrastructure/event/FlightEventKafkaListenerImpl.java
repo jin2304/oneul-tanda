@@ -1,7 +1,7 @@
 package com.oneul_tanda.flight_service.infrastructure.event;
 
 import com.oneul_tanda.flight_service.application.event.FlightEventKafkaListener;
-import com.oneul_tanda.flight_service.application.event.ReservationCanceledEvent;
+import com.oneul_tanda.flight_service.application.dtos.event.ReservationCanceledEvent;
 import com.oneul_tanda.flight_service.application.service.flight.FlightService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.oneul_tanda.flight_service.application.event;
+package com.oneul_tanda.flight_service.application.dtos.event;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

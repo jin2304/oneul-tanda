@@ -1,6 +1,6 @@
 package com.oneul_tanda.flight_service.infrastructure.config;
 
-import com.oneul_tanda.flight_service.application.event.ReservationCanceledEvent;
+import com.oneul_tanda.flight_service.application.dtos.event.ReservationCanceledEvent;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
