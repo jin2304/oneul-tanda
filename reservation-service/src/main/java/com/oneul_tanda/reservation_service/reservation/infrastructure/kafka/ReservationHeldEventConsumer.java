@@ -35,7 +35,7 @@ public class ReservationHeldEventConsumer {
             );
 
             // 예약 임시 생성(사용자가 추후 예약정보 입력하여 예약 완료)
-            reservationService.createHoldReservationV2(command);
+            reservationService.createHoldReservation(command);
 
         } catch (FeignException e) {
             log.error("항공편 조회 실패 - flightId={}, error={}", event.getData().getFlightId(), e.getMessage());

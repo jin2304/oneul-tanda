@@ -23,7 +23,6 @@ public class KafkaReservationProducer {
         ReservationCanceledEvent event = ReservationCanceledEvent.of(
                 reservationId,
                 flightId,
-                userId,
                 seatCount,
                 "reservation-canceled");
 

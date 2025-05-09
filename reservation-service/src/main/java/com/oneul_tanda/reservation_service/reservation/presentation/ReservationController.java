@@ -1,16 +1,13 @@
 package com.oneul_tanda.reservation_service.reservation.presentation;
 
-import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommand;
-import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommandV2;
+import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommandV1;
 import com.oneul_tanda.reservation_service.reservation.application.command.CreateReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.service.ReservationService;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.DeleteReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateReservationRequestDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.update.ConfirmReservationRequestDto;
-import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.update.ConfirmReservationRequestDtoV2;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
-import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDtoV2;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.read.ReadReservationResponseDto;
 import jakarta.validation.Valid;
@@ -57,20 +54,9 @@ public class ReservationController {
             @RequestHeader("X-User-ID") UUID userId,
             @PathVariable UUID reservationId,
             @RequestBody @Valid ConfirmReservationRequestDto requestDto) {
-        return ResponseEntity.ok(reservationService.confirmReservation(ConfirmReservationCommand.of(userId, reservationId, requestDto)));
+        return ResponseEntity.ok(reservationService.confirmReservation(ConfirmReservationCommandV1.of(userId, reservationId, requestDto)));
     }
 
-
-
-    /**
-     * 예약 확정 v2 (Redis 기반)
-     */
-    @PutMapping("/confirm")
-    public ResponseEntity<ConfirmReservationResponseDto> confirmReservationV2(
-            @RequestHeader("X-User-ID") UUID userId,
-            @RequestBody @Valid ConfirmReservationRequestDtoV2 requestDto) {
-        return ResponseEntity.ok(reservationService.confirmReservationV2(ConfirmReservationCommandV2.of(userId, requestDto)));
-    }
 
 
     /**
@@ -99,16 +85,6 @@ public class ReservationController {
     @PutMapping("/{reservationId}/cancel")
     public ResponseEntity<CancelReservationResponseDto> cancelReservation(@PathVariable UUID reservationId) {
         return ResponseEntity.ok(reservationService.cancelReservation(reservationId));
-    }
-
-
-
-    /**
-     * 예약 취소 V2
-     */
-    @PutMapping("/{reservationId}/cancelV2")
-    public ResponseEntity<CancelReservationResponseDtoV2> cancelReservationV2(@PathVariable UUID reservationId) {
-        return ResponseEntity.ok(reservationService.cancelReservationV2(reservationId));
     }
 
 

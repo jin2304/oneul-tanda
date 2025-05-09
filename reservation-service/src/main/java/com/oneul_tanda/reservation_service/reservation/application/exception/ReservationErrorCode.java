@@ -40,10 +40,9 @@ public enum ReservationErrorCode implements ErrorCode {
 
   HOLD_RESERVATION_EXPIRED("임시 예약이 만료되었습니다. 다시 예약을 시도해주세요.", HttpStatus.BAD_REQUEST),
   REDIS_SAVE_FAILED("Redis 저장에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-  REDIS_LOAD_FAILED("Redis 데이터 읽기에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+  REDIS_LOAD_FAILED("Redis 데이터 읽기에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
-
-
+  INVALID_COMMAND_TYPE("잘못된 예약 확정 요청 타입입니다.", HttpStatus.BAD_REQUEST);
 
 
 

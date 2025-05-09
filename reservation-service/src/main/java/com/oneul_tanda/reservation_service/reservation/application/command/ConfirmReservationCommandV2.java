@@ -10,7 +10,7 @@ public record ConfirmReservationCommandV2(
         UUID userId,
         UUID flightId,
         List<PassengerDto> passengers
-) {
+) implements ConfirmReservationCommand {
     public static ConfirmReservationCommandV2 of(UUID userId, ConfirmReservationRequestDtoV2 dto) {
         return new ConfirmReservationCommandV2(
                 userId,

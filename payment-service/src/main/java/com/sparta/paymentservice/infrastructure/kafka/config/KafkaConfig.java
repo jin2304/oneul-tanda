@@ -50,7 +50,7 @@ public class KafkaConfig {
 
     @Bean
     public ConsumerFactory<String, ReservationCanceledEvent> reservationCanceledConsumerFactory() {
-
+        
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
