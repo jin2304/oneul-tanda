@@ -71,6 +71,7 @@ services:
     depends_on:
       - flight-db
       - redis
+      - kafka
       - eureka-server
 
   flight-db:
