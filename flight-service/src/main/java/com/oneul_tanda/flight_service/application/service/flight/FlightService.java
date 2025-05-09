@@ -2,6 +2,7 @@ package com.oneul_tanda.flight_service.application.service.flight;
 
 import com.oneul_tanda.flight_service.application.dtos.flight.CreateFlightCommand;
 import com.oneul_tanda.flight_service.application.dtos.flight.UpdateFlightCommand;
+import com.oneul_tanda.flight_service.application.event.FlightEventKafkaProducer;
 import com.oneul_tanda.flight_service.domain.entity.AirlineEntity;
 import com.oneul_tanda.flight_service.domain.entity.AirportEntity;
 import com.oneul_tanda.flight_service.domain.entity.FlightEntity;
@@ -39,6 +40,7 @@ public class FlightService {
     private final FlightRepositoryCustom flightRepositoryCustom;
     private final AirlineRepository airlineRepository;
     private final AirportRepository airportRepository;
+    private final FlightEventKafkaProducer flightEventKafkaProducer;
 
     @Cacheable(value = "flights", key = "#flightId")
     public FlightDetailResponse getFlight(UUID flightId) {
@@ -148,6 +150,18 @@ public class FlightService {
         FlightEntity flight = getFlightById(flightId);
 
         flight.increaseSeatCount(requiredSeats);
+    }
+
+    // 예약 취소(결제 취소)시 좌석 복구 비동기 처리
+    @Transactional
+    @CacheEvict(value = "flights", key = "#flightId") // 캐시 무효화
+    public void increaseSeatsV2(UUID reservationId, UUID flightId, Integer requiredSeats) {
+        FlightEntity flight = getFlightById(flightId);
+
+        flight.increaseSeatCount(requiredSeats);
+
+        // 좌석 복구 후, 예약 서비스로 이벤트 발행
+        flightEventKafkaProducer.sendFlightSeatRecovered(reservationId, flightId, requiredSeats);
     }
 
     private AirportEntity getArrivalAirportForUpdateFlight(UpdateFlightCommand flightCommand) {

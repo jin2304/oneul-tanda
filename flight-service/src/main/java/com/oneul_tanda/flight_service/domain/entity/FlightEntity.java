@@ -1,6 +1,7 @@
 package com.oneul_tanda.flight_service.domain.entity;
 
 import com.oneul_tanda.flight_service.common.BaseTimeEntity;
+import com.oneul_tanda.flight_service.domain.exception.common.InvalidRequestException;
 import com.vladmihalcea.hibernate.type.interval.PostgreSQLIntervalType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -107,17 +108,17 @@ public class FlightEntity extends BaseTimeEntity {
 
     public void decreaseSeatCount(Integer requiredSeats) {
         if (requiredSeats == null || requiredSeats <= 0) {
-            throw new IllegalArgumentException("Required seats must be positive");
+            throw new InvalidRequestException();
         }
         if (this.remainingSeats < requiredSeats) {
-            throw new IllegalStateException("Not enough seats");
+            throw new InvalidRequestException();
         }
         this.remainingSeats -= requiredSeats;
     }
 
     public void increaseSeatCount(Integer requiredSeats) {
         if (requiredSeats == null || requiredSeats <= 0) {
-            throw new IllegalArgumentException("Seats to add must be positive");
+            throw new InvalidRequestException();
         }
         this.remainingSeats += requiredSeats;
     }

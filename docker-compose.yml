@@ -71,6 +71,7 @@ services:
     depends_on:
       - flight-db
       - redis
+      - kafka
       - eureka-server
 
   flight-db:
@@ -150,6 +151,7 @@ services:
       - .env
     depends_on:
       - payments-db
+      - kafka
       - eureka-server
 
   payments-db:

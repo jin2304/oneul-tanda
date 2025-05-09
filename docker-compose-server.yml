@@ -61,6 +61,7 @@ services:
     depends_on:
       - flight-db
       - redis
+      - kafka
       - eureka-server
 
   flight-db:
@@ -134,6 +135,7 @@ services:
       - .env
     depends_on:
       - payments-db
+      - kafka
       - eureka-server
 
   payments-db:
@@ -147,7 +149,6 @@ services:
       - "5435:5432"
     volumes:
       - payments-postgres-data:/var/lib/postgresql/data
-
 
   zookeeper:
     image: wurstmeister/zookeeper:latest
