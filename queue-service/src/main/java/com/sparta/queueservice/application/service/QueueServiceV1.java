@@ -18,17 +18,17 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-public class QueueService {
+public class QueueServiceV1 {
     private final ZSetOperations<String, String> rankOps;
     private final FlightClient flightClient;
     private final ProducerService producerService;
     private final RedisTemplate<String, String> redisTemplate;
     private final RedissonClient redissonClient;
 
-    public QueueService(FlightClient airportClient,
-                        RedisTemplate<String, String> redisTemplate,
-                        ProducerService producerService,
-                        RedissonClient redissonClient) {
+    public QueueServiceV1(FlightClient airportClient,
+                          RedisTemplate<String, String> redisTemplate,
+                          ProducerService producerService,
+                          RedissonClient redissonClient) {
         this.flightClient = airportClient;
         this.rankOps = redisTemplate.opsForZSet();
         this.producerService = producerService;
@@ -56,7 +56,7 @@ public class QueueService {
         String reserveInfo = userId + ":" + seatCount;
         rankOps.add("ranks:" +  flightId, reserveInfo, score);
 
-       return processReserve(flightId);
+        return processReserve(flightId);
     }
 
     public QueueResponseDto processReserve(UUID flightId) {
@@ -109,32 +109,32 @@ public class QueueService {
         }
 
         // 좌석 수가 남아 있을때 대기열 선점 좌석 수가 0이면 실패 메시지를 보낸 후 대기열에서 삭제
-            String[] parts =  topUser.split(":");
-            UUID userId = UUID.fromString(parts[0]);
-            int seatCount = Integer.parseInt(parts[1]);
+        String[] parts =  topUser.split(":");
+        UUID userId = UUID.fromString(parts[0]);
+        int seatCount = Integer.parseInt(parts[1]);
 
-            if (!isTopUser(userId, flightId)) {
-                log.info("순서가 아닙니다.");
-                return QueueResponseDto.of(EventStatusEnum.FAILED, "순서가 아닙니다.");
-            }
+        if (!isTopUser(userId, flightId)) {
+            log.info("순서가 아닙니다.");
+            return QueueResponseDto.of(EventStatusEnum.FAILED, "순서가 아닙니다.");
+        }
 
-            if(seatCount <= remainingSeats) { // 대기열 선점 성공시 항공편의 좌석 수 차감 후 성공 메세지 전달
-                // 좌석 수 차감 api 필요 (임시 좌석 차감 로직)
+        if(seatCount <= remainingSeats) { // 대기열 선점 성공시 항공편의 좌석 수 차감 후 성공 메세지 전달
+            // 좌석 수 차감 api 필요 (임시 좌석 차감 로직)
 //                remainingSeats -= seatCount;
 //                redisTemplate.opsForValue().set("seat:" + flightId, String.valueOf(remainingSeats));
-                // 실제 항공편 서비스 좌석 차감
-                flightClient.decreaseSeats(flightId, seatCount);
-//                producerService.sendDecreaseSeats(flightId, userId, seatCount);
-                log.info("대기열 선점에 성공 했습니다. 남은 좌석 수: {}", remainingSeats - seatCount);
-                rankOps.remove(key, topUser);
-                producerService.sendReserveSuccess(flightId, userId, seatCount);
-                return QueueResponseDto.of(EventStatusEnum.SUCCESS, "대기열 선점에 성공했습니다.");
-            } else {
-                log.info("남은 좌석이 없습니다. 남은 좌석 수: {}", remainingSeats);
-                rankOps.remove(key, topUser);
-                deleteExistReserve(flightId, userId);
-                return QueueResponseDto.of(EventStatusEnum.FAILED, "남은 좌석이 없습니다.");
-            }
+            // 실제 항공편 서비스 좌석 차감 - v1
+            flightClient.decreaseSeats(flightId, seatCount);
+            log.info("대기열 선점에 성공 했습니다. 남은 좌석 수: {}", remainingSeats - seatCount);
+            rankOps.remove(key, topUser);
+            // v2 로 전환시 주석 처리 해야함
+            producerService.sendReserveSuccess(flightId, userId, seatCount);
+            return QueueResponseDto.of(EventStatusEnum.SUCCESS, "대기열 선점에 성공했습니다.");
+        } else {
+            log.info("남은 좌석이 없습니다. 남은 좌석 수: {}", remainingSeats);
+            rankOps.remove(key, topUser);
+            deleteExistReserve(flightId, userId);
+            return QueueResponseDto.of(EventStatusEnum.FAILED, "남은 좌석이 없습니다.");
+        }
     }
 
     // 중복 유저가 있는지 체크
@@ -162,3 +162,4 @@ public class QueueService {
         return topUser != null && topUser.startsWith(userId.toString());
     }
 }
+
