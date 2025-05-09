@@ -22,10 +22,10 @@ public class ProducerService {
         kafkaTemplate.send("reservation-held", flightId.toString(), event);
     }
 
-//    public void sendDecreaseSeats(UUID flightId, UUID userId, int seatCount) {
-//        ReservationHeldEvent event = ReservationHeldEvent
-//                .createReservationEvent(flightId, userId, seatCount, "flight-decrease");
-//
-//        kafkaTemplate.send("flight-decrease", flightId.toString(), event);
-//    }
+    public void sendDecreaseSeats(UUID flightId, UUID userId, int seatCount) {
+        ReservationHeldEvent event = ReservationHeldEvent
+                .createReservationEvent(flightId, userId, seatCount, "flight-seatReduced");
+
+        kafkaTemplate.send("flight-seatReduced", flightId.toString(), event);
+    }
 }
