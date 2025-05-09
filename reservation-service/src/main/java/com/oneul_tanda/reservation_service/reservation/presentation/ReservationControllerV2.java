@@ -27,7 +27,6 @@ public class ReservationControllerV2 {
     public ResponseEntity<ConfirmReservationResponseDto> confirmReservationV2(
             @RequestHeader("X-User-Id") UUID userId,
             @RequestBody @Valid ConfirmReservationRequestDtoV2 requestDto) {
-        System.out.println("requestDto: " + requestDto);
         return ResponseEntity.ok(reservationService.confirmReservation(ConfirmReservationCommandV2.of(userId, requestDto)));
     }
 

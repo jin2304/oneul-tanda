@@ -91,11 +91,10 @@ public class ReservationStrategyV2 implements ReservationStrategy {
      */
     @Override
     public ConfirmReservationResponseDto confirmReservation(ConfirmReservationCommand commandV2) {
-        System.out.println("캐스팅: ");
+
         if (!(commandV2 instanceof ConfirmReservationCommandV2 command)) {
             throw new CustomException(ReservationErrorCode.INVALID_COMMAND_TYPE);
         }
-        System.out.println("캐스팅 후: ");
 
         UUID flightId = command.flightId();
         UUID userId = command.userId();
