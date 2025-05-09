@@ -50,8 +50,6 @@ public class KafkaConfig {
 
     @Bean
     public ConsumerFactory<String, ReservationCanceledEvent> reservationCanceledConsumerFactory() {
-
-        JsonDeserializer<ReservationCanceledEvent> jsonDeserializer = new JsonDeserializer<>(ReservationCanceledEvent.class);
         
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -67,7 +65,7 @@ public class KafkaConfig {
         configProps.put(JsonDeserializer.TRUSTED_PACKAGES,
                 "com.sparta.paymentservice.infrastructure.kafka.event");
 
-        return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), jsonDeserializer);
+        return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
     @Bean
