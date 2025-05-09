@@ -15,7 +15,7 @@ import java.util.UUID;
 public class ReservationCanceledEvent {
     private UUID eventId;
     private String eventType;
-    private LocalDateTime paymentCancelledTime;
+    private LocalDateTime paymentCanceledTime;
     private Data data;
 
     @Getter
@@ -34,7 +34,7 @@ public class ReservationCanceledEvent {
         return ReservationCanceledEvent.builder()
                 .eventId(reservationId)
                 .eventType(eventType)
-                .paymentCancelledTime(LocalDateTime.now())
+                .paymentCanceledTime(LocalDateTime.now())
                 .data((Data.builder()
                         .flightId(flightId)
                         .seatCount(seatCount)

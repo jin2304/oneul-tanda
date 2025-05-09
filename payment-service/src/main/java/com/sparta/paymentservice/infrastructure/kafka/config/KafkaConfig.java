@@ -16,6 +16,7 @@ import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.DeserializationException;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.util.backoff.FixedBackOff;
@@ -48,12 +49,21 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, ReservationCanceledEvent> reservationCancelledConsumerFactory() {
+    public ConsumerFactory<String, ReservationCanceledEvent> reservationCanceledConsumerFactory() {
 
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+
+        configProps.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        configProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
+
+        configProps.put(JsonDeserializer.VALUE_DEFAULT_TYPE,
+                "com.sparta.paymentservice.infrastructure.kafka.event.ReservationCanceledEvent");
+
+        configProps.put(JsonDeserializer.TRUSTED_PACKAGES,
+                "com.sparta.paymentservice.infrastructure.kafka.event");
 
         return new DefaultKafkaConsumerFactory<>(configProps);
     }
@@ -70,13 +80,13 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ReservationCanceledEvent> reservationCancelledListenerFactory(
+    public ConcurrentKafkaListenerContainerFactory<String, ReservationCanceledEvent> reservationCanceledListenerFactory(
             KafkaTemplate<String, byte[]> dlqKafkaTemplate) {
 
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(dlqKafkaTemplate,
                 (record, ex) -> {
                     log.warn("[DLQ] 실패 메시지 전송. key={}, cause={}", record.key(), ex.getMessage());
-                    return new TopicPartition("reservation-cancelled-dlq", 0);
+                    return new TopicPartition("reservation-canceled-dlq", 0);
                 });
 
 
@@ -99,7 +109,7 @@ public class KafkaConfig {
 
         ConcurrentKafkaListenerContainerFactory<String, ReservationCanceledEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setCommonErrorHandler(errorHandler);
-        factory.setConsumerFactory(reservationCancelledConsumerFactory());
+        factory.setConsumerFactory(reservationCanceledConsumerFactory());
         return factory;
     }
 }

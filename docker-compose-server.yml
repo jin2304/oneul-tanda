@@ -135,6 +135,7 @@ services:
       - .env
     depends_on:
       - payments-db
+      - kafka
       - eureka-server
 
   payments-db:

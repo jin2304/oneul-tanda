@@ -101,7 +101,7 @@ public class KcpPaymentService implements PaymentService {
     @Transactional
     @KafkaListener(topics = "reservation-canceled",
             groupId = "payment-service",
-            containerFactory = "reservationCancelledListenerFactory")
+            containerFactory = "reservationCanceledListenerFactory")
     public PaymentResponseDto cancelPaymentV2(ReservationCanceledEvent event){
         try {
             Payments payments = paymentRepository.findByReservationId(event.getEventId());
