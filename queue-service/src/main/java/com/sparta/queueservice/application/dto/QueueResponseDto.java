@@ -1,6 +1,6 @@
 package com.sparta.queueservice.application.dto;
 
-import com.sparta.queueservice.infrastructure.kafka.event.EventStatusEnum;
+import com.sparta.queueservice.application.service.EventStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

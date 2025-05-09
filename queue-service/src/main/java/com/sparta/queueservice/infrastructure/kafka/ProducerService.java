@@ -1,6 +1,5 @@
 package com.sparta.queueservice.infrastructure.kafka;
 
-import com.sparta.queueservice.infrastructure.kafka.event.EventStatusEnum;
 import com.sparta.queueservice.infrastructure.kafka.event.ReservationHeldEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,5 +20,12 @@ public class ProducerService {
                 .createReservationEvent(flightId, userId, seatCount, "reservation-held");
 
         kafkaTemplate.send("reservation-held", flightId.toString(), event);
+    }
+
+    public void sendDecreaseSeats(UUID flightId, UUID userId, int seatCount) {
+        ReservationHeldEvent event = ReservationHeldEvent
+                .createReservationEvent(flightId, userId, seatCount, "flight-seatReduced");
+
+        kafkaTemplate.send("flight-seatReduced", flightId.toString(), event);
     }
 }
