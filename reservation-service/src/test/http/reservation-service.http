@@ -154,13 +154,6 @@ Authorization: Bearer {{access_token}}
 
 
 
-### 예약 취소 V2
-PUT http://localhost:19091/api/v1/reservations/fb05d396-811b-4fda-a127-30ac61027aaf/cancelV2
-Content-Type: application/json
-Authorization: Bearer {{access_token}}
-
-
-
 ### 예약 삭제
 DELETE http://localhost:19091/api/v1/reservations/b9f9c07b-0b9a-4166-8ffe-5f0673ffe9f0
 Content-Type: application/json
