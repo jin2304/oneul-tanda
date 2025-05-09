@@ -32,7 +32,7 @@ Content-Type: application/json
 %}
 
 ### 항공편 조회 및 저장
-POST http://localhost:19091/api/v1/amadeus/flights/fetch-and-save?departureAirportCode=LGW&arrivalAirportCode=KWE&departureDate=2025-04-25T19:45:25&requiredSeats=2
+POST http://localhost:19091/api/v1/amadeus/flights/fetch-and-save?departureAirportCode=LGW&arrivalAirportCode=KWE&departureDate=2025-05-10T19:45:25&requiredSeats=2
 Authorization: Bearer {{access_token}}
 
 
@@ -42,7 +42,7 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "flightId" : "66b08c46-8393-480a-a8bc-3d72dcda80dd",
+  "flightId" : "32c7b4bc-1abb-45e7-af42-6400487c0a8a",
   "seatCount" : 2
 }
 
@@ -55,12 +55,12 @@ Authorization: Bearer {{access_token}}
 
 
 ### 예약 확정 V2
-PUT http://localhost:19091/api/v1/reservations/confirm
+PUT http://localhost:19091/api/v1/reservations/confirmV2
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "flightId": "57944490-33fb-4bb1-9254-1eae30a1a25c",
+  "flightId": "32c7b4bc-1abb-45e7-af42-6400487c0a8a",
   "passengers": [
     {
       "name": "홍길동1",
@@ -79,7 +79,7 @@ Authorization: Bearer {{access_token}}
 
 
 ### 예약 확정 V2, 결제 재시도
-PUT http://localhost:19091/api/v1/reservations/confirm
+PUT http://localhost:19091/api/v1/reservations/confirmV2
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
@@ -90,7 +90,7 @@ Authorization: Bearer {{access_token}}
 
 
 ### 예약 취소 V2
-PUT http://localhost:19091/api/v1/reservations/1c7204d2-c276-4d8e-8c9e-2446423deee4/cancelV2
+PUT http://localhost:19091/api/v1/reservations/c65b8f33-43df-43d1-956e-e1d0d5f9ec7c/cancelV2
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
