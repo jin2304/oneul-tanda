@@ -86,7 +86,7 @@ public class KafkaConfig {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(dlqKafkaTemplate,
                 (record, ex) -> {
                     log.warn("[DLQ] 실패 메시지 전송. key={}, cause={}", record.key(), ex.getMessage());
-                    return new TopicPartition("reservation-cancelled-dlq", 0);
+                    return new TopicPartition("reservation-canceled-dlq", 0);
                 });
 
 
