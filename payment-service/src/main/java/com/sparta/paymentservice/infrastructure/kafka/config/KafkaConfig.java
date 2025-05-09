@@ -50,12 +50,14 @@ public class KafkaConfig {
     @Bean
     public ConsumerFactory<String, ReservationCanceledEvent> reservationCancelledConsumerFactory() {
 
+        JsonDeserializer<ReservationCanceledEvent> jsonDeserializer = new JsonDeserializer<>(ReservationCanceledEvent.class);
+        
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
-        return new DefaultKafkaConsumerFactory<>(configProps);
+        return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), jsonDeserializer);
     }
 
     @Bean
