@@ -1,8 +1,11 @@
 package com.oneul_tanda.reservation_service.reservation.presentation;
 
 import com.oneul_tanda.reservation_service.reservation.application.command.ConfirmReservationCommandV2;
+import com.oneul_tanda.reservation_service.reservation.application.command.CreateHoldReservationCommand;
 import com.oneul_tanda.reservation_service.reservation.application.service.ReservationService;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.update.ConfirmReservationRequestDtoV2;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.request.create.CreateHoldReservationRequestDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import jakarta.validation.Valid;
@@ -18,6 +21,24 @@ import java.util.UUID;
 public class ReservationControllerV2 {
 
     private final ReservationService reservationService;
+
+    /**
+     * 예약 임시 생성 테스트
+     */
+    @PostMapping("/holds")
+    public ResponseEntity<CreateHoldReservationResponseDto> createHoldReservation(
+            @RequestBody CreateHoldReservationRequestDto request,
+            @RequestHeader("X-User-Id") UUID userId
+    ) {
+
+        CreateHoldReservationCommand command = CreateHoldReservationCommand.of(
+                request.flightId(),
+                userId,
+                request.seatCount()
+        );
+
+        return ResponseEntity.ok(reservationService.createHoldReservation(command));
+    }
 
 
     /**
