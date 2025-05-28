@@ -20,7 +20,7 @@ public record CreateHoldReservationResponseDtoV1(
         String message
 ) implements CreateHoldReservationResponseDto {
 
-    public static CreateHoldReservationResponseDtoV1 Success(Reservation reservation) {
+    public static CreateHoldReservationResponseDtoV1 success(Reservation reservation) {
         return CreateHoldReservationResponseDtoV1.builder()
                 .reservationId(reservation.getId())
                 .userId(reservation.getUserId())
@@ -28,15 +28,15 @@ public record CreateHoldReservationResponseDtoV1(
                 .status(reservation.getStatus())
                 .tickets(reservation.getTicketList().stream()
                         .map(CreateHoldTicketResponseDto::from)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .success(true)
                 .message("예약 임시 생성 완료")
                 .build();
     }
 
 
-    public static CreateHoldReservationResponseDtoV2 Failed(){
-        return CreateHoldReservationResponseDtoV2.builder()
+    public static CreateHoldReservationResponseDtoV1 failed(){
+        return CreateHoldReservationResponseDtoV1.builder()
                 .success(false)
                 .message("예약 임시 생성 실패")
                 .build();

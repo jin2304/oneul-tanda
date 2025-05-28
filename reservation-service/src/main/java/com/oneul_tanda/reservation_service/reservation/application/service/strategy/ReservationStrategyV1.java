@@ -50,7 +50,7 @@ public class ReservationStrategyV1 implements ReservationStrategy {
         // 중복 예약 생성 검증
         if(validateDuplicateReservation(command.userId(), command.flightId())){
             log.warn("[V1 임시 예약 저장 실패: 중복 예약] userId={}, flightId={}", command.userId(), command.flightId());
-            return CreateHoldReservationResponseDtoV1.Failed();
+            return CreateHoldReservationResponseDtoV1.failed();
         }
 
         // FeignClient 항공편 조회 및 데이터 획득
@@ -62,7 +62,7 @@ public class ReservationStrategyV1 implements ReservationStrategy {
         // 예약 임시 생성
         Reservation reservation = Reservation.createHoldReservation(command.userId(), ticketList);
 
-        return CreateHoldReservationResponseDtoV1.Success(reservationRepository.save(reservation));
+        return CreateHoldReservationResponseDtoV1.success(reservationRepository.save(reservation));
     }
 
 
