@@ -20,6 +20,7 @@ import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.SeatClas
 import com.oneul_tanda.reservation_service.reservation.domain.repository.ReservationRepository;
 import com.oneul_tanda.reservation_service.reservation.infrastructure.kafka.KafkaReservationProducer;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDtoV2;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +64,10 @@ public class ReservationStrategyV2 implements ReservationStrategy {
         String key = "HoldReservation:" + flightId + ":" + userId;
 
         // 중복 임시 예약 생성 검증
-        validateDuplicateHoldReservation(key);
+        if(validateDuplicateHoldReservation(key)){
+            log.warn("[V2 임시 예약 저장 실패: 중복 예약] userId={}, flightId={}", command.userId(), command.flightId());
+            return CreateHoldReservationResponseDtoV2.Failed();
+        }
 
         // 임시 예약 데이터 생성
         HoldReservationData holdData = HoldReservationData.of(seatCount, new ArrayList<>());
@@ -77,11 +81,11 @@ public class ReservationStrategyV2 implements ReservationStrategy {
         } catch (JsonProcessingException e) {
             log.error("임시 예약 저장 실패: {}", e.getMessage(), e);
             // Todo 좌석 복구 or 알림 시스템에 예약 임시 생성 실패 전송
-            throw new CustomException(ReservationErrorCode.REDIS_SAVE_FAILED);
+            return CreateHoldReservationResponseDtoV2.Failed();
         }
 
         // Todo 예약 임시 생성 완료 이벤트 발행 or 알림 시스템에 예약 임시 생성 완료 전송
-        return null;
+        return CreateHoldReservationResponseDtoV2.Success();
     }
 
 
@@ -250,10 +254,8 @@ public class ReservationStrategyV2 implements ReservationStrategy {
     // === 검증 메서드 === //
     // 예약 내에서 특정 티켓 조회 및 존재 여부 검증
     // 중복 임시 예약 생성 검증
-    private void validateDuplicateHoldReservation(String key) {
-        if (redisTemplate.hasKey(key)) {
-            throw CustomException.from(ReservationErrorCode.RESERVATION_DUPLICATE);
-        }
+    private boolean  validateDuplicateHoldReservation(String key) {
+        return redisTemplate.hasKey(key);
     }
 
 

@@ -63,6 +63,18 @@ Authorization: Bearer {{access_token}}
 }
 
 
+
+### 예약 임시 생성 테스트
+POST http://localhost:19091/api/v1/reservations/holds
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "flightId": "3432182d-9c02-4ba3-8840-be7f4d7e1a17",
+  "seatCount": 2
+}
+
+
 ### 예약 단일 조회
 GET http://localhost:19095/api/v1/reservations/9b7f421f-47b0-47f5-aa5c-8f489697a57d
 Content-Type: application/json

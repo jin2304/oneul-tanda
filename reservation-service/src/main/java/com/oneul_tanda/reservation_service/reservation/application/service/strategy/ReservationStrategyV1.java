@@ -16,6 +16,7 @@ import com.oneul_tanda.reservation_service.reservation.domain.entity.vo.SeatClas
 import com.oneul_tanda.reservation_service.reservation.domain.repository.ReservationRepository;
 
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDto;
+import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.create.CreateHoldReservationResponseDtoV1;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.CancelReservationResponseDto;
 import com.oneul_tanda.reservation_service.reservation.presentation.dto.response.update.ConfirmReservationResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,10 @@ public class ReservationStrategyV1 implements ReservationStrategy {
     public CreateHoldReservationResponseDto createHoldReservation(CreateHoldReservationCommand command) {
 
         // 중복 예약 생성 검증
-        validateDuplicateReservation(command.userId(), command.flightId());
+        if(validateDuplicateReservation(command.userId(), command.flightId())){
+            log.warn("[V1 임시 예약 저장 실패: 중복 예약] userId={}, flightId={}", command.userId(), command.flightId());
+            return CreateHoldReservationResponseDtoV1.failed();
+        }
 
         // FeignClient 항공편 조회 및 데이터 획득
         GetFlightInfo flightInfo = flightClient.getFlight(command.flightId());
@@ -58,7 +62,7 @@ public class ReservationStrategyV1 implements ReservationStrategy {
         // 예약 임시 생성
         Reservation reservation = Reservation.createHoldReservation(command.userId(), ticketList);
 
-        return CreateHoldReservationResponseDto.from(reservationRepository.save(reservation));
+        return CreateHoldReservationResponseDtoV1.success(reservationRepository.save(reservation));
     }
 
 
@@ -277,9 +281,7 @@ public class ReservationStrategyV1 implements ReservationStrategy {
 
 
     // 중복 예약 생성 검증
-    private void validateDuplicateReservation(UUID userId, UUID flightId) {
-        if (reservationRepository.findByUserIdAndFlightId(userId, flightId).isPresent()) {
-            throw CustomException.from(ReservationErrorCode.RESERVATION_DUPLICATE);
-        }
+    private boolean validateDuplicateReservation(UUID userId, UUID flightId) {
+        return reservationRepository.findByUserIdAndFlightId(userId, flightId).isPresent();
     }
 }
